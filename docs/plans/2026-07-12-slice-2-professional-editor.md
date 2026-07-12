@@ -1,6 +1,6 @@
 # Slice 2: Professional Editor & Pagination — Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans as a SINGLE active coding agent (Billy's rule: one repo, one editor). Do NOT use subagent-driven development here; any helper agent must be read-only or work in a separate git worktree. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Replace the Slice 1 approximate page breaks with a true Final Draft-style pagination engine, and complete the professional editing feel: zoom that never repaginates, revision marks, (MORE)/(CONT'D), direct element keys, smart-type character names, and page-aware navigation.
 
@@ -21,7 +21,7 @@
 
 ## Industry pagination rules implemented (the spec for the engine)
 
-US Letter, Courier 12pt: 6 lines/inch vertical, 10 chars/inch horizontal. Text block 1.0in top → 1.0in bottom on 11in paper, minus the 1-line page header = **55 content lines per page** (page 1 has no header number). Element widths from `ELEMENT_LAYOUT` (action/heading 6.0in→60 chars, dialogue 3.5in→35, parenthetical 2.0in→20, character 3.8in→38, transition 60 right-aligned). One blank line before every element except inside a dialogue stack (character/parenthetical/dialogue run) and except the first element on a page.
+US Letter, Courier 12pt: 6 lines/inch vertical, 10 chars/inch horizontal. **55 screenplay content lines per page, full stop.** The page-number header is a render artifact in the top margin: the engine emits it as metadata (`kind: 'page_header'`) but it NEVER counts against the 55 body lines (page 1 has no header). Body lines = every emitted kind except `page_header`; `(MORE)`/`(CONT'D)` lines DO occupy body lines, as on a real screenplay page. Continuations use plain ASCII exactly: `(MORE)` and `NAME (CONT'D)` — straight apostrophe, never curly, in code, tests, rendered output, and golden files (FDX/Fountain export compatibility). Element widths from `ELEMENT_LAYOUT` (action/heading 6.0in→60 chars, dialogue 3.5in→35, parenthetical 2.0in→20, character 3.8in→38, transition 60 right-aligned). One blank line before every element except inside a dialogue stack (character/parenthetical/dialogue run) and except the first element on a page.
 
 Break rules:
 1. A scene heading or transition is never the last line of a page (push to next page).
@@ -122,12 +122,12 @@ it('never leaves a scene heading as the last line of a page', () => {
   for (const line of lastLines) expect(typeOf(line.elementId)).not.toBe('scene_heading');
 });
 it('keeps a character cue with at least two dialogue lines', ...);
-it('splits long dialogue with (MORE) and NAME (CONT’D)', () => {
+it('splits long dialogue with (MORE) and NAME (CONT'D)', () => {
   const r = paginate(fixtureLongMonologue());
   const moreLine = r.pages[0].lines.at(-1)!;
   expect(moreLine.kind).toBe('more');           // "(MORE)" at 1.0in dialogue indent
   const contd = r.pages[1].lines.find(l => l.kind === 'contd')!;
-  expect(contd.text).toBe('MARISOL (CONT’D)');
+  expect(contd.text).toBe('MARISOL (CONT'D)');
 });
 it('never splits a parenthetical', ...);
 it('never orphans a single action line on either side of a break', ...);
@@ -141,7 +141,7 @@ it('page 1 has no header line; pages 2+ start with a page_header line', ...);
 ### Task 3: Golden fixtures + extend LAS GARZAS to 8+ pages
 
 **Files:**
-- Modify: `src/model/sample/gauntlet-sample.ts` (extend existing 12 scenes with fuller action/dialogue and add scenes 13–16: the archive clerk’s reversal, a dry-well set piece, Raúl’s counter-move, a second Marisol–Lupita porch beat — original content, same characters, same ids for existing elements so evidence links survive)
+- Modify: `src/model/sample/gauntlet-sample.ts` (extend existing 12 scenes with fuller action/dialogue and add scenes 13–16: the archive clerk's reversal, a dry-well set piece, Raúl's counter-move, a second Marisol–Lupita porch beat — original content, same characters, same ids for existing elements so evidence links survive)
 - Create: `src/pagination/fixtures/rules-golden.json`, `src/pagination/fixtures/las-garzas-golden.json`
 - Test: `src/pagination/goldens.test.ts`
 
@@ -157,9 +157,9 @@ it('page 1 has no header line; pages 2+ start with a page_header line', ...);
 - Create: `src/editor/paginationPlugin.ts`
 - Modify: `src/editor/ScreenplayEditor.tsx` (swap out old `pageBreakPlugin`), `src/editor/editor.css`, `src/editor/layout.ts` (delete `approximatePagination`/`approximateElementLines`), `src/panels/SceneNavigator.tsx` (import `paginate` instead of `approximatePagination` — same `pageOfElement` shape)
 
-**Interfaces — Produces:** `paginationPlugin(getScreenplay: () => Screenplay): Plugin` rendering, per engine output: a page-bottom gap + crisp divider + next-page header widget (`— 2 —` becomes a real header line: page number top-right, revision-set label top-left when active — Task 6), `(MORE)` widget at split bottoms, `NAME (CONT’D)` widget at split tops, and scene numbers rendered in the left margin of each `scene_heading` block (`data-scene-number` pseudo-element).
+**Interfaces — Produces:** `paginationPlugin(getScreenplay: () => Screenplay): Plugin` rendering, per engine output: a page-bottom gap + crisp divider + next-page header widget (`— 2 —` becomes a real header line: page number top-right, revision-set label top-left when active — Task 6), `(MORE)` widget at split bottoms, `NAME (CONT'D)` widget at split tops, and scene numbers rendered in the left margin of each `scene_heading` block (`data-scene-number` pseudo-element).
 
-- [ ] **Step 1: Failing component test** (`src/editor/paginationRender.test.tsx`): render editor with the 8+ page sample; assert `document.querySelectorAll('.sp-page-header').length === paginate(sample).pageCount - 1`, one `.sp-more` per split, `.sp-contd` text matches `NAME (CONT’D)`, and `.sp-scene_heading[data-scene-number="6"]` exists.
+- [ ] **Step 1: Failing component test** (`src/editor/paginationRender.test.tsx`): render editor with the 8+ page sample; assert `document.querySelectorAll('.sp-page-header').length === paginate(sample).pageCount - 1`, one `.sp-more` per split, `.sp-contd` text matches `NAME (CONT'D)`, and `.sp-scene_heading[data-scene-number="6"]` exists.
 - [ ] **Step 2:** Run → FAIL. **Step 3:** Implement plugin (decoration rebuild only when `tr.docChanged`, engine memoized on screenplay reference). **Step 4:** Run → PASS; e2e smoke `workspace.spec.ts` still green. **Step 5:** Commit `"Slice 2 Task 4: true page rendering, headers, scene numbers"`.
 
 ### Task 5: Zoom that never repaginates
@@ -187,7 +187,7 @@ Revision-mark rendering: right-margin `*` on every wrapped line of a revised ele
 
 - [ ] **Step 1: Failing unit tests** — diff logic (changed text flagged; unchanged not; new element flagged); persistence round-trip: `startRevisionSet('Blue')` → reload store → baseline recovered (fake-indexeddb).
 - [ ] **Step 2:** FAIL. **Step 3:** Implement store + plugin. 
-- [ ] **Step 4: Failing e2e** (`editorpro.spec.ts`): start revision set from status bar (Task 8 wires the button; here use a temporary top-bar button placed in its final TopBar position), edit Marisol’s line, expect `.sp-revised` on that element and navigator scene 2 marked revised; reload → marks persist. Run → PASS after wiring.
+- [ ] **Step 4: Failing e2e** (`editorpro.spec.ts`): start revision set from status bar (Task 8 wires the button; here use a temporary top-bar button placed in its final TopBar position), edit Marisol's line, expect `.sp-revised` on that element and navigator scene 2 marked revised; reload → marks persist. Run → PASS after wiring.
 - [ ] **Step 5:** Commit `"Slice 2 Task 6: revision baseline, margin asterisks, set labels"`.
 
 ### Task 7: Professional keyboard flow (Mod-1..6, smart-type, scene jump, go-to-page)
