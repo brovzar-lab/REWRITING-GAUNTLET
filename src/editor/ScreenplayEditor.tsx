@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { EditorState, Plugin, TextSelection, type Transaction } from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
+import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
 import { keymap } from 'prosemirror-keymap';
 import { baseKeymap, chainCommands, newlineInCode } from 'prosemirror-commands';
 import { history, redo, undo } from 'prosemirror-history';
@@ -45,6 +45,19 @@ function tabCommand(state: EditorState, dispatch?: (tr: Transaction) => void): b
   dispatch(tr);
   return true;
 }
+
+/** Marks the block that carries the caret so the working line stays visible. */
+const selectedLinePlugin = new Plugin({
+  props: {
+    decorations(state) {
+      const block = currentBlock(state);
+      if (!block) return null;
+      return DecorationSet.create(state.doc, [
+        Decoration.node(block.pos, block.pos + block.node.nodeSize, { class: 'sp-selected' }),
+      ]);
+    },
+  },
+});
 
 interface SmartTypeState {
   items: string[];
@@ -143,6 +156,7 @@ export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
           },
         ),
         revisionPlugin(() => store.getState().revisionBaseline),
+        selectedLinePlugin,
       ],
     });
 

@@ -3,7 +3,11 @@
 .sp-page-scroller {
   overflow: auto;
   height: 100%;
-  padding: var(--space-lg);
+  /* The desk: generous head/foot room so the page never glues to an edge,
+     and a recessed surface that makes the paper read as the center. */
+  padding: var(--space-xl) var(--space-lg) 120px;
+  scroll-padding-block: 96px;
+  background: var(--desk);
   display: flex;
   justify-content: center;
 }
@@ -94,7 +98,7 @@
 .sp-page-gap {
   margin: 0.9in -1in 0 -1.5in; /* fills the bottom margin, spans full paper width */
   height: 44px;
-  background: var(--surface-frame);
+  background: var(--desk);
   border-top: 1px solid var(--divider);
   border-bottom: 1px solid var(--divider);
   box-shadow: inset 0 6px 8px -6px rgba(12, 18, 22, 0.35), inset 0 -6px 8px -6px rgba(12, 18, 22, 0.35);
@@ -152,6 +156,9 @@
 /* Selected element indicator: accent bar + tint, never color alone (cursor is present). */
 .sp-element.sp-selected {
   background: var(--row-selected, rgba(220, 165, 46, 0.12));
+  /* Accent bar at the line start: position carries the meaning, not color alone. */
+  box-shadow: inset 3px 0 0 var(--accent);
+  border-radius: var(--rounded-panel);
 }
 
 /* Smart-type character suggestions. */

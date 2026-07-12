@@ -14,6 +14,8 @@
   --focus-ring: var(--color-selection-amber);
   --row-hover: rgba(231, 230, 224, 0.06);
   --row-selected: rgba(220, 165, 46, 0.16);
+  /* Desk: the recessed surface the paper rests on (tonal layer of the frame). */
+  --desk: #0D141A;
 }
 
 :root[data-theme='day'] {
@@ -29,6 +31,7 @@
   --focus-ring: var(--color-selection-blue);
   --row-hover: rgba(32, 35, 33, 0.06);
   --row-selected: rgba(44, 114, 199, 0.14);
+  --desk: #DDD8CC;
 }
 
 /* System theme follows the OS. */
@@ -45,6 +48,7 @@
     --focus-ring: var(--color-selection-blue);
     --row-hover: rgba(32, 35, 33, 0.06);
     --row-selected: rgba(44, 114, 199, 0.14);
+    --desk: #DDD8CC;
   }
 }
 
@@ -61,6 +65,7 @@
     --focus-ring: var(--color-selection-amber);
     --row-hover: rgba(231, 230, 224, 0.06);
     --row-selected: rgba(220, 165, 46, 0.16);
+    --desk: #0D141A;
   }
 }
 
