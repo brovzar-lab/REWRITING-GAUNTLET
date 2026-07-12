@@ -9,6 +9,7 @@
 }
 
 .sp-page {
+  zoom: var(--sp-zoom, 1); /* rendering only; pagination comes from the engine */
   background: var(--color-screenplay-paper);
   color: var(--color-ink);
   box-shadow: var(--shadow-paper-rest);

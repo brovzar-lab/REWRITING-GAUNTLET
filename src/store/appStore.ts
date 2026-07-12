@@ -19,6 +19,9 @@ export interface AppState {
   setFocusMode: (on: boolean) => void;
   fullBoard: boolean;
   setFullBoard: (on: boolean) => void;
+  /** Screenplay rendering zoom, 0.5–2.0. Rendering only — never affects pagination. */
+  zoom: number;
+  setZoom: (zoom: number) => void;
   screenplay: Screenplay;
   evidence: EvidenceRecord[];
   connections: Connection[];
@@ -54,6 +57,8 @@ export const useAppStore = create<AppState>((set) => ({
   setFocusMode: (focusMode) => set({ focusMode }),
   fullBoard: false,
   setFullBoard: (fullBoard) => set({ fullBoard }),
+  zoom: 1,
+  setZoom: (zoom) => set({ zoom: Math.min(2, Math.max(0.5, zoom)) }),
   screenplay: clone(sampleScreenplay),
   evidence: sampleEvidence,
   connections: sampleConnections,

@@ -12,6 +12,7 @@ export interface UiRow {
   id: 'ui';
   theme: ThemeChoice;
   lang?: UiLang;
+  zoom?: number;
   activePassId: string | null;
   panelSizes: Record<string, number>;
   collapsedPanels: Record<string, boolean>;
@@ -44,6 +45,7 @@ export async function initPersistence(options: PersistenceOptions = {}): Promise
   const savedUi = await db.ui.get('ui');
   if (savedUi) {
     if (savedUi.lang) store.getState().setLang(savedUi.lang);
+    if (savedUi.zoom) store.getState().setZoom(savedUi.zoom);
     store.getState().loadUiState({
       theme: savedUi.theme,
       activePassId: savedUi.activePassId,
@@ -65,6 +67,7 @@ export async function initPersistence(options: PersistenceOptions = {}): Promise
         id: 'ui',
         theme: state.theme,
         lang: state.lang,
+        zoom: state.zoom,
         activePassId: state.activePassId,
         panelSizes: state.panelSizes,
         collapsedPanels: state.collapsedPanels,

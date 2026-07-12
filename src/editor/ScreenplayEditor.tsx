@@ -9,6 +9,7 @@ import { screenplaySchema } from './schema';
 import { buildDoc, parseDoc } from './docSync';
 import { nextElementOnEnter, nextElementOnTab } from './elementCycling';
 import { paginationPlugin } from './paginationPlugin';
+import { zoomKeymap } from './editorKeymap';
 import type { ElementType } from '../model/screenplay';
 import { useAppStore } from '../store/appStore';
 import './editor.css';
@@ -57,6 +58,7 @@ export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const syncingFromEditor = useRef(false);
+  const zoom = useAppStore((s) => s.zoom);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -81,6 +83,7 @@ export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
           'Shift-Mod-z': redo,
         }),
         keymap(baseKeymap),
+        zoomKeymap(),
         paginationPlugin(() => store.getState().screenplay),
       ],
     });
@@ -155,6 +158,7 @@ export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
       role="region"
       aria-label="Screenplay"
       tabIndex={0}
+      style={{ ['--sp-zoom' as string]: zoom }}
     >
       <div className="sp-page" ref={hostRef} aria-label="Screenplay page" />
     </div>
