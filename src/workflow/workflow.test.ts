@@ -148,6 +148,32 @@ describe('approvals and the scene lock', () => {
   });
 });
 
+describe('pass orchestration', () => {
+  it('completing a pass snapshots the draft and bumps the draft label', async () => {
+    const before = useAppStore.getState().screenplay.draftLabel;
+    await useAppStore.getState().completePass('character');
+    const s = useAppStore.getState();
+    expect(s.workflow.passRuns.character).toBe('complete');
+    expect(s.screenplay.draftLabel).toBe('Rewrite 1');
+    expect(s.screenplay.draftLabel).not.toBe(before);
+    const snaps = await db.snapshots.where('screenplayId').equals(s.screenplay.id).toArray();
+    expect(snaps).toHaveLength(1);
+    expect(snaps[0].label).toMatch(/Character/);
+  });
+
+  it('each completed pass counts up the rewrite label', async () => {
+    await useAppStore.getState().completePass('character');
+    await useAppStore.getState().completePass('dialogue');
+    expect(useAppStore.getState().screenplay.draftLabel).toBe('Rewrite 2');
+  });
+
+  it('passes are reusable lenses: a complete pass can run again', async () => {
+    await useAppStore.getState().completePass('character');
+    useAppStore.getState().setPassRunState('character', 'diagnosing');
+    expect(useAppStore.getState().workflow.passRuns.character).toBe('diagnosing');
+  });
+});
+
 describe('snapshots and document replacement', () => {
   it('takeSnapshot + restoreSnapshot round-trips the draft', async () => {
     dispose = await initPersistence({ debounceMs: 5 });

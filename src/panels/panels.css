@@ -447,3 +447,23 @@
   font-family: var(--font-ui);
   font-size: var(--font-size-body);
 }
+
+/* Pass run states on tray chips. */
+.chip-state {
+  font-size: 10px;
+  letter-spacing: var(--letter-spacing-label);
+  color: var(--text-secondary);
+  border-left: 1px solid var(--divider);
+  padding-left: 6px;
+  margin-left: 2px;
+}
+
+.ds-pass-chip.run-complete .chip-state,
+.chip-state-complete {
+  color: var(--color-confirmed);
+}
+
+.ai-pass-actions {
+  display: flex;
+  gap: var(--space-xs);
+}

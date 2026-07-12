@@ -61,6 +61,9 @@ export interface AppState {
   approveProposal: (findingId: string) => void;
   rejectFinding: (findingId: string) => void;
   setPassRunState: (passId: string, state: WorkflowState['passRuns'][string]) => void;
+  /** Complete the active pass: snapshot the draft, mark the run complete,
+      and bump the draft label. Passes stay repeatable afterwards. */
+  completePass: (passId: string) => Promise<void>;
   setCloudAiConsent: (consented: boolean) => void;
   addEvidenceNote: (record: EvidenceRecord) => void;
   /** Replace the working draft (import). Caller is responsible for snapshotting first. */
@@ -235,6 +238,20 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   setPassRunState: (passId, runState) =>
     set((s) => ({ workflow: { ...s.workflow, passRuns: { ...s.workflow.passRuns, [passId]: runState } } })),
+
+  completePass: async (passId) => {
+    const state = get();
+    const pass = EPPS_PASSES.find((p) => p.id === passId);
+    await state.takeSnapshot(`After ${pass?.name ?? passId} pass`);
+    set((s) => {
+      const passRuns: WorkflowState['passRuns'] = { ...s.workflow.passRuns, [passId]: 'complete' };
+      const completed = Object.values(passRuns).filter((v) => v === 'complete').length;
+      return {
+        workflow: { ...s.workflow, passRuns },
+        screenplay: { ...s.screenplay, draftLabel: `Rewrite ${completed}` },
+      };
+    });
+  },
 
   setCloudAiConsent: (cloudAiConsent) => set((s) => ({ workflow: { ...s.workflow, cloudAiConsent } })),
 

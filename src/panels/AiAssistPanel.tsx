@@ -111,6 +111,8 @@ export function AiAssistPanel() {
   const findings = useAppStore((s) => s.workflow.findings);
   const setFindings = useAppStore((s) => s.setFindings);
   const setPassRunState = useAppStore((s) => s.setPassRunState);
+  const passRuns = useAppStore((s) => s.workflow.passRuns);
+  const completePass = useAppStore((s) => s.completePass);
   const enterReadMode = useAppStore((s) => s.enterReadMode);
   const setAiSettingsOpen = useAppStore((s) => s.setAiSettingsOpen);
   const t = useT();
@@ -170,9 +172,16 @@ export function AiAssistPanel() {
         <>
           <div className="ai-pass-row">
             <span className="ai-pass-name">{pass.name}</span>
-            <button type="button" className="seg-button" disabled={busy} onClick={() => void diagnose()}>
-              {busy ? t('ai.diagnosing') : t('ai.diagnose')}
-            </button>
+            <span className="ai-pass-actions">
+              <button type="button" className="seg-button" disabled={busy} onClick={() => void diagnose()}>
+                {busy ? t('ai.diagnosing') : t('ai.diagnose')}
+              </button>
+              {passRuns[pass.id] === 'reviewing' && (
+                <button type="button" className="seg-button" onClick={() => void completePass(pass.id)}>
+                  {t('ai.completePass')}
+                </button>
+              )}
+            </span>
           </div>
           {error && (
             <p className="inspector-error" role="alert">
