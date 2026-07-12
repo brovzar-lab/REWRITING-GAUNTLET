@@ -94,14 +94,20 @@ test('the full alpha journey', async ({ page }) => {
   await expect(inspector.getByText('Writer-confirmed')).toBeVisible();
   await expect(inspector.getByText(/Stray spacing/)).toBeVisible();
 
-  // 8. Complete the pass: snapshot + label bump + tray state.
+  // 8. Complete the pass: the summary says what happened.
   await page.getByRole('tab', { name: 'Rewrite pass' }).click();
   await page.getByRole('button', { name: 'Complete pass' }).click();
+  const summaryDialog = page.getByRole('dialog', { name: /Polish pass complete/ });
+  await expect(summaryDialog).toBeVisible();
+  await expect(summaryDialog.getByText('Approved changes: 1')).toBeVisible();
+  await expect(summaryDialog.getByText('Rejected proposals: 1')).toBeVisible();
+  await expect(summaryDialog.getByText(/Snapshot created: After Polish pass/)).toBeVisible();
+  await expect(summaryDialog.getByText(/Rewrite 1/)).toBeVisible();
+
+  // 9. Export straight from the summary: approved change in, rejected out.
+  await summaryDialog.getByRole('button', { name: 'Export now' }).click();
   await expect(page.locator('.top-bar')).toContainText('Rewrite 1');
   await expect(page.getByRole('button', { name: /POLISH.*Complete/i })).toBeVisible();
-
-  // 9. Export Fountain: approved change in, rejected change out.
-  await page.getByRole('button', { name: 'Export', exact: true }).click();
   const [download] = await Promise.all([
     page.waitForEvent('download'),
     page.getByRole('dialog', { name: 'Export screenplay' }).getByRole('button', { name: /Fountain/ }).click(),

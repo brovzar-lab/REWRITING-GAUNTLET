@@ -167,6 +167,40 @@ describe('pass orchestration', () => {
     expect(useAppStore.getState().screenplay.draftLabel).toBe('Rewrite 2');
   });
 
+  it('completing a pass produces a summary: approved, rejected, unresolved, snapshot, next', async () => {
+    useAppStore.getState().completeAnnotatedRead();
+    useAppStore.getState().setFindings('run1', [
+      fakeFinding({ id: 'f1' }),
+      fakeFinding({
+        id: 'f2',
+        citations: [{ sceneId: 'sc3', elementId: 'sc3-e2' }],
+        proposal: undefined,
+      }),
+      fakeFinding({
+        id: 'f3',
+        citations: [{ sceneId: 'sc4', elementId: 'sc4-e2' }],
+        proposal: undefined,
+      }),
+    ]);
+    useAppStore.getState().approveProposal('f1');
+    useAppStore.getState().rejectFinding('f2');
+    await useAppStore.getState().completePass('character');
+
+    const summary = useAppStore.getState().passSummary!;
+    expect(summary).toBeTruthy();
+    expect(summary.passId).toBe('character');
+    expect(summary.passName).toBe('Character');
+    expect(summary.approved).toHaveLength(1);
+    expect(summary.rejectedCount).toBe(1);
+    expect(summary.unresolvedCount).toBe(1);
+    expect(summary.snapshotLabel).toMatch(/Character/);
+    expect(summary.draftLabel).toBe('Rewrite 1');
+    expect(summary.nextPassId).toBe('story-theme');
+
+    useAppStore.getState().clearPassSummary();
+    expect(useAppStore.getState().passSummary).toBeNull();
+  });
+
   it('passes are reusable lenses: a complete pass can run again', async () => {
     await useAppStore.getState().completePass('character');
     useAppStore.getState().setPassRunState('character', 'diagnosing');

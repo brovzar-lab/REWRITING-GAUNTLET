@@ -6,6 +6,7 @@ import { AnnotatedReadBar } from './panels/AnnotatedReadBar';
 import { AiSettings } from './panels/AiSettings';
 import { ExportMenu } from './panels/ExportMenu';
 import { PrintView } from './panels/PrintView';
+import { PassSummaryDialog } from './panels/PassSummaryDialog';
 import { SceneNavigator } from './panels/SceneNavigator';
 import { InspectorTabs } from './panels/InspectorTabs';
 import { PassTray } from './panels/PassTray';
@@ -138,6 +139,7 @@ export default function App() {
       <AiSettings />
       <ExportMenu />
       <PrintView />
+      <PassSummaryDialog />
     </>
   );
 }

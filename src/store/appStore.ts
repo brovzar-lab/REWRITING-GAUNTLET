@@ -6,6 +6,7 @@ import {
   emptyWorkflow,
   MAX_INITIAL_READERS,
   MAX_INTERIM_READERS,
+  type Approval,
   type Finding,
   type Reader,
   type WorkflowState,
@@ -16,6 +17,18 @@ import { db } from './db';
 export interface Selection {
   sceneId: string;
   elementId: string;
+}
+
+/** What just happened in a completed pass — shown as the pass summary. */
+export interface PassSummary {
+  passId: string;
+  passName: string;
+  approved: Approval[];
+  rejectedCount: number;
+  unresolvedCount: number;
+  snapshotLabel: string;
+  draftLabel: string;
+  nextPassId: string | null;
 }
 
 export type ThemeChoice = 'day' | 'night' | 'system';
@@ -68,8 +81,10 @@ export interface AppState {
   rejectFinding: (findingId: string) => void;
   setPassRunState: (passId: string, state: WorkflowState['passRuns'][string]) => void;
   /** Complete the active pass: snapshot the draft, mark the run complete,
-      and bump the draft label. Passes stay repeatable afterwards. */
+      bump the draft label, and publish a pass summary. Passes stay repeatable. */
   completePass: (passId: string) => Promise<void>;
+  passSummary: PassSummary | null;
+  clearPassSummary: () => void;
   setCloudAiConsent: (consented: boolean) => void;
   addEvidenceNote: (record: EvidenceRecord) => void;
   /** Replace the working draft (import). Caller is responsible for snapshotting first. */
@@ -254,16 +269,32 @@ export const useAppStore = create<AppState>((set, get) => ({
   completePass: async (passId) => {
     const state = get();
     const pass = EPPS_PASSES.find((p) => p.id === passId);
-    await state.takeSnapshot(`After ${pass?.name ?? passId} pass`);
+    const snapshotLabel = `After ${pass?.name ?? passId} pass`;
+    await state.takeSnapshot(snapshotLabel);
     set((s) => {
       const passRuns: WorkflowState['passRuns'] = { ...s.workflow.passRuns, [passId]: 'complete' };
       const completed = Object.values(passRuns).filter((v) => v === 'complete').length;
+      const draftLabel = `Rewrite ${completed}`;
+      const passFindings = s.workflow.findings.filter((f) => f.passId === passId);
       return {
         workflow: { ...s.workflow, passRuns },
-        screenplay: { ...s.screenplay, draftLabel: `Rewrite ${completed}` },
+        screenplay: { ...s.screenplay, draftLabel },
+        passSummary: {
+          passId,
+          passName: pass?.name ?? passId,
+          approved: s.workflow.approvals.filter((a) => a.passId === passId),
+          rejectedCount: passFindings.filter((f) => f.resolution === 'rejected').length,
+          unresolvedCount: passFindings.filter((f) => f.resolution === 'open').length,
+          snapshotLabel,
+          draftLabel,
+          nextPassId: EPPS_PASSES.find((p) => p.order === (pass?.order ?? 0) + 1)?.id ?? null,
+        },
       };
     });
   },
+
+  passSummary: null,
+  clearPassSummary: () => set({ passSummary: null }),
 
   setCloudAiConsent: (cloudAiConsent) => set((s) => ({ workflow: { ...s.workflow, cloudAiConsent } })),
 
@@ -377,6 +408,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       readModeActive: false,
       noteComposerOpen: false,
       inspectorTab: 'evidence',
+      passSummary: null,
     }),
 }));
 
