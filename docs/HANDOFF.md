@@ -2,37 +2,46 @@
 
 ## Where we left off
 
-Two big pieces of work finished and committed on main today:
+Billy rejected the alpha's look (too plain, too dashboard) and approved a **Visual + UX Realignment Pass** to match the approved hybrid mockup (`/Users/quantumcode/Downloads/Recommended hybrid, Night mode.png` is the visual north star; feel and hierarchy, not pixels). The full approved plan with per-task code and tests is `docs/plans/2026-07-12-visual-ux-realignment.md` (11 tasks, R1-R11). Execution is mid-flight:
 
-1. **End-to-End Alpha** (plan `docs/plans/2026-07-12-alpha-end-to-end.md`, tasks A1-A11): the complete rewrite journey works. Import a screenplay (paste, .fountain, or .fdx) → private annotated read (AI locked until it is done) → notes with Epps reader limits → AI pass diagnosis (free local analyzer by default; cloud assistant only behind a consent screen plus Billy's own key; vendor named only in `src/ai/adapters/`, enforced by a test) → approve or reject each proposal (scene-locked, provenance, revision marks) → complete pass (snapshot, "Rewrite N" label) → export Fountain/FDX/print-PDF containing approved changes only.
-2. **Alpha UX Repair Pass** (plan `docs/plans/2026-07-12-alpha-ux-repair.md`, tasks U1-U7, dictated by Billy after he tested the alpha and found the UX unclear): app-style import menu; guided pass workspace when you click a pass chip (objective, what it examines, diagnose, approve/reject queue, progress, complete, next pass); always-visible Add note in the status bar with per-scene note badges and per-pass note counts; pass completion summary dialog; the page centered on a desk surface with a real selected-line highlight (old one was a dead style never applied); visible snapshot history with safe two-step restore; six usability acceptance e2e tests.
+- **R1 done** (`46686a9`): board docks beside the script in a `.board-panel` column at >=1280px viewport (store `boardDock: 'side'|'bottom'` + matchMedia effect in PanelLayout), bottom drawer `.board-shelf` when narrow. New tests: `src/store/boardDock.test.ts`, `src/panels/panelLayout.test.tsx`, e2e `e2e/realignment.spec.ts`.
+- **R2 done** (`431ee52`): board grouped by act with `.board-act-header` headings, cards wrap in side dock, hover no longer lifts (drag only), new `board.scenes` string EN/ES.
+- **R3 done** (`e5d2cba`): new `src/panels/TopBar.tsx` (extracted from App.tsx): save indicator fed by `saveState` in store + persistence.ts (guarded so its own writes do not reschedule saves), RevisionControl moved from StatusBar to top bar, theme seg-buttons replaced by an Appearance `<select>` (e2e now use `page.getByLabel('Appearance').selectOption('day')`), quiet `.tool-button` style.
+- **R4 in progress, red TDD state** (`088f0fe`): `src/editor/editorToolbar.test.tsx` written and INTENTIONALLY FAILING (imports `./EditorToolbar` which does not exist yet). `src/editor/editorHandle.ts` (registerEditorView/getEditorView) created. `editorKeymap.ts` has the EditorView type import added, nothing else.
 
-Verified at handoff: **192 unit tests**, **38 Playwright tests** (full journey, 6 usability checks, axe WCAG 2.1 AA both themes, full regression), **build exit 0**, worktree clean. Proof pack: `docs/proof/alpha/` (14 screenshots, exported .fountain showing approved-in / rejected-out, honest approximations list in its README).
-
-Alpha commits: `5ed616c` (A1) through `a24ed12` (A11). UX repair commits: `af9285d` (U1), `57239a6` (U2), `1156ea5` (U3), `cad5d1e` (U4), `e5020b9` (U5), `9c3f3fd` (U6), `b7acaf0`+`2fd5ea7` (U7).
+At R3 commit: 199 unit tests and 40 Playwright tests passing, but right now `npx vitest run` fails 1 file (the intentional R4 red test). That is expected; do not "fix" it by deleting the test.
 
 ## Next action
 
-Billy re-tests the repaired alpha by hand at http://localhost:5213 (start command below). Collect his verdict on three things: (1) do passes now feel active, (2) walk one of his real scripts through the whole journey, (3) round-trip one exported .fdx in his real Final Draft copy. Whatever he reports becomes the next plan; do not start new features before his verdict.
+Resume the plan at **task R4 step 3** in `docs/plans/2026-07-12-visual-ux-realignment.md`: implement `src/editor/EditorToolbar.tsx` plus the StatusBar page footer until `npx vitest run src/editor/editorToolbar.test.tsx` passes, then finish R4 steps 4-6 and continue R5-R11 in order. Key implementation notes already scouted:
+
+- Export `applyElementType(view, type)` from `editorKeymap.ts` (extract the Mod-1..6 body) and reuse it in both the keymap and the toolbar select.
+- `ScreenplayEditor.tsx` must call `registerEditorView(view)` after creating the view (line ~217, next to `viewRef.current = view`) and `registerEditorView(null)` in the destroy cleanup.
+- Undo/redo buttons use `undo/redo/undoDepth/redoDepth` from `prosemirror-history` (1.4.1, already a dep, already imported in ScreenplayEditor). Toolbar re-renders via store subscriptions (screenplay/selection), which is enough to refresh disabled states.
+- Prev/next page in the StatusBar footer needs NO EditorView: copy GoToPage.tsx's approach (paginate → `pages[n].lines.find(l => l.kind === 'text')` → `select(...)`), clamped to 1..pageCount.
+- Zoom −/%/+ moves from StatusBar to EditorToolbar. `e2e/pagination.spec.ts:49` asserts zoom % text inside `getByTestId('status-bar')` — update that spec to target the toolbar (keep the assertion meaning).
+- Mount `<EditorToolbar />` in App.tsx's editor slot between `<AnnotatedReadBar />` and `<ScreenplayEditor />`.
+- After toolbar actions, refocus `.sp-page-scroller` (NEVER ProseMirror's DOM; it resets the caret).
+- New strings needed EN+ES: `toolbar.element`, `toolbar.undo`, `toolbar.redo`, `toolbar.gotopage`, `footer.prevpage`, `footer.nextpage` (see plan R4). Element-type option labels have NO existing i18n keys; add them (six types in `ELEMENT_KEY_ORDER` order).
+- Formatting bold/italic/underline is consciously OUT (schema has no marks; would break FDX/Fountain round-trip). Say so if Billy asks.
 
 ## Locked decisions
 
-- Plan first, Billy approves, then build. Continuous build was authorized for the alpha and the UX repair only; new scope needs a new approved plan.
-- One repo, one editor. No subagent-driven development here; helpers read-only or in a separate worktree.
-- App at repo root, port 5213, host 127.0.0.1, strictPort. Port registry is `~/.Codex/dev-ports.md` (NOT ~/.claude/dev-ports.md).
-- Dependencies pinned exact (no ^). fast-xml-parser@4.5.0 was the only alpha addition. `npm ls playwright-core` must stay a single deduped 1.48.2.
-- Plain ASCII (MORE) and NAME (CONT'D); 55 body lines per page; page headers never count.
-- Methodology invariants live in the store and are tested: AI gate behind the annotated read; 5-max/3-recommended initial readers, exactly 1 interim; claim labels plus Clear/Uncertain/Priority Concern; never a numeric script score; never a one-shot rewrite; scene lock (a proposal may only touch an element its finding cites); draft = approved changes only, with provenance.
-- AI boundary: `src/ai/provider.ts` interface; local analyzer default; only `src/ai/adapters/cloud.ts` may name the vendor (model claude-sonnet-5, plain fetch, anthropic-dangerous-direct-browser-access header, key in localStorage via keyStore). Consent resets when a new document is imported.
-- Epps pass names and order locked; Studio additions labeled "Studio extension".
-- DESIGN.md / DESIGN.json tokens are mandatory; compact type, warm paper both themes, no dashboards, no chatbot-first layout. The desk tone (--desk in themes.css) is a derived tonal layer, not a new palette color.
+- The 11-task plan is approved by Billy verbatim; do not re-plan. Deferred on purpose (no dead UI): board tabs Outline/Beats/Relationships, board minimap/filter, pass multi-run "v2" versions, per-line numbers in LINKED TO, confidence for the local analyzer (field only, cloud may fill).
+- Commits go directly on main, one per task, message prefix `realign RN:`.
+- `boardDock` is NOT persisted and NOT in `resetToSample` (the viewport matchMedia effect owns it; resetting would fight narrow windows).
+- `src/theme/tokens.css` untouchable (guarded by tokens.test.ts). New visual values = semantic tokens in `themes.css`, tonally derived (the `--desk` precedent). R9 will add `--surface-toolbar`, `--surface-inset`, `--divider-strong`.
+- Do NOT animate `background` on controls that flip to an accent fill from transparent: axe samples mid-transition and fails contrast (this really happened; fix was transition border-color only on `.tool-button`).
+- App at repo root, port 5213, host 127.0.0.1, strictPort. One repo one editor; helpers read-only.
+- All prior alpha rules stand (AI gate, no numeric score, scene lock, Epps pass names/order, Page Rule, WCAG 2.1 AA, EN+ES for every new string).
 
 ## Open loops
 
-1. **Billy's re-test of the repaired alpha** — see Next action. Done when he signs off or dictates the next fix list.
-2. **FDX validation in real Final Draft** — our .fdx is structurally tested but has never been opened in the actual application; the UI says so. Done when one exported file round-trips in Billy's FD copy.
-3. **claude-goal repo location** — a separate tool repo sits gitignored at `claude-goal/` inside this repo; Billy's ~/.claude/settings.json Stop hook and ~/.claude/skills/goal symlink point INTO it, so never delete it. Done when Billy decides to leave it or approves moving it to ~/CODE/claude-goal with the symlink and hook repointed.
-4. **Deferred features backlog** (needs Billy's priorities): PDF text-extraction import, per-scene act reassignment UI, per-approval undo, Spanish analyzer findings, deeper Epps artifacts (Game Plan, Set-Up checklist, four high points, Scene Point, holdovers/orphans, Polish Read, Touchstone, Ticking Clock, slug file), TV pilot adapter (labeled Studio extension), co-writer mode, cloud sync, revision paper tinting.
+1. **Plan tasks R4-R11 unbuilt** — done when each task's tests pass and it is committed; R10 = full green regression (target: >=199 unit + >=40 e2e + new ones, build exit 0); R11 = proof pack `docs/proof/realign/` (7 shots listed in the plan) + handoff + Billy verdict.
+2. **Intentional red test on main** — `src/editor/editorToolbar.test.tsx` fails until R4 lands. Done when R4 committed.
+3. **FDX round-trip in real Final Draft** — still never validated (UI says so). Unchanged from before.
+4. **claude-goal repo location** — gitignored `claude-goal/` inside this repo; Billy's Stop hook and skills symlink point into it. NEVER delete. Waiting on Billy.
+5. **Deferred features backlog** — alpha list plus the realignment deferrals above. Waiting on Billy's priorities.
 
 ## How to run and verify
 
@@ -40,25 +49,17 @@ Billy re-tests the repaired alpha by hand at http://localhost:5213 (start comman
 cd /Users/quantumcode/CODE/REWRITING-GAUNTLET && npm run dev
 ```
 
-- URL: http://localhost:5213 (also answers on http://127.0.0.1:5213).
-- If the port is busy, find out WHOSE server it is before killing anything (`lsof -i:5213`). It may be Billy's own running session. A stale agent server is killed with `lsof -ti:5213 | xargs kill`; never move to another port.
-- Agent rule (this bit Billy twice): before telling Billy to run the dev command, kill any server this session started and confirm the port is free, or give him only the URL and say it is already running. Never both.
-- Tests: `npm test` (192 passing), `npx playwright test` (38 passing; reuses a running server), `npm run build` (exit 0).
-- Proof pack regeneration: dev server running, then `node scripts/proof-alpha.mjs` (wipes its own demo data afterwards).
-- Golden pagination fixtures: regenerate only after intentional engine changes (`node scripts/gen-goldens.mjs`), then hand-review the diff.
+- URL: http://localhost:5213 (also http://127.0.0.1:5213). Port registry: `~/.Codex/dev-ports.md` (NOT ~/.claude/dev-ports.md).
+- **As of this handoff a dev server on 5213 is BILLY'S OWN** (vite, PID 33047, started 2026-07-12 04:36, cwd this repo; the ChatGPT/Codex desktop app holds open connections to it). Do not kill it. If it is still up on resume, just use it; Playwright reuses a running 5213 server. Always `lsof -i:5213` before killing anything.
+- Tests: `npx vitest run` (1 intentional failure until R4 lands, see above), `npx playwright test` (40 passing), `npm run build`.
+- jsdom stubs live in `src/test/setup.ts`: ResizeObserver AND now matchMedia (defaults to desktop/side dock; tests wanting the bottom drawer call `setBoardDock('bottom')` after render).
 
 ## Gotchas / context not on disk
 
-- Billy dictates by voice; read charitably. Plain language, short ordered lists, no em dashes, one copy-paste terminal block starting with cd, proof before claiming done.
-- Import dialog is two-step (menu → paste or file step): e2e must click "Paste screenplay" before filling the box.
-- The pass workspace lives on the "Rewrite pass" inspector tab and only shows the lock message once a pass chip is selected; clicking a chip auto-switches the tab (store setActivePass does it).
-- The pass-summary dialog opens automatically after Complete pass and overlays everything; close it or use its Export now button before clicking the top bar in e2e.
-- parseFountain TRIMS every line, so trailing spaces never survive paste-import; polish-pass fixtures need internal double spaces.
-- testing-library normalizes whitespace: assert doubled-space strings through raw DOM textContent, not getByText. jsdom Blob has no .text(): use FileReader in tests.
-- Two "Annotated read" buttons exist while a pass workspace is locked (top bar + workspace); scope Playwright locators with getByRole('banner').
-- Autosave debounce is 500ms: e2e waits 1200ms before reload assertions (repo convention).
-- alpha-a11y.spec.ts is marked test.slow() (five sequential axe scans time out at the default 30s under load).
-- Editor rules: Tab switches element type, Escape exits the page (focuses [data-editor-exit]); never focus ProseMirror's DOM directly (resets the caret; focus .sp-page-scroller instead). Element ids like sc2-e5 are stable references; only append to scene ends in the sample data.
-- ProseMirror widget decoration keys must encode everything the widget renders or stale DOM survives redraws. dnd-kit spreads its own aria-pressed; set yours after {...attributes}.
-- Snapshot history lists snapshots across ALL documents on purpose (the draft you replaced at import is the one you usually want back).
-- Codex (another agent Billy uses) sometimes inspects this repo; keep the worktree clean between sessions.
+- Billy dictates by voice; plain language, short lists, no em dashes, one cd-first terminal block, proof before done claims.
+- Billy stopped this session at ~78% token budget mid-R4; nothing else was wrong. No design disagreement is pending; the plan stands approved.
+- The approved-mockup PNG lives in Downloads; if it disappears, `docs/proof/alpha/` screenshots plus DESIGN.md describe the target, and the plan's R-tasks encode the layout.
+- e2e conventions: `freshApp(page)` helper deletes the `rewrite-studio` IndexedDB then reloads; import dialog is two-step; two "Annotated read" buttons exist when a pass workspace is locked (scope with getByRole('banner')); autosave debounce 500ms so reload assertions wait 1200ms; `alpha-a11y.spec.ts` is test.slow().
+- Editor rules: Tab switches element type; Escape exits to `[data-editor-exit]`; widget decoration keys must encode everything they render; dnd-kit spreads aria-pressed so set yours after `{...attributes}`.
+- parseFountain trims every line; testing-library normalizes whitespace (use raw textContent for doubled spaces); jsdom Blob lacks .text() (use FileReader).
+- The in-session task list (R1-R11) mirrors the plan; statuses at handoff: R1-R3 completed, R4 in progress, R5-R11 pending.
