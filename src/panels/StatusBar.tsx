@@ -10,6 +10,8 @@ export function StatusBar() {
   const selection = useAppStore((s) => s.selection);
   const zoom = useAppStore((s) => s.zoom);
   const setZoom = useAppStore((s) => s.setZoom);
+  const setInspectorTab = useAppStore((s) => s.setInspectorTab);
+  const setNoteComposerOpen = useAppStore((s) => s.setNoteComposerOpen);
   const t = useT();
 
   const pagination = useMemo(() => paginate(screenplay), [screenplay]);
@@ -28,6 +30,17 @@ export function StatusBar() {
         )}
       </span>
       <span className="top-bar-spacer" />
+      <button
+        type="button"
+        className="seg-button"
+        disabled={!selection}
+        onClick={() => {
+          setInspectorTab('evidence');
+          setNoteComposerOpen(true);
+        }}
+      >
+        {t('notes.add')}
+      </button>
       <RevisionControl />
       <span className="control-group" role="group" aria-label="Zoom">
         <button type="button" className="seg-button" aria-label={t('status.zoomOut')} onClick={() => setZoom(Math.round((zoom - 0.1) * 10) / 10)}>

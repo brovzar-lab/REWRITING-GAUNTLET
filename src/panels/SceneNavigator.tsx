@@ -11,7 +11,14 @@ export function SceneNavigator() {
   const screenplay = useAppStore((s) => s.screenplay);
   const selection = useAppStore((s) => s.selection);
   const select = useAppStore((s) => s.select);
+  const evidence = useAppStore((s) => s.evidence);
   const t = useT();
+
+  const noteCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const record of evidence) counts.set(record.sceneId, (counts.get(record.sceneId) ?? 0) + 1);
+    return counts;
+  }, [evidence]);
 
   const revisionBaseline = useAppStore((s) => s.revisionBaseline);
   const pagination = useMemo(() => paginate(screenplay), [screenplay]);
@@ -57,6 +64,11 @@ export function SceneNavigator() {
                         </span>
                       )}
                     </span>
+                    {(noteCounts.get(scene.id) ?? 0) > 0 && (
+                      <span className="scene-notes" aria-label={`${t('nav.notes')}: ${noteCounts.get(scene.id)}`}>
+                        {noteCounts.get(scene.id)}
+                      </span>
+                    )}
                     <span className="scene-page">
                       {t('nav.page')} {page}
                     </span>

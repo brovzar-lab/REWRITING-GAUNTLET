@@ -45,6 +45,8 @@ export interface AppState {
   setInspectorTab: (tab: 'evidence' | 'pass') => void;
   exportOpen: boolean;
   setExportOpen: (open: boolean) => void;
+  noteComposerOpen: boolean;
+  setNoteComposerOpen: (open: boolean) => void;
   printViewOpen: boolean;
   setPrintViewOpen: (open: boolean) => void;
 
@@ -128,6 +130,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   setInspectorTab: (inspectorTab) => set({ inspectorTab }),
   exportOpen: false,
   setExportOpen: (exportOpen) => set({ exportOpen }),
+  noteComposerOpen: false,
+  setNoteComposerOpen: (noteComposerOpen) => set({ noteComposerOpen }),
   printViewOpen: false,
   setPrintViewOpen: (printViewOpen) => set({ printViewOpen }),
 
@@ -371,6 +375,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       revisionSetLabel: null,
       workflow: emptyWorkflow(),
       readModeActive: false,
+      noteComposerOpen: false,
+      inspectorTab: 'evidence',
     }),
 }));
 

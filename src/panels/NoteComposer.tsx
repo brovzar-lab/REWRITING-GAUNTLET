@@ -14,9 +14,11 @@ const STATUS_CHOICES: EvidenceStatus[] = ['clear', 'uncertain', 'priority_concer
 export function NoteComposer({ selection }: { selection: Selection }) {
   const addEvidenceNote = useAppStore((s) => s.addEvidenceNote);
   const readers = useAppStore((s) => s.workflow.readers);
+  const activePassId = useAppStore((s) => s.activePassId);
+  const open = useAppStore((s) => s.noteComposerOpen);
+  const setOpen = useAppStore((s) => s.setNoteComposerOpen);
   const t = useT();
 
-  const [open, setOpen] = useState(false);
   const [source, setSource] = useState<ComposerSource>('writer');
   const [readerId, setReaderId] = useState('');
   const [claimType, setClaimType] = useState<ClaimType>('textual_fact');
@@ -38,6 +40,7 @@ export function NoteComposer({ selection }: { selection: Selection }) {
       sceneId: selection.sceneId,
       elementId: selection.elementId,
       readerName: source === 'reader' ? chosenReader!.name : undefined,
+      passId: activePassId ?? undefined,
     });
     setSummary('');
     setOpen(false);
