@@ -106,6 +106,10 @@ export interface AppState {
   activePassId: string | null;
   panelSizes: Record<string, number>;
   collapsedPanels: Record<string, boolean>;
+  /** Where the story board lives: beside the page (approved hybrid) or as a bottom drawer.
+      Follows the viewport; not persisted. */
+  boardDock: 'side' | 'bottom';
+  setBoardDock: (boardDock: 'side' | 'bottom') => void;
 
   select: (selection: Selection | null) => void;
   updateElementText: (sceneId: string, elementId: string, text: string) => void;
@@ -354,6 +358,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   activePassId: null,
   panelSizes: {},
   collapsedPanels: {},
+  boardDock: 'side',
+  setBoardDock: (boardDock) => set({ boardDock }),
 
   select: (selection) => set({ selection }),
 

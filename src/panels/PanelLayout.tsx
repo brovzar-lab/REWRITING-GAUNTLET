@@ -1,4 +1,4 @@
-import { useCallback, useRef, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, type ReactNode } from 'react';
 import { useAppStore } from '../store/appStore';
 import { StatusBar } from './StatusBar';
 import { useT } from '../i18n/strings';
@@ -71,7 +71,7 @@ function Resizer({ panel, orientation, min, max, invert, label }: ResizerProps) 
   );
 }
 
-const DEFAULT_SIZES: Record<string, number> = { navigator: 232, inspector: 296, board: 200 };
+const DEFAULT_SIZES: Record<string, number> = { navigator: 232, inspector: 296, board: 200, boardSide: 340 };
 export function defaultSize(panel: string): number {
   return DEFAULT_SIZES[panel] ?? 200;
 }
@@ -93,11 +93,25 @@ export function PanelLayout({ topBar, navigator, editor, board, inspector, tray 
   const collapsed = useAppStore((s) => s.collapsedPanels);
   const focusMode = useAppStore((s) => s.focusMode);
   const fullBoard = useAppStore((s) => s.fullBoard);
+  const boardDock = useAppStore((s) => s.boardDock);
+  const setBoardDock = useAppStore((s) => s.setBoardDock);
   const t = useT();
 
+  // The board sits beside the page on desktop widths (approved hybrid) and
+  // drops to a bottom drawer when the window is too narrow to hold four columns.
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1280px)');
+    const apply = () => setBoardDock(mq.matches ? 'side' : 'bottom');
+    apply();
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
+  }, [setBoardDock]);
+
+  const sideBoard = boardDock === 'side' && !focusMode;
   const navWidth = collapsed.navigator || focusMode ? 0 : (sizes.navigator ?? defaultSize('navigator'));
   const inspectorWidth = collapsed.inspector || focusMode ? 0 : (sizes.inspector ?? defaultSize('inspector'));
   const boardHeight = collapsed.board || focusMode ? 0 : (sizes.board ?? defaultSize('board'));
+  const boardWidth = sideBoard ? (collapsed.boardSide ? 0 : (sizes.boardSide ?? defaultSize('boardSide'))) : 0;
 
   return (
     <div className={`workspace${focusMode ? ' focus-mode' : ''}${fullBoard ? ' full-board' : ''}`}>
@@ -106,7 +120,14 @@ export function PanelLayout({ topBar, navigator, editor, board, inspector, tray 
         <div className="middle board-only">{board}</div>
       ) : (
         <>
-          <div className="middle" style={{ gridTemplateColumns: `${navWidth}px auto 1fr auto ${inspectorWidth}px` }}>
+          <div
+            className={`middle${sideBoard ? ' has-side-board' : ''}`}
+            style={{
+              gridTemplateColumns: sideBoard
+                ? `${navWidth}px auto minmax(0, 1fr) auto ${boardWidth}px auto ${inspectorWidth}px`
+                : `${navWidth}px auto minmax(0, 1fr) auto ${inspectorWidth}px`,
+            }}
+          >
             <div className="panel navigator-panel" hidden={navWidth === 0}>
               {navigator}
             </div>
@@ -115,15 +136,27 @@ export function PanelLayout({ topBar, navigator, editor, board, inspector, tray 
               {editor}
               <StatusBar />
             </main>
+            {sideBoard && (
+              <>
+                <Resizer panel="boardSide" orientation="vertical" min={240} max={520} invert label={t('board.title')} />
+                <div className="panel board-panel" hidden={boardWidth === 0}>
+                  {board}
+                </div>
+              </>
+            )}
             <Resizer panel="inspector" orientation="vertical" min={220} max={480} invert label={t('inspector.title')} />
             <div className="panel inspector-panel" hidden={inspectorWidth === 0}>
               {inspector}
             </div>
           </div>
-          <Resizer panel="board" orientation="horizontal" min={120} max={420} label={t('board.title')} />
-          <div className="board-shelf" style={{ height: boardHeight }} hidden={boardHeight === 0}>
-            {board}
-          </div>
+          {!sideBoard && (
+            <>
+              <Resizer panel="board" orientation="horizontal" min={120} max={420} label={t('board.title')} />
+              <div className="board-shelf" style={{ height: boardHeight }} hidden={boardHeight === 0}>
+                {board}
+              </div>
+            </>
+          )}
         </>
       )}
       {tray}

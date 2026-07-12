@@ -59,6 +59,12 @@
   border-left: 1px solid var(--divider);
 }
 
+/* Side-docked story board column (approved hybrid: board beside the page). */
+.board-panel {
+  border-left: 1px solid var(--divider);
+  overflow: hidden auto;
+}
+
 .editor-panel {
   min-width: 0;
   overflow: hidden;
