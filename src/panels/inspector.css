@@ -1,0 +1,126 @@
+/* Evidence inspector: quiet, dense, provenance-first. */
+
+.evidence-inspector {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.inspector-hint {
+  padding: 0 var(--space-md);
+  color: var(--text-secondary);
+  font-size: var(--font-size-body);
+  margin: var(--space-xs) 0;
+}
+
+.inspector-context {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: baseline;
+  padding: 0 var(--space-md);
+  margin: 0 0 var(--space-sm);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.inspector-section {
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-label);
+  letter-spacing: var(--letter-spacing-label);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  margin: var(--space-md) 0 var(--space-xs);
+  padding: 0 var(--space-md);
+}
+
+.evidence-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 var(--space-md);
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.evidence-card {
+  width: 100%;
+  display: grid;
+  gap: 6px;
+  text-align: left;
+  background: var(--surface-frame);
+  color: var(--text-primary);
+  border: 1px solid var(--divider);
+  border-radius: var(--rounded-control);
+  padding: var(--space-sm) var(--space-md);
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: border-color var(--motion-state-fast);
+}
+
+.evidence-card:hover {
+  border-color: var(--accent);
+}
+
+.evidence-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+.source-chip {
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-label);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  border: 1px solid var(--divider);
+  border-radius: var(--rounded-control);
+  padding: 2px 6px;
+}
+
+/* Source identity: tinted chip + text label (color never alone). */
+.source-chip.source-writer { border-color: var(--color-confirmed); }
+.source-chip.source-reader { border-color: var(--color-card-blue); }
+.source-chip.source-ai { border-color: var(--color-card-plum); }
+.source-chip.source-producer_executive { border-color: var(--color-card-ochre); }
+.source-chip.source-interim_reader { border-color: var(--color-card-sage); }
+
+.reader-name {
+  font-size: var(--font-size-label);
+  color: var(--text-secondary);
+}
+
+.claim-label {
+  font-size: var(--font-size-label);
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+.evidence-summary {
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+}
+
+.evidence-status {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-label);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+}
+
+.evidence-status [data-status-icon] {
+  display: inline-grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  font-size: 10px;
+  font-style: normal;
+}
+
+.evidence-status.status-clear { color: var(--color-confirmed); }
+.evidence-status.status-uncertain { color: var(--text-secondary); }
+.evidence-status.status-priority_concern { color: var(--color-concern); }
