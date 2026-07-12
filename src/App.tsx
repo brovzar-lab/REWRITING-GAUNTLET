@@ -12,6 +12,7 @@ import { SceneNavigator } from './panels/SceneNavigator';
 import { InspectorTabs } from './panels/InspectorTabs';
 import { PassTray } from './panels/PassTray';
 import { ScreenplayEditor } from './editor/ScreenplayEditor';
+import { EditorToolbar } from './editor/EditorToolbar';
 import { Board } from './board/Board';
 import { TopBar } from './panels/TopBar';
 import { initPersistence } from './store/persistence';
@@ -50,6 +51,7 @@ export default function App() {
         editor={
           <>
             <AnnotatedReadBar />
+            <EditorToolbar />
             <ScreenplayEditor />
           </>
         }

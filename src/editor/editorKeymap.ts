@@ -43,17 +43,26 @@ export function zoomKeymap(): Plugin {
   });
 }
 
+/** Retype the caret's element, keeping its identity. Shared by Mod-1..6 and the toolbar. */
+export function setElementType(type: ElementType) {
+  return (state: EditorState, dispatch?: (tr: Transaction) => void): boolean => {
+    const block = currentBlock(state);
+    if (!block) return false;
+    if (dispatch) dispatch(state.tr.setNodeMarkup(block.pos, screenplaySchema.nodes[type], block.node.attrs));
+    return true;
+  };
+}
+
+export function applyElementType(view: EditorView, type: ElementType): boolean {
+  return setElementType(type)(view.state, view.dispatch);
+}
+
 /** Direct element set (Mod-1..6), scene jump (Mod-Arrows), go-to-page (Mod-g). */
 export function professionalKeymap(): Plugin {
   const bindings: Record<string, (state: EditorState, dispatch?: (tr: Transaction) => void) => boolean> = {};
 
   ELEMENT_KEY_ORDER.forEach((type, i) => {
-    bindings[`Mod-${i + 1}`] = (state, dispatch) => {
-      const block = currentBlock(state);
-      if (!block) return false;
-      if (dispatch) dispatch(state.tr.setNodeMarkup(block.pos, screenplaySchema.nodes[type], block.node.attrs));
-      return true;
-    };
+    bindings[`Mod-${i + 1}`] = setElementType(type);
   });
 
   const jump = (direction: 1 | -1) => (state: EditorState, dispatch?: (tr: Transaction) => void) => {

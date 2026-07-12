@@ -55,6 +55,38 @@ test('Mod-G jumps to a page', async ({ page }) => {
   await expect(page.locator('.sp-page-header').filter({ hasText: /^3\.$/ })).toBeInViewport();
 });
 
+test('toolbar undo reverts typing', async ({ page }) => {
+  const line = page.locator('[data-element-id="sc2-e5"]');
+  const before = await line.textContent();
+  await line.click();
+  await page.keyboard.press('End');
+  await page.keyboard.type(' XQZ');
+  await expect(line).toContainText('XQZ');
+  const undoButton = page.getByRole('button', { name: 'Undo' });
+  await expect(undoButton).toBeEnabled();
+  await undoButton.click();
+  await expect(line).toHaveText(before!);
+});
+
+test('toolbar element selector reflects and retypes the selected line', async ({ page }) => {
+  await page.locator('[data-element-id="sc1-e2"]').click(); // action line
+  const select = page.getByLabel('Element type');
+  await expect(select).toHaveValue('action');
+  await select.selectOption('character');
+  await expect(page.locator('[data-element-id="sc1-e2"]')).toHaveAttribute('data-element-type', 'character');
+});
+
+test('footer page arrows move through the script', async ({ page }) => {
+  const status = page.getByTestId('status-bar');
+  await expect(status).toContainText(/Page 1 of \d+/);
+  await expect(page.getByRole('button', { name: 'Previous page' })).toBeDisabled();
+  await page.getByRole('button', { name: 'Next page' }).click();
+  await expect(status).toContainText(/Page 2 of \d+/);
+  await expect(page.getByRole('button', { name: 'Previous page' })).toBeEnabled();
+  await page.getByRole('button', { name: 'Previous page' }).click();
+  await expect(status).toContainText(/Page 1 of \d+/);
+});
+
 test('revision set: marks edited lines, labels the header, survives reload', async ({ page }) => {
   await page.locator('#rev-select').selectOption('Blue');
   await page.getByTestId('rev-start').click();

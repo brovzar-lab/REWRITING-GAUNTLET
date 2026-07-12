@@ -10,6 +10,7 @@ import { nextElementOnEnter, nextElementOnTab } from './elementCycling';
 import { paginationPlugin } from './paginationPlugin';
 import { revisionPlugin } from './revisionPlugin';
 import { currentBlock, professionalKeymap, zoomKeymap } from './editorKeymap';
+import { registerEditorView } from './editorHandle';
 import { suggestCharacters } from './smartType';
 import type { ElementType } from '../model/screenplay';
 import { useAppStore } from '../store/appStore';
@@ -215,6 +216,7 @@ export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
       },
     });
     viewRef.current = view;
+    registerEditorView(view);
     onReady?.(view);
 
     // Outside changes (navigator, board, hydration, revision set) rebuild the
@@ -253,6 +255,7 @@ export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
       unsubscribe();
       view.destroy();
       viewRef.current = null;
+      registerEditorView(null);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
