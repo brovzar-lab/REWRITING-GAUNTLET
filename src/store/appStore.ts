@@ -60,6 +60,8 @@ export interface AppState {
   setExportOpen: (open: boolean) => void;
   noteComposerOpen: boolean;
   setNoteComposerOpen: (open: boolean) => void;
+  historyOpen: boolean;
+  setHistoryOpen: (open: boolean) => void;
   printViewOpen: boolean;
   setPrintViewOpen: (open: boolean) => void;
 
@@ -147,6 +149,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   setExportOpen: (exportOpen) => set({ exportOpen }),
   noteComposerOpen: false,
   setNoteComposerOpen: (noteComposerOpen) => set({ noteComposerOpen }),
+  historyOpen: false,
+  setHistoryOpen: (historyOpen) => set({ historyOpen }),
   printViewOpen: false,
   setPrintViewOpen: (printViewOpen) => set({ printViewOpen }),
 

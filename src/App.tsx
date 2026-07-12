@@ -7,6 +7,7 @@ import { AiSettings } from './panels/AiSettings';
 import { ExportMenu } from './panels/ExportMenu';
 import { PrintView } from './panels/PrintView';
 import { PassSummaryDialog } from './panels/PassSummaryDialog';
+import { HistoryDialog } from './panels/HistoryDialog';
 import { SceneNavigator } from './panels/SceneNavigator';
 import { InspectorTabs } from './panels/InspectorTabs';
 import { PassTray } from './panels/PassTray';
@@ -31,6 +32,7 @@ function TopBar() {
   const setFocusMode = useAppStore((s) => s.setFocusMode);
   const setImportOpen = useAppStore((s) => s.setImportOpen);
   const setExportOpen = useAppStore((s) => s.setExportOpen);
+  const setHistoryOpen = useAppStore((s) => s.setHistoryOpen);
   const enterReadMode = useAppStore((s) => s.enterReadMode);
   const readModeActive = useAppStore((s) => s.readModeActive);
   const readComplete = useAppStore((s) => s.workflow.annotatedReadComplete);
@@ -50,6 +52,9 @@ function TopBar() {
       </button>
       <button type="button" className="seg-button" onClick={() => setExportOpen(true)}>
         {t('export.open')}
+      </button>
+      <button type="button" className="seg-button" onClick={() => setHistoryOpen(true)}>
+        {t('history.open')}
       </button>
       <button type="button" className="seg-button" aria-pressed={readModeActive} onClick={enterReadMode}>
         {readComplete ? t('read.completeDone') : t('read.enter')}
@@ -140,6 +145,7 @@ export default function App() {
       <ExportMenu />
       <PrintView />
       <PassSummaryDialog />
+      <HistoryDialog />
     </>
   );
 }
