@@ -25,6 +25,8 @@ export interface AppState {
   /** Revision set: element texts snapshotted when the set started, or null. */
   revisionBaseline: Record<string, string> | null;
   revisionSetLabel: string | null;
+  goToPageOpen: boolean;
+  setGoToPageOpen: (open: boolean) => void;
   startRevisionSet: (label: string) => void;
   endRevisionSet: () => void;
   loadRevision: (baseline: Record<string, string>, label: string) => void;
@@ -67,6 +69,8 @@ export const useAppStore = create<AppState>((set) => ({
   setZoom: (zoom) => set({ zoom: Math.min(2, Math.max(0.5, zoom)) }),
   revisionBaseline: null,
   revisionSetLabel: null,
+  goToPageOpen: false,
+  setGoToPageOpen: (goToPageOpen) => set({ goToPageOpen }),
   startRevisionSet: (label) =>
     set((s) => ({
       revisionSetLabel: label,
