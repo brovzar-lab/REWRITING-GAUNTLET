@@ -31,10 +31,12 @@ for (const theme of ['Night', 'Day'] as const) {
     await expectClean(page, 'import-paste-step');
     await page.getByRole('button', { name: 'Cancel', exact: true }).click();
 
-    // AI Assist tab in its locked state.
-    await page.getByRole('tab', { name: 'AI Assist' }).click();
+    // Pass workspace in its locked state (a pass chip opens it).
+    await page.getByRole('button', { name: /^1 FOUNDATION/ }).click();
+    await expect(page.getByText(/What this pass examines/)).toBeVisible();
     await expect(page.getByText(/Locked until/)).toBeVisible();
-    await expectClean(page, 'ai-locked');
+    await expectClean(page, 'pass-workspace-locked');
+    await page.getByRole('button', { name: /^1 FOUNDATION/ }).click(); // deselect
 
     // AI settings / consent screen.
     await page.getByRole('button', { name: 'AI settings', exact: true }).click();

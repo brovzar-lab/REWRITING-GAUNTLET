@@ -1,10 +1,11 @@
 import { useAppStore } from '../store/appStore';
 import { EvidenceInspector } from './EvidenceInspector';
-import { AiAssistPanel } from './AiAssistPanel';
+import { PassWorkspace } from './PassWorkspace';
 import { useT } from '../i18n/strings';
 
-/** The inspector column: human evidence & notes on one tab, AI Assist on the
-    other. Separate tabs keep note sources visibly apart, as the method demands. */
+/** The inspector column: human evidence & notes on one tab, the guided pass
+    workspace (with its AI assist) on the other. Separate tabs keep note
+    sources visibly apart, as the method demands. */
 export function InspectorTabs() {
   const tab = useAppStore((s) => s.inspectorTab);
   const setTab = useAppStore((s) => s.setInspectorTab);
@@ -12,7 +13,7 @@ export function InspectorTabs() {
 
   const tabs = [
     { id: 'evidence' as const, label: t('inspector.tabEvidence') },
-    { id: 'ai' as const, label: t('inspector.tabAi') },
+    { id: 'pass' as const, label: t('inspector.tabPass') },
   ];
 
   return (
@@ -32,7 +33,7 @@ export function InspectorTabs() {
             onKeyDown={(e) => {
               if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
                 e.preventDefault();
-                const next = id === 'evidence' ? 'ai' : 'evidence';
+                const next = id === 'evidence' ? 'pass' : 'evidence';
                 setTab(next);
                 document.getElementById(`inspector-tab-${next}`)?.focus();
               }
@@ -48,7 +49,7 @@ export function InspectorTabs() {
         aria-labelledby={`inspector-tab-${tab}`}
         className="inspector-tabpanel"
       >
-        {tab === 'evidence' ? <EvidenceInspector /> : <AiAssistPanel />}
+        {tab === 'evidence' ? <EvidenceInspector /> : <PassWorkspace />}
       </div>
     </div>
   );

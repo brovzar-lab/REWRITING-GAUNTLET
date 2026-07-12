@@ -368,3 +368,51 @@
   text-transform: uppercase;
   color: var(--text-secondary);
 }
+
+/* Guided pass workspace. */
+.pass-brief {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  border: 1px solid var(--divider);
+  border-radius: var(--rounded-control);
+  padding: var(--space-sm);
+}
+
+.pass-objective {
+  margin: 0;
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+  color: var(--text-primary);
+}
+
+.pass-examines {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+  color: var(--text-primary);
+}
+
+.pass-progress {
+  font-size: var(--font-size-label);
+  color: var(--text-secondary);
+}
+
+.pass-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  border-top: 1px solid var(--divider);
+  padding-top: var(--space-sm);
+  margin-top: auto;
+}
+
+.pass-next {
+  margin-left: auto;
+  border-color: var(--accent);
+}

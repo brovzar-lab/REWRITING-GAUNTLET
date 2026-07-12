@@ -40,8 +40,12 @@ test('the full alpha journey', async ({ page }) => {
   await importDialog.getByRole('button', { name: 'Import and replace draft' }).click();
   await expect(page.locator('.top-bar')).toContainText('THE LEDGER');
 
-  // 2. The AI panel is locked before the private annotated read.
-  await page.getByRole('tab', { name: 'AI Assist' }).click();
+  // 2. Choosing a pass opens the guided workspace, but diagnosis is locked
+  //    before the private annotated read.
+  await page.getByRole('button', { name: /11.*POLISH/ }).click();
+  await expect(page.locator('[data-pass-workspace="polish"]')).toBeVisible();
+  await expect(page.getByText(/Pass 11 of 11/)).toBeVisible();
+  await expect(page.getByText(/What this pass examines/)).toBeVisible();
   await expect(page.getByText(/Locked until your private annotated read/)).toBeVisible();
   await expect(page.getByRole('button', { name: 'Diagnose', exact: true })).toHaveCount(0);
 
@@ -59,8 +63,8 @@ test('the full alpha journey', async ({ page }) => {
   await complete.click();
   await expect(readBar).toBeHidden();
 
-  // 4. Run the Polish pass: the local analyzer finds the two spacing problems.
-  await page.getByRole('button', { name: /11.*POLISH/ }).click();
+  // 4. The Polish workspace is already open; the local analyzer finds the
+  //    two spacing problems.
   await expect(page.getByRole('button', { name: 'Diagnose', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Diagnose', exact: true }).click();
   const findings = page.locator('.ai-finding');
@@ -91,7 +95,7 @@ test('the full alpha journey', async ({ page }) => {
   await expect(inspector.getByText(/Stray spacing/)).toBeVisible();
 
   // 8. Complete the pass: snapshot + label bump + tray state.
-  await page.getByRole('tab', { name: 'AI Assist' }).click();
+  await page.getByRole('tab', { name: 'Rewrite pass' }).click();
   await page.getByRole('button', { name: 'Complete pass' }).click();
   await expect(page.locator('.top-bar')).toContainText('Rewrite 1');
   await expect(page.getByRole('button', { name: /POLISH.*Complete/i })).toBeVisible();

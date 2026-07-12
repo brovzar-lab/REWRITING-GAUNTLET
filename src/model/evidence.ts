@@ -21,4 +21,6 @@ export interface EvidenceRecord {
   sceneId: string;
   elementId: string;
   readerName?: string;
+  /** Rewrite pass that was active when the note was made, if any. */
+  passId?: string;
 }

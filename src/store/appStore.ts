@@ -41,8 +41,8 @@ export interface AppState {
   setImportOpen: (open: boolean) => void;
   aiSettingsOpen: boolean;
   setAiSettingsOpen: (open: boolean) => void;
-  inspectorTab: 'evidence' | 'ai';
-  setInspectorTab: (tab: 'evidence' | 'ai') => void;
+  inspectorTab: 'evidence' | 'pass';
+  setInspectorTab: (tab: 'evidence' | 'pass') => void;
   exportOpen: boolean;
   setExportOpen: (open: boolean) => void;
   printViewOpen: boolean;
@@ -347,7 +347,9 @@ export const useAppStore = create<AppState>((set, get) => ({
     }),
 
   setTheme: (theme) => set({ theme }),
-  setActivePass: (activePassId) => set({ activePassId }),
+  // Choosing a pass opens its guided workspace; deselecting leaves the tab alone.
+  setActivePass: (activePassId) =>
+    set((s) => ({ activePassId, inspectorTab: activePassId ? 'pass' : s.inspectorTab })),
   setPanelSize: (panel, px) => set((s) => ({ panelSizes: { ...s.panelSizes, [panel]: px } })),
   togglePanel: (panel) =>
     set((s) => ({ collapsedPanels: { ...s.collapsedPanels, [panel]: !s.collapsedPanels[panel] } })),

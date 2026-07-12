@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAppStore } from '../store/appStore';
 import { resolveProvider } from '../ai';
 import { EPPS_PASSES } from '../model/passes';
-import { useT } from '../i18n/strings';
+import { useT, type StringKey } from '../i18n/strings';
 import type { Finding } from '../workflow/types';
 import type { EvidenceStatus } from '../model/evidence';
 
@@ -99,16 +99,19 @@ function FindingCard({ finding }: { finding: Finding }) {
   );
 }
 
-/** The AI Assist panel: per active pass, Diagnose produces labeled hypotheses
-    with citations; each scene-level proposal needs the writer's approval.
-    Locked until the private annotated read is done — the writer reads first. */
-export function AiAssistPanel() {
+/** The guided pass workspace. Selecting a pass in the tray opens this:
+    the pass objective, what it examines, Diagnose, the approve/reject queue,
+    progress, Complete pass, and the recommended next pass. Diagnosis stays
+    locked until the private annotated read is done; the guidance does not. */
+export function PassWorkspace() {
   const screenplay = useAppStore((s) => s.screenplay);
   const connections = useAppStore((s) => s.connections);
   const activePassId = useAppStore((s) => s.activePassId);
+  const setActivePass = useAppStore((s) => s.setActivePass);
   const readComplete = useAppStore((s) => s.workflow.annotatedReadComplete);
   const cloudConsent = useAppStore((s) => s.workflow.cloudAiConsent);
   const findings = useAppStore((s) => s.workflow.findings);
+  const evidence = useAppStore((s) => s.evidence);
   const setFindings = useAppStore((s) => s.setFindings);
   const setPassRunState = useAppStore((s) => s.setPassRunState);
   const passRuns = useAppStore((s) => s.workflow.passRuns);
@@ -121,24 +124,42 @@ export function AiAssistPanel() {
 
   const pass = EPPS_PASSES.find((p) => p.id === activePassId);
   const provider = resolveProvider(cloudConsent);
-  const passFindings = pass ? findings.filter((f) => f.passId === pass.id) : [];
+
+  if (!pass) {
+    return (
+      <aside className="ai-panel" aria-label={t('inspector.tabPass')}>
+        <div className="ai-panel-header">
+          <h2 className="panel-title">{t('inspector.tabPass')}</h2>
+          <span className="ai-provider-label">
+            {provider.id === 'cloud' ? t('ai.activeCloud') : t('ai.activeLocal')}
+          </span>
+          <button type="button" className="seg-button" onClick={() => setAiSettingsOpen(true)}>
+            {t('ai.settings')}
+          </button>
+        </div>
+        <p className="inspector-hint">{t('ai.noPass')}</p>
+      </aside>
+    );
+  }
+
+  const runState = passRuns[pass.id];
+  const nextPass = EPPS_PASSES.find((p) => p.order === pass.order + 1);
+  const passFindings = findings.filter((f) => f.passId === pass.id);
   const open = passFindings.filter((f) => f.resolution === 'open');
   const resolved = passFindings.filter((f) => f.resolution !== 'open');
+  const proposals = passFindings.filter((f) => f.proposal);
+  const proposalsResolved = proposals.filter((f) => f.resolution !== 'open');
+  const passNotes = evidence.filter((e) => e.passId === pass.id);
+  const examines = t(`pass.ex.${pass.id}` as StringKey).split('|');
 
   const diagnose = async () => {
-    if (!pass || busy) return;
+    if (busy) return;
     setBusy(true);
     setError(null);
     setPassRunState(pass.id, 'diagnosing');
     try {
       const passRunId = `run-${pass.id}-${crypto.randomUUID()}`;
-      const result = await provider.diagnose({
-        screenplay,
-        connections,
-        pass,
-        passRunId,
-        now: Date.now(),
-      });
+      const result = await provider.diagnose({ screenplay, connections, pass, passRunId, now: Date.now() });
       setFindings(passRunId, result);
       setPassRunState(pass.id, 'reviewing');
     } catch (e) {
@@ -150,14 +171,26 @@ export function AiAssistPanel() {
   };
 
   return (
-    <aside className="ai-panel" aria-label={t('ai.assist')}>
+    <aside className="ai-panel pass-workspace" data-pass-workspace={pass.id} aria-label={t('inspector.tabPass')}>
       <div className="ai-panel-header">
-        <h2 className="panel-title">{t('ai.assist')}</h2>
-        <span className="ai-provider-label">{provider.id === 'cloud' ? t('ai.activeCloud') : t('ai.activeLocal')}</span>
-        <button type="button" className="seg-button" onClick={() => setAiSettingsOpen(true)}>
-          {t('ai.settings')}
-        </button>
+        <h2 className="panel-title">
+          {t('pass.pass')} {pass.order} {t('pass.of')} {EPPS_PASSES.length} · {pass.name}
+        </h2>
+        {runState && runState !== 'not_started' && (
+          <span className={`chip-state chip-state-${runState}`}>{t(`passState.${runState}`)}</span>
+        )}
       </div>
+
+      <section className="pass-brief" aria-label={t('pass.objective')}>
+        <span className="control-label">{t('pass.objective')}</span>
+        <p className="pass-objective">{t(`pass.obj.${pass.id}` as StringKey)}</p>
+        <span className="control-label">{t('pass.examines')}</span>
+        <ul className="pass-examines">
+          {examines.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </section>
 
       {!readComplete ? (
         <div className="ai-locked">
@@ -166,21 +199,29 @@ export function AiAssistPanel() {
             {t('read.enter')}
           </button>
         </div>
-      ) : !pass ? (
-        <p className="inspector-hint">{t('ai.noPass')}</p>
       ) : (
         <>
           <div className="ai-pass-row">
-            <span className="ai-pass-name">{pass.name}</span>
+            <span className="pass-progress" data-testid="pass-progress">
+              {proposals.length > 0 && (
+                <>
+                  {proposalsResolved.length} {t('pass.of')} {proposals.length} {t('pass.resolved')} ·{' '}
+                </>
+              )}
+              {passNotes.length} {t('pass.notes')}
+            </span>
             <span className="ai-pass-actions">
               <button type="button" className="seg-button" disabled={busy} onClick={() => void diagnose()}>
                 {busy ? t('ai.diagnosing') : t('ai.diagnose')}
               </button>
-              {passRuns[pass.id] === 'reviewing' && (
-                <button type="button" className="seg-button" onClick={() => void completePass(pass.id)}>
-                  {t('ai.completePass')}
-                </button>
-              )}
+              <button
+                type="button"
+                className="seg-button"
+                disabled={runState !== 'reviewing'}
+                onClick={() => void completePass(pass.id)}
+              >
+                {t('ai.completePass')}
+              </button>
             </span>
           </div>
           {error && (
@@ -198,6 +239,20 @@ export function AiAssistPanel() {
           )}
         </>
       )}
+
+      <div className="pass-footer">
+        <span className="ai-provider-label">
+          {provider.id === 'cloud' ? t('ai.activeCloud') : t('ai.activeLocal')}
+        </span>
+        <button type="button" className="seg-button" onClick={() => setAiSettingsOpen(true)}>
+          {t('ai.settings')}
+        </button>
+        {nextPass && (
+          <button type="button" className="seg-button pass-next" onClick={() => setActivePass(nextPass.id)}>
+            {t('pass.next')}: {nextPass.order} {nextPass.name}
+          </button>
+        )}
+      </div>
     </aside>
   );
 }
