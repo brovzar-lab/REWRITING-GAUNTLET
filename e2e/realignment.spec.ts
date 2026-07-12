@@ -67,6 +67,16 @@ test.describe('visual realignment', () => {
     await expect(page.locator('.ds-story-card.is-selected')).toContainText('2');
   });
 
+  test('clicking a pass opens the pass control surface', async ({ page }) => {
+    await freshApp(page);
+    await page.locator('.ds-pass-chip').nth(1).click();
+    const openPass = page.getByRole('button', { name: /open pass/i });
+    await expect(openPass).toBeVisible();
+    await expect(page.locator('.tray-detail')).toContainText('Focus');
+    await openPass.click();
+    await expect(page.getByRole('tab', { name: /rewrite pass/i })).toHaveAttribute('aria-selected', 'true');
+  });
+
   test('evidence Go to script selects the exact cited line', async ({ page }) => {
     await freshApp(page);
     await pasteImport(page);
