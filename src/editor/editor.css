@@ -1,0 +1,89 @@
+/* The screenplay page: warm paper in both themes (The Page Rule). */
+
+.sp-page-scroller {
+  overflow: auto;
+  height: 100%;
+  padding: var(--space-lg);
+  display: flex;
+  justify-content: center;
+}
+
+.sp-page {
+  background: var(--color-screenplay-paper);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-paper-rest);
+  border-radius: var(--rounded-panel);
+  width: 8.5in;
+  min-height: 11in;
+  flex: 0 0 auto;
+  padding: 1in 1in 1in 1.5in;
+  height: max-content;
+}
+
+.sp-page .ProseMirror {
+  outline: none;
+  font-family: var(--font-screenplay);
+  font-size: var(--font-size-screenplay);
+  font-weight: var(--font-weight-screenplay);
+  line-height: 1.2;
+  white-space: pre-wrap;
+}
+
+.sp-element {
+  margin: 0;
+  padding-top: 12pt; /* one blank Courier line between elements */
+}
+
+.sp-dialogue,
+.sp-parenthetical {
+  padding-top: 0; /* dialogue stacks directly under character/parenthetical */
+}
+
+.sp-scene_heading {
+  width: 6in;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.sp-action {
+  width: 6in;
+}
+
+.sp-character {
+  margin-left: 2.2in;
+  width: 3.8in;
+  text-transform: uppercase;
+}
+
+.sp-parenthetical {
+  margin-left: 1.6in;
+  width: 2in;
+}
+
+.sp-dialogue {
+  margin-left: 1in;
+  width: 3.5in;
+}
+
+.sp-transition {
+  width: 6in;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+/* Approximate page-break marker (Slice 1 heuristic; true pagination in Slice 2). */
+.sp-page-break {
+  margin: 24pt -1in 24pt -1.5in;
+  border-top: 1px dashed rgba(32, 35, 33, 0.35);
+  color: rgba(32, 35, 33, 0.6);
+  font: var(--font-weight-label) var(--font-size-label) var(--font-ui);
+  letter-spacing: var(--letter-spacing-label);
+  text-align: center;
+  padding-top: var(--space-xs);
+  user-select: none;
+}
+
+/* Selected element indicator: accent bar + tint, never color alone (cursor is present). */
+.sp-element.sp-selected {
+  background: var(--row-selected, rgba(220, 165, 46, 0.12));
+}

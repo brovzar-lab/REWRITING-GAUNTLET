@@ -1,0 +1,186 @@
+import { useEffect, useRef } from 'react';
+import { EditorState, Plugin, TextSelection, type Transaction } from 'prosemirror-state';
+import { EditorView, Decoration, DecorationSet } from 'prosemirror-view';
+import { keymap } from 'prosemirror-keymap';
+import { baseKeymap, chainCommands, newlineInCode } from 'prosemirror-commands';
+import { history, redo, undo } from 'prosemirror-history';
+import type { Node as PMNode } from 'prosemirror-model';
+import { screenplaySchema } from './schema';
+import { buildDoc, parseDoc } from './docSync';
+import { nextElementOnEnter, nextElementOnTab } from './elementCycling';
+import { approximatePagination } from './layout';
+import type { ElementType, Screenplay } from '../model/screenplay';
+import { useAppStore } from '../store/appStore';
+import './editor.css';
+
+function currentBlock(state: EditorState): { node: PMNode; pos: number } | null {
+  const { $from } = state.selection;
+  if ($from.depth < 1) return null;
+  return { node: $from.node(1), pos: $from.before(1) };
+}
+
+/** Enter: split and retype the new block per the Final Draft table, with a fresh stable id. */
+function enterCommand(state: EditorState, dispatch?: (tr: Transaction) => void): boolean {
+  const block = currentBlock(state);
+  if (!block) return false;
+  const from = block.node.type.name as ElementType;
+  const next = nextElementOnEnter(from);
+  if (!dispatch) return true;
+  let tr = state.tr.deleteSelection();
+  tr = tr.split(tr.selection.from, 1, [
+    {
+      type: screenplaySchema.nodes[next],
+      attrs: { elementId: `el-${crypto.randomUUID()}`, sceneId: block.node.attrs.sceneId as string },
+    },
+  ]);
+  dispatch(tr.scrollIntoView());
+  return true;
+}
+
+/** Tab: retype the current block per the Final Draft table, keeping its identity. */
+function tabCommand(state: EditorState, dispatch?: (tr: Transaction) => void): boolean {
+  const block = currentBlock(state);
+  if (!block) return false;
+  const from = block.node.type.name as ElementType;
+  const next = nextElementOnTab(from);
+  if (!dispatch) return true;
+  const tr = state.tr.setNodeMarkup(block.pos, screenplaySchema.nodes[next], block.node.attrs);
+  dispatch(tr);
+  return true;
+}
+
+/** Widget decorations marking APPROXIMATE page breaks (true pagination is Slice 2). */
+function pageBreakPlugin(getScreenplay: () => Screenplay): Plugin {
+  const build = (doc: PMNode) => {
+    const { pageBreakBefore, pageOfElement } = approximatePagination(getScreenplay());
+    const decorations: Decoration[] = [];
+    doc.forEach((node, offset) => {
+      const id = node.attrs.elementId as string;
+      if (pageBreakBefore.has(id)) {
+        const page = pageOfElement.get(id) ?? 0;
+        decorations.push(
+          Decoration.widget(offset, () => {
+            const el = document.createElement('div');
+            el.className = 'sp-page-break';
+            el.setAttribute('aria-hidden', 'true');
+            el.setAttribute('contenteditable', 'false');
+            el.textContent = `— ${page} —`;
+            return el;
+          }, { side: -1 }),
+        );
+      }
+    });
+    return DecorationSet.create(doc, decorations);
+  };
+  return new Plugin({
+    state: {
+      init: (_config, state) => build(state.doc),
+      apply: (tr, old) => (tr.docChanged ? build(tr.doc) : old),
+    },
+    props: {
+      decorations(state) {
+        return this.getState(state);
+      },
+    },
+  });
+}
+
+export interface ScreenplayEditorProps {
+  onReady?: (view: EditorView) => void;
+}
+
+export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
+  const hostRef = useRef<HTMLDivElement>(null);
+  const viewRef = useRef<EditorView | null>(null);
+  const syncingFromEditor = useRef(false);
+
+  useEffect(() => {
+    const host = hostRef.current;
+    if (!host) return;
+
+    const store = useAppStore;
+    const state = EditorState.create({
+      doc: buildDoc(store.getState().screenplay),
+      plugins: [
+        history(),
+        keymap({
+          Enter: chainCommands(newlineInCode, enterCommand),
+          Tab: tabCommand,
+          'Mod-z': undo,
+          'Mod-y': redo,
+          'Shift-Mod-z': redo,
+        }),
+        keymap(baseKeymap),
+        pageBreakPlugin(() => store.getState().screenplay),
+      ],
+    });
+
+    const view = new EditorView(host, {
+      state,
+      dispatchTransaction(tr) {
+        const newState = view.state.apply(tr);
+        view.updateState(newState);
+        if (tr.docChanged) {
+          syncingFromEditor.current = true;
+          store.getState().loadScreenplay(parseDoc(newState.doc, store.getState().screenplay));
+          syncingFromEditor.current = false;
+        }
+        if (tr.selectionSet || tr.docChanged) {
+          const block = currentBlock(newState);
+          if (block) {
+            const selection = store.getState().selection;
+            const sceneId = block.node.attrs.sceneId as string;
+            const elementId = block.node.attrs.elementId as string;
+            if (selection?.sceneId !== sceneId || selection?.elementId !== elementId) {
+              syncingFromEditor.current = true;
+              store.getState().select({ sceneId, elementId });
+              syncingFromEditor.current = false;
+            }
+          }
+        }
+      },
+    });
+    viewRef.current = view;
+    onReady?.(view);
+
+    // Outside changes (navigator, board, hydration) rebuild the doc and move the cursor.
+    let prevScreenplay = store.getState().screenplay;
+    let prevSelection = store.getState().selection;
+    const unsubscribe = store.subscribe((s) => {
+      if (s.screenplay !== prevScreenplay && !syncingFromEditor.current) {
+        const doc = buildDoc(s.screenplay);
+        view.updateState(
+          EditorState.create({ doc, plugins: view.state.plugins }),
+        );
+      }
+      prevScreenplay = s.screenplay;
+
+      if (s.selection !== prevSelection && s.selection && !syncingFromEditor.current) {
+        let targetPos: number | null = null;
+        view.state.doc.forEach((node, offset) => {
+          if (node.attrs.elementId === s.selection!.elementId) targetPos = offset + 1;
+        });
+        if (targetPos !== null) {
+          const tr = view.state.tr.setSelection(TextSelection.create(view.state.doc, targetPos));
+          view.dispatch(tr);
+          const dom = view.dom.querySelector(`[data-element-id="${s.selection.elementId}"]`);
+          dom?.scrollIntoView?.({ block: 'center' });
+        }
+      }
+      prevSelection = s.selection;
+    });
+
+    return () => {
+      unsubscribe();
+      view.destroy();
+      viewRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div className="sp-page-scroller" data-testid="screenplay-editor">
+      <div className="sp-page" ref={hostRef} aria-label="Screenplay page" />
+    </div>
+  );
+}
