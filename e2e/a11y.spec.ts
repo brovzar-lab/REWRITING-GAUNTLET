@@ -17,7 +17,7 @@ for (const viewport of VIEWPORTS) {
     test(`axe clean in ${theme} theme at ${viewport.name} (${viewport.width}px)`, async ({ page }) => {
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
       await page.goto('/');
-      await page.getByRole('button', { name: theme, exact: true }).click();
+      await page.getByLabel('Appearance').selectOption(theme.toLowerCase());
       await expect(page.locator('.sp-page .ProseMirror')).toBeVisible();
       const results = await scan(page);
       expect(

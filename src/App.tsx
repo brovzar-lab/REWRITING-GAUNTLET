@@ -13,91 +13,9 @@ import { InspectorTabs } from './panels/InspectorTabs';
 import { PassTray } from './panels/PassTray';
 import { ScreenplayEditor } from './editor/ScreenplayEditor';
 import { Board } from './board/Board';
+import { TopBar } from './panels/TopBar';
 import { initPersistence } from './store/persistence';
-import { useAppStore, type ThemeChoice, type UiLang } from './store/appStore';
-import { useT } from './i18n/strings';
-
-const THEMES: { id: ThemeChoice; key: 'theme.day' | 'theme.night' | 'theme.system' }[] = [
-  { id: 'day', key: 'theme.day' },
-  { id: 'night', key: 'theme.night' },
-  { id: 'system', key: 'theme.system' },
-];
-
-function TopBar() {
-  const theme = useAppStore((s) => s.theme);
-  const setTheme = useAppStore((s) => s.setTheme);
-  const lang = useAppStore((s) => s.lang);
-  const setLang = useAppStore((s) => s.setLang);
-  const focusMode = useAppStore((s) => s.focusMode);
-  const setFocusMode = useAppStore((s) => s.setFocusMode);
-  const setImportOpen = useAppStore((s) => s.setImportOpen);
-  const setExportOpen = useAppStore((s) => s.setExportOpen);
-  const setHistoryOpen = useAppStore((s) => s.setHistoryOpen);
-  const enterReadMode = useAppStore((s) => s.enterReadMode);
-  const readModeActive = useAppStore((s) => s.readModeActive);
-  const readComplete = useAppStore((s) => s.workflow.annotatedReadComplete);
-  const title = useAppStore((s) => s.screenplay.title);
-  const draftLabel = useAppStore((s) => s.screenplay.draftLabel);
-  const t = useT();
-
-  return (
-    <>
-      <h1 className="app-title">{t('app.title')}</h1>
-      <span className="draft-label">
-        {title} · {draftLabel}
-      </span>
-      <span className="top-bar-spacer" />
-      <button type="button" className="seg-button" onClick={() => setImportOpen(true)}>
-        {t('import.open')}
-      </button>
-      <button type="button" className="seg-button" onClick={() => setExportOpen(true)}>
-        {t('export.open')}
-      </button>
-      <button type="button" className="seg-button" onClick={() => setHistoryOpen(true)}>
-        {t('history.open')}
-      </button>
-      <button type="button" className="seg-button" aria-pressed={readModeActive} onClick={enterReadMode}>
-        {readComplete ? t('read.completeDone') : t('read.enter')}
-      </button>
-      <button
-        type="button"
-        className="seg-button"
-        aria-pressed={focusMode}
-        onClick={() => setFocusMode(!focusMode)}
-      >
-        {focusMode ? t('focus.exit') : t('focus.enter')}
-      </button>
-      <span className="control-group" role="group" aria-label={t('lang.label')}>
-        <span className="control-label">{t('lang.label')}</span>
-        {(['en', 'es'] as UiLang[]).map((l) => (
-          <button
-            key={l}
-            type="button"
-            className="seg-button"
-            aria-pressed={lang === l}
-            onClick={() => setLang(l)}
-          >
-            {l.toUpperCase()}
-          </button>
-        ))}
-      </span>
-      <span className="control-group" role="group" aria-label={t('theme.label')}>
-        <span className="control-label">{t('theme.label')}</span>
-        {THEMES.map(({ id, key }) => (
-          <button
-            key={id}
-            type="button"
-            className="seg-button"
-            aria-pressed={theme === id}
-            onClick={() => setTheme(id)}
-          >
-            {t(key)}
-          </button>
-        ))}
-      </span>
-    </>
-  );
-}
+import { useAppStore } from './store/appStore';
 
 export default function App() {
   const theme = useAppStore((s) => s.theme);

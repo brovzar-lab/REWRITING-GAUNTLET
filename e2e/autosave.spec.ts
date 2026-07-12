@@ -19,7 +19,7 @@ test('edits autosave locally and survive a full reload', async ({ page }) => {
 
 test('theme choice also survives reload', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Day', exact: true }).click();
+  await page.getByLabel('Appearance').selectOption('day');
   await page.waitForTimeout(1200);
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'day');

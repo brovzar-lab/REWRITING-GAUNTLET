@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { useAppStore } from '../store/appStore';
 import { paginate } from '../pagination/engine';
-import { RevisionControl } from './RevisionControl';
 import { useT } from '../i18n/strings';
 
 /** Slim strip under the page: position, zoom, and the revision-set control. */
@@ -41,7 +40,6 @@ export function StatusBar() {
       >
         {t('notes.add')}
       </button>
-      <RevisionControl />
       <span className="control-group" role="group" aria-label="Zoom">
         <button type="button" className="seg-button" aria-label={t('status.zoomOut')} onClick={() => setZoom(Math.round((zoom - 0.1) * 10) / 10)}>
           −

@@ -21,7 +21,7 @@ for (const theme of ['Night', 'Day'] as const) {
     await page.goto('/');
     await page.evaluate(() => indexedDB.deleteDatabase('rewrite-studio'));
     await page.reload();
-    await page.getByRole('button', { name: theme, exact: true }).click();
+    await page.getByLabel('Appearance').selectOption(theme.toLowerCase());
     await expect(page.locator('.sp-page .ProseMirror')).toBeVisible();
 
     // Import menu, then the paste step with a preview showing.

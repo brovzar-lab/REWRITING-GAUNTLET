@@ -110,6 +110,9 @@ export interface AppState {
       Follows the viewport; not persisted. */
   boardDock: 'side' | 'bottom';
   setBoardDock: (boardDock: 'side' | 'bottom') => void;
+  /** Autosave heartbeat for the top-bar indicator. Owned by persistence.ts. */
+  saveState: 'saving' | 'saved';
+  setSaveState: (saveState: 'saving' | 'saved') => void;
 
   select: (selection: Selection | null) => void;
   updateElementText: (sceneId: string, elementId: string, text: string) => void;
@@ -360,6 +363,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   collapsedPanels: {},
   boardDock: 'side',
   setBoardDock: (boardDock) => set({ boardDock }),
+  saveState: 'saved',
+  setSaveState: (saveState) => set({ saveState }),
 
   select: (selection) => set({ selection }),
 

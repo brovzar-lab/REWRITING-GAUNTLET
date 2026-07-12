@@ -40,7 +40,10 @@ export async function initPersistence(options: PersistenceOptions = {}): Promise
   }
 
   let timer: ReturnType<typeof setTimeout> | undefined;
-  const unsubscribe = store.subscribe((state) => {
+  const unsubscribe = store.subscribe((state, prev) => {
+    // Our own save-state bookkeeping must not reschedule the save it reports on.
+    if (state.saveState !== prev.saveState) return;
+    if (store.getState().saveState !== 'saving') store.getState().setSaveState('saving');
     clearTimeout(timer);
     timer = setTimeout(() => {
       void db.documents.put({
@@ -63,16 +66,18 @@ export async function initPersistence(options: PersistenceOptions = {}): Promise
       } else {
         void db.baselines.delete(state.screenplay.id);
       }
-      void db.ui.put({
-        id: 'ui',
-        theme: state.theme,
-        lang: state.lang,
-        zoom: state.zoom,
-        activeDocumentId: state.screenplay.id,
-        activePassId: state.activePassId,
-        panelSizes: state.panelSizes,
-        collapsedPanels: state.collapsedPanels,
-      });
+      void db.ui
+        .put({
+          id: 'ui',
+          theme: state.theme,
+          lang: state.lang,
+          zoom: state.zoom,
+          activeDocumentId: state.screenplay.id,
+          activePassId: state.activePassId,
+          panelSizes: state.panelSizes,
+          collapsedPanels: state.collapsedPanels,
+        })
+        .then(() => store.getState().setSaveState('saved'));
     }, debounceMs);
   });
 

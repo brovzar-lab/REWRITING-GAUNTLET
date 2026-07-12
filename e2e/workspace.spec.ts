@@ -30,7 +30,7 @@ test.describe('workspace', () => {
     await freshApp(page);
     const paper = page.locator('.sp-page');
     const nightPaper = await paper.evaluate((el) => getComputedStyle(el).backgroundColor);
-    await page.getByRole('button', { name: 'Day', exact: true }).click();
+    await page.getByLabel('Appearance').selectOption('day');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'day');
     const dayPaper = await paper.evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(dayPaper).toBe(nightPaper); // warm paper in both themes

@@ -10,10 +10,70 @@
 .top-bar {
   display: flex;
   align-items: center;
-  gap: var(--space-md);
-  padding: var(--space-sm) var(--space-md);
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-md);
+  min-height: 44px;
   background: var(--surface-panel);
   border-bottom: 1px solid var(--divider);
+}
+
+/* Quiet document-action buttons: labels, not boxes, until touched. */
+.tool-button {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid transparent;
+  border-radius: var(--rounded-control);
+  padding: 5px 8px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-label);
+  letter-spacing: var(--letter-spacing-label);
+  cursor: pointer;
+  /* Border only: animating background from transparent leaves the pressed
+     state semi-transparent mid-flight, which fails WCAG contrast sampling. */
+  transition: border-color var(--motion-state-fast);
+}
+
+.tool-button:hover {
+  border-color: var(--divider);
+  background: var(--row-hover);
+}
+
+.tool-button[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border-color: var(--accent);
+}
+
+.top-bar-divider {
+  width: 1px;
+  align-self: stretch;
+  margin: var(--space-xs) 0;
+  background: var(--divider);
+}
+
+.save-indicator {
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-label);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.save-indicator::before {
+  content: '●';
+  margin-right: var(--space-xs);
+  font-size: 8px;
+  vertical-align: 1px;
+}
+
+.save-indicator.save-saved::before {
+  color: var(--color-confirmed);
+}
+
+.save-indicator.save-saving::before {
+  color: var(--text-secondary);
 }
 
 .app-title {
