@@ -16,6 +16,8 @@ async function expectClean(page: Page, surface: string) {
 
 for (const theme of ['Night', 'Day'] as const) {
   test(`alpha surfaces axe-clean in ${theme} theme`, async ({ page }) => {
+    test.slow(); // five full axe scans in sequence
+
     await page.goto('/');
     await page.evaluate(() => indexedDB.deleteDatabase('rewrite-studio'));
     await page.reload();

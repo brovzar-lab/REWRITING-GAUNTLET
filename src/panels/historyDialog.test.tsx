@@ -18,7 +18,7 @@ describe('snapshot history', () => {
     await waitFor(() => expect(screen.getByText(/no snapshots yet/i)).toBeInTheDocument());
   });
 
-  it('lists snapshots of the current document, newest first', async () => {
+  it('lists snapshots across documents, newest first', async () => {
     await useAppStore.getState().takeSnapshot('Before import: LAS GARZAS');
     await useAppStore.getState().takeSnapshot('After Character pass');
     render(<HistoryDialog />);

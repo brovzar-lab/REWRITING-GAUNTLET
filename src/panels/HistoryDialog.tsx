@@ -4,12 +4,12 @@ import { db, type SnapshotRow } from '../store/db';
 import { useT } from '../i18n/strings';
 
 /** Visible snapshot history: every automatic snapshot (imports, completed
-    passes) is listed and restorable. Restoring asks first and always saves a
-    safety snapshot of the current draft, so nothing is ever lost. */
+    passes) is listed and restorable — across documents, because the snapshot
+    a writer wants back is often of the draft they just replaced. Restoring
+    asks first and always saves a safety snapshot of the current draft. */
 export function HistoryDialog() {
   const open = useAppStore((s) => s.historyOpen);
   const setOpen = useAppStore((s) => s.setHistoryOpen);
-  const screenplayId = useAppStore((s) => s.screenplay.id);
   const takeSnapshot = useAppStore((s) => s.takeSnapshot);
   const restoreSnapshot = useAppStore((s) => s.restoreSnapshot);
   const t = useT();
@@ -22,17 +22,13 @@ export function HistoryDialog() {
     if (!open) return;
     setConfirming(null);
     let cancelled = false;
-    void db.snapshots
-      .where('screenplayId')
-      .equals(screenplayId)
-      .toArray()
-      .then((list) => {
-        if (!cancelled) setRows(list.sort((a, b) => b.takenAt - a.takenAt));
-      });
+    void db.snapshots.toArray().then((list) => {
+      if (!cancelled) setRows(list.sort((a, b) => b.takenAt - a.takenAt));
+    });
     return () => {
       cancelled = true;
     };
-  }, [open, screenplayId]);
+  }, [open]);
 
   if (!open) return null;
 
