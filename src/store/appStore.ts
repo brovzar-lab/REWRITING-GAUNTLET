@@ -10,7 +10,15 @@ export interface Selection {
 
 export type ThemeChoice = 'day' | 'night' | 'system';
 
+export type UiLang = 'en' | 'es';
+
 export interface AppState {
+  lang: UiLang;
+  setLang: (lang: UiLang) => void;
+  focusMode: boolean;
+  setFocusMode: (on: boolean) => void;
+  fullBoard: boolean;
+  setFullBoard: (on: boolean) => void;
   screenplay: Screenplay;
   evidence: EvidenceRecord[];
   connections: Connection[];
@@ -40,6 +48,12 @@ export interface AppState {
 const clone = <T>(v: T): T => (typeof structuredClone === 'function' ? structuredClone(v) : JSON.parse(JSON.stringify(v)));
 
 export const useAppStore = create<AppState>((set) => ({
+  lang: 'en',
+  setLang: (lang) => set({ lang }),
+  focusMode: false,
+  setFocusMode: (focusMode) => set({ focusMode }),
+  fullBoard: false,
+  setFullBoard: (fullBoard) => set({ fullBoard }),
   screenplay: clone(sampleScreenplay),
   evidence: sampleEvidence,
   connections: sampleConnections,

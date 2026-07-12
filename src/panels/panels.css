@@ -1,0 +1,267 @@
+/* Workspace shell: editing-suite density, tonal layering, crisp separators. */
+
+.workspace {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-frame);
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--surface-panel);
+  border-bottom: 1px solid var(--divider);
+}
+
+.app-title {
+  font-size: var(--font-size-title);
+  font-weight: var(--font-weight-title);
+  line-height: var(--line-height-title);
+  margin: 0;
+}
+
+.draft-label {
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-label);
+  letter-spacing: var(--letter-spacing-label);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.top-bar-spacer {
+  flex: 1;
+}
+
+.middle {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+}
+
+.middle.board-only {
+  display: block;
+}
+
+.panel {
+  background: var(--surface-panel);
+  overflow-y: auto;
+  min-width: 0;
+}
+
+.navigator-panel {
+  border-right: 1px solid var(--divider);
+}
+
+.inspector-panel {
+  border-left: 1px solid var(--divider);
+}
+
+.editor-panel {
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-title {
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-label);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: 0;
+  padding: var(--space-md) var(--space-md) var(--space-sm);
+}
+
+/* Resizers */
+.panel-resizer {
+  background: transparent;
+  position: relative;
+  z-index: 2;
+}
+
+.panel-resizer.vertical {
+  width: 6px;
+  margin: 0 -3px;
+  cursor: col-resize;
+}
+
+.panel-resizer.horizontal {
+  height: 6px;
+  margin: -3px 0;
+  cursor: row-resize;
+  border-top: 1px solid var(--divider);
+}
+
+.panel-resizer:hover,
+.panel-resizer:focus-visible {
+  background: var(--accent);
+  opacity: 0.4;
+}
+
+/* Scene navigator */
+.scene-navigator .act-header {
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-label);
+  letter-spacing: var(--letter-spacing-label);
+  color: var(--text-secondary);
+  margin: var(--space-md) 0 var(--space-xs);
+  padding: 0 var(--space-md);
+}
+
+.scene-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.scene-row {
+  display: grid;
+  grid-template-columns: 22px 1fr auto;
+  gap: var(--space-sm);
+  align-items: baseline;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-left: 2px solid transparent;
+  padding: 5px var(--space-md) 5px calc(var(--space-md) - 2px);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: var(--font-size-body);
+  cursor: pointer;
+}
+
+.scene-row:hover {
+  background: var(--row-hover);
+}
+
+.scene-row.is-selected {
+  background: var(--row-selected);
+  border-left-color: var(--accent);
+}
+
+.scene-number {
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-label);
+  color: var(--text-secondary);
+}
+
+.scene-slug {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.scene-page {
+  font-size: var(--font-size-label);
+  color: var(--text-secondary);
+}
+
+/* Pass tray */
+.pass-tray {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--surface-panel);
+  border-top: 1px solid var(--divider);
+  overflow-x: auto;
+}
+
+.tray-label {
+  padding: 0;
+  white-space: nowrap;
+}
+
+.tray-chips {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.ds-pass-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface-frame);
+  color: var(--text-primary);
+  border: 1px solid var(--divider);
+  border-radius: var(--rounded-control);
+  padding: 7px 10px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-label);
+  letter-spacing: var(--letter-spacing-label);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color var(--motion-state-fast), background var(--motion-state-fast);
+}
+
+.ds-pass-chip:hover {
+  border-color: var(--accent);
+}
+
+.ds-pass-chip.is-active {
+  border-color: var(--accent);
+  background: var(--row-selected);
+  font-weight: 700;
+}
+
+.chip-order {
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-body);
+}
+
+.ds-pass-chip.is-active .chip-order {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* Board shelf */
+.board-shelf {
+  background: var(--surface-panel);
+  overflow: hidden;
+}
+
+/* Top-bar controls */
+.control-group {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.control-label {
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-label);
+  letter-spacing: var(--letter-spacing-label);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.seg-button {
+  background: var(--surface-frame);
+  color: var(--text-primary);
+  border: 1px solid var(--divider);
+  border-radius: var(--rounded-control);
+  padding: 5px 10px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-label);
+  letter-spacing: var(--letter-spacing-label);
+  cursor: pointer;
+  transition: border-color var(--motion-state-fast), background var(--motion-state-fast);
+}
+
+.seg-button:hover {
+  border-color: var(--accent);
+}
+
+.seg-button[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border-color: var(--accent);
+}
