@@ -1,0 +1,101 @@
+/* Semantic theme surfaces. Day and Night share identical hierarchy; only the
+   workspace changes. The Page Rule: screenplay paper stays warm in both themes. */
+
+:root,
+:root[data-theme='night'] {
+  color-scheme: dark;
+  --surface-frame: var(--color-night-frame);
+  --surface-panel: var(--color-night-panel);
+  --divider: var(--color-night-divider);
+  --text-primary: var(--color-night-text);
+  --text-secondary: rgba(231, 230, 224, 0.72);
+  --accent: var(--color-selection-amber);
+  --accent-contrast: var(--color-ink);
+  --focus-ring: var(--color-selection-amber);
+  --row-hover: rgba(231, 230, 224, 0.06);
+  --row-selected: rgba(220, 165, 46, 0.16);
+}
+
+:root[data-theme='day'] {
+  color-scheme: light;
+  --surface-frame: var(--color-day-frame);
+  --surface-panel: var(--color-day-panel);
+  --divider: var(--color-day-divider);
+  --text-primary: var(--color-ink);
+  --text-secondary: rgba(32, 35, 33, 0.72);
+  --accent: var(--color-selection-blue);
+  --accent-contrast: var(--color-day-panel);
+  --focus-ring: var(--color-selection-blue);
+  --row-hover: rgba(32, 35, 33, 0.06);
+  --row-selected: rgba(44, 114, 199, 0.14);
+}
+
+/* System theme follows the OS. */
+@media (prefers-color-scheme: light) {
+  :root[data-theme='system'] {
+    color-scheme: light;
+    --surface-frame: var(--color-day-frame);
+    --surface-panel: var(--color-day-panel);
+    --divider: var(--color-day-divider);
+    --text-primary: var(--color-ink);
+    --text-secondary: rgba(32, 35, 33, 0.72);
+    --accent: var(--color-selection-blue);
+    --accent-contrast: var(--color-day-panel);
+    --focus-ring: var(--color-selection-blue);
+    --row-hover: rgba(32, 35, 33, 0.06);
+    --row-selected: rgba(44, 114, 199, 0.14);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme='system'] {
+    color-scheme: dark;
+    --surface-frame: var(--color-night-frame);
+    --surface-panel: var(--color-night-panel);
+    --divider: var(--color-night-divider);
+    --text-primary: var(--color-night-text);
+    --text-secondary: rgba(231, 230, 224, 0.72);
+    --accent: var(--color-selection-amber);
+    --accent-contrast: var(--color-ink);
+    --focus-ring: var(--color-selection-amber);
+    --row-hover: rgba(231, 230, 224, 0.06);
+    --row-selected: rgba(220, 165, 46, 0.16);
+  }
+}
+
+/* Base application chrome */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--surface-frame);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-body);
+  line-height: var(--line-height-body);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Reduced motion: kill transitions and animations entirely. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

@@ -1,0 +1,9 @@
+node_modules/
+dist/
+tmp/
+.superpowers/
+playwright-report/
+test-results/
+e2e/screenshots/
+*.local
+.DS_Store

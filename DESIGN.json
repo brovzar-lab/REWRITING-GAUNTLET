@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-11T00:00:00-06:00",
+  "title": "Design System: Rewrite Studio",
+  "extensions": {
+    "colorMeta": {
+      "night-frame": { "role": "neutral", "displayName": "Night Frame", "canonical": "oklch(20% 0.018 240)", "tonalRamp": ["#172028", "#26313A", "#3B4750", "#56616A", "#747E85", "#969DA2", "#BBC0C3", "#E2E4E5"] },
+      "day-frame": { "role": "neutral", "displayName": "Day Frame", "canonical": "oklch(92% 0.012 90)", "tonalRamp": ["#24231F", "#3D3B35", "#5A574F", "#77736A", "#969188", "#B6B1A8", "#D5D1C9", "#F3F0E9"] },
+      "selection-amber": { "role": "primary", "displayName": "Selection Amber", "canonical": "oklch(75% 0.15 82)", "tonalRamp": ["#2D2208", "#4B390D", "#6B5113", "#8E6B1B", "#B08824", "#DCA52E", "#E8C76D", "#F4E6B4"] },
+      "selection-blue": { "role": "primary", "displayName": "Selection Blue", "canonical": "oklch(56% 0.15 250)", "tonalRamp": ["#0B1E35", "#113253", "#194775", "#235D99", "#2C72C7", "#6797D5", "#9DBBE4", "#D4E1F2"] }
+    },
+    "typographyMeta": {
+      "title": { "displayName": "UI Title", "purpose": "Panel titles and major controls." },
+      "body": { "displayName": "UI Body", "purpose": "Evidence, notes, and explanations." },
+      "label": { "displayName": "Compact Label", "purpose": "Navigation, metadata, and card taxonomy." },
+      "screenplay": { "displayName": "Screenplay", "purpose": "Industry-standard screenplay content." }
+    },
+    "shadows": [
+      { "name": "paper-rest", "value": "0 1px 4px rgba(20, 24, 25, 0.14)", "purpose": "Separates screenplay paper from the workspace." },
+      { "name": "card-lift", "value": "0 8px 20px rgba(12, 18, 22, 0.22)", "purpose": "Indicates a dragged or opened story card." },
+      { "name": "floating-tool", "value": "0 10px 30px rgba(12, 18, 22, 0.28)", "purpose": "Temporary command and menu surfaces." }
+    ],
+    "motion": [
+      { "name": "state-fast", "value": "150ms cubic-bezier(0.25, 1, 0.5, 1)", "purpose": "Hover, focus, and selection feedback." },
+      { "name": "panel-standard", "value": "220ms cubic-bezier(0.25, 1, 0.5, 1)", "purpose": "Panel collapse and progressive reveal." }
+    ],
+    "breakpoints": [
+      { "name": "laptop", "value": "1280px" },
+      { "name": "desktop", "value": "1600px" },
+      { "name": "wide", "value": "1920px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Night Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary-night",
+      "description": "Primary approval or forward action in Night mode.",
+      "html": "<button class=\"ds-btn-primary-night\">Approve change</button>",
+      "css": ".ds-btn-primary-night { background:#DCA52E; color:#202321; border:0; border-radius:4px; padding:8px 12px; font:600 13px Inter,sans-serif; transition:background 150ms cubic-bezier(.25,1,.5,1); } .ds-btn-primary-night:hover { background:#E8B947; } .ds-btn-primary-night:focus-visible { outline:2px solid #F4E6B4; outline-offset:2px; }"
+    },
+    {
+      "name": "Story Card",
+      "kind": "card",
+      "refersTo": "scene-card",
+      "description": "Directly manipulable scene or beat on the visual board.",
+      "html": "<article class=\"ds-story-card\"><b>11</b><small>INT. SHERIFF'S OFFICE</small><span>First turning point</span></article>",
+      "css": ".ds-story-card { width:132px; background:#D6AE69; color:#202321; border:1px solid rgba(32,35,33,.24); border-radius:5px; padding:10px; display:grid; gap:5px; font:500 12px Inter,sans-serif; } .ds-story-card small { font-size:10px; font-weight:650; } .ds-story-card:hover { box-shadow:0 8px 20px rgba(12,18,22,.22); transform:translateY(-1px); } .ds-story-card:focus-visible { outline:2px solid #2C72C7; outline-offset:2px; }"
+    },
+    {
+      "name": "Rewrite Pass Chip",
+      "kind": "chip",
+      "description": "Persistent pass selector with version and state.",
+      "html": "<button class=\"ds-pass-chip\">CHARACTER <small>v2</small></button>",
+      "css": ".ds-pass-chip { background:#F4F1EA; color:#202321; border:1px solid #C8C4BA; border-radius:4px; padding:7px 10px; font:600 11px Inter,sans-serif; letter-spacing:.03em; } .ds-pass-chip:hover { border-color:#2C72C7; } .ds-pass-chip:focus-visible { outline:2px solid #2C72C7; outline-offset:2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Professional Rewrite Room",
+    "overview": "A professional screenplay page at the center of a cinematic editing suite, joined to the tactile intelligence of a physical writers' room.",
+    "keyCharacteristics": ["Editor-first", "Tactile story structure", "Evidence-linked", "Compact professional density", "Theme parity"],
+    "rules": [
+      { "name": "The Page Rule", "body": "Theme switching changes the workspace, not the warm screenplay surface.", "section": "colors" },
+      { "name": "The Structural Depth Rule", "body": "Depth explains interaction and is never ambient decoration.", "section": "elevation" }
+    ],
+    "dos": ["Keep the screenplay central.", "Connect evidence to exact text.", "Use direct manipulation for spatial story work."],
+    "donts": ["Do not use a chatbot-first layout.", "Do not use oversized typography or generic rounded-card grids.", "Do not hide the screenplay behind analysis."]
+  }
+}
