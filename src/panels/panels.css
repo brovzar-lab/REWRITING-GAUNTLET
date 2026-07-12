@@ -289,3 +289,75 @@
   color: var(--accent-contrast);
   border-color: var(--accent);
 }
+
+/* Import dialog. */
+.import-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgba(12, 18, 22, 0.35);
+  display: grid;
+  place-items: start center;
+  padding-top: 8vh;
+}
+
+.import-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  background: var(--surface-panel);
+  border: 1px solid var(--divider);
+  border-radius: var(--rounded-control);
+  box-shadow: var(--shadow-floating-tool);
+  padding: var(--space-md);
+  width: min(560px, 92vw);
+  max-height: 84vh;
+  overflow-y: auto;
+}
+
+.import-dialog textarea {
+  min-height: 150px;
+  resize: vertical;
+  background: var(--surface-frame);
+  color: var(--text-primary);
+  border: 1px solid var(--divider);
+  border-radius: var(--rounded-control);
+  padding: var(--space-sm);
+  font-family: var(--font-screenplay);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.import-dialog input[type='file'] {
+  color: var(--text-secondary);
+  font-family: var(--font-ui);
+  font-size: var(--font-size-label);
+}
+
+.import-preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  border: 1px solid var(--divider);
+  border-radius: var(--rounded-control);
+  padding: var(--space-sm);
+  font-size: var(--font-size-body);
+  color: var(--text-primary);
+}
+
+.import-preview-title {
+  font-weight: var(--font-weight-title);
+}
+
+.import-note {
+  margin: 0;
+  font-size: var(--font-size-label);
+  line-height: var(--line-height-body);
+  color: var(--text-secondary);
+}
+
+.import-actions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+}

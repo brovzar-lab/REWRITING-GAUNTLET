@@ -36,6 +36,8 @@ export interface AppState {
   revisionSetLabel: string | null;
   goToPageOpen: boolean;
   setGoToPageOpen: (open: boolean) => void;
+  importOpen: boolean;
+  setImportOpen: (open: boolean) => void;
 
   /** Rewrite workflow: annotated read, readers, findings, approvals. */
   workflow: WorkflowState;
@@ -100,6 +102,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   revisionSetLabel: null,
   goToPageOpen: false,
   setGoToPageOpen: (goToPageOpen) => set({ goToPageOpen }),
+  importOpen: false,
+  setImportOpen: (importOpen) => set({ importOpen }),
 
   workflow: emptyWorkflow(),
 

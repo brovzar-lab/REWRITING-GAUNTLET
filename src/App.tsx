@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { PanelLayout } from './panels/PanelLayout';
 import { GoToPage } from './panels/GoToPage';
+import { ImportDialog } from './panels/ImportDialog';
 import { SceneNavigator } from './panels/SceneNavigator';
 import { EvidenceInspector } from './panels/EvidenceInspector';
 import { PassTray } from './panels/PassTray';
@@ -23,6 +24,7 @@ function TopBar() {
   const setLang = useAppStore((s) => s.setLang);
   const focusMode = useAppStore((s) => s.focusMode);
   const setFocusMode = useAppStore((s) => s.setFocusMode);
+  const setImportOpen = useAppStore((s) => s.setImportOpen);
   const title = useAppStore((s) => s.screenplay.title);
   const draftLabel = useAppStore((s) => s.screenplay.draftLabel);
   const t = useT();
@@ -34,6 +36,9 @@ function TopBar() {
         {title} · {draftLabel}
       </span>
       <span className="top-bar-spacer" />
+      <button type="button" className="seg-button" onClick={() => setImportOpen(true)}>
+        {t('import.open')}
+      </button>
       <button
         type="button"
         className="seg-button"
@@ -110,6 +115,7 @@ export default function App() {
         tray={<PassTray />}
       />
       <GoToPage />
+      <ImportDialog />
     </>
   );
 }
