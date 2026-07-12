@@ -9,6 +9,7 @@ import { buildDoc, parseDoc } from './docSync';
 import { nextElementOnEnter, nextElementOnTab } from './elementCycling';
 import { paginationPlugin } from './paginationPlugin';
 import { revisionPlugin } from './revisionPlugin';
+import { annotationPlugin } from './annotationPlugin';
 import { currentBlock, professionalKeymap, zoomKeymap } from './editorKeymap';
 import { registerEditorView } from './editorHandle';
 import { suggestCharacters } from './smartType';
@@ -45,6 +46,18 @@ function tabCommand(state: EditorState, dispatch?: (tr: Transaction) => void): b
   const tr = state.tr.setNodeMarkup(block.pos, screenplaySchema.nodes[next], block.node.attrs);
   dispatch(tr);
   return true;
+}
+
+/** Evidence records plus open finding citations, counted per element, feed the
+    margin note markers. */
+function annotationCounts(s: ReturnType<typeof useAppStore.getState>): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const e of s.evidence) counts.set(e.elementId, (counts.get(e.elementId) ?? 0) + 1);
+  for (const f of s.workflow.findings) {
+    if (f.resolution !== 'open') continue;
+    for (const c of f.citations) counts.set(c.elementId, (counts.get(c.elementId) ?? 0) + 1);
+  }
+  return counts;
 }
 
 /** Marks the block that carries the caret so the working line stays visible. */
@@ -157,6 +170,7 @@ export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
           },
         ),
         revisionPlugin(() => store.getState().revisionBaseline),
+        annotationPlugin(() => annotationCounts(store.getState())),
         selectedLinePlugin,
       ],
     });
@@ -224,10 +238,13 @@ export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
     let prevScreenplay = store.getState().screenplay;
     let prevSelection = store.getState().selection;
     let prevBaseline = store.getState().revisionBaseline;
+    let prevEvidence = store.getState().evidence;
+    let prevFindings = store.getState().workflow.findings;
     const unsubscribe = store.subscribe((s) => {
       const outsideDocChange = s.screenplay !== prevScreenplay && !syncingFromEditor.current;
       const revisionChange = s.revisionBaseline !== prevBaseline;
-      if (outsideDocChange || revisionChange) {
+      const annotationChange = s.evidence !== prevEvidence || s.workflow.findings !== prevFindings;
+      if (outsideDocChange || revisionChange || annotationChange) {
         const doc = outsideDocChange ? buildDoc(s.screenplay) : view.state.doc;
         view.updateState(
           EditorState.create({ doc, plugins: view.state.plugins }),
@@ -235,6 +252,8 @@ export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
       }
       prevScreenplay = s.screenplay;
       prevBaseline = s.revisionBaseline;
+      prevEvidence = s.evidence;
+      prevFindings = s.workflow.findings;
 
       if (s.selection !== prevSelection && s.selection && !syncingFromEditor.current) {
         let targetPos: number | null = null;

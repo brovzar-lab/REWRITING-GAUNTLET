@@ -22,14 +22,17 @@ const STATUS_ICON: Record<EvidenceStatus, string> = {
 
 function EvidenceCard({ record }: { record: EvidenceRecord }) {
   const select = useAppStore((s) => s.select);
+  const selection = useAppStore((s) => s.selection);
   const t = useT();
+  const linked = selection?.elementId === record.elementId;
   return (
     <li>
       <button
         type="button"
-        className={`evidence-card source-${record.source}`}
+        className={`evidence-card source-${record.source}${linked ? ' is-linked' : ''}`}
         onClick={() => select({ sceneId: record.sceneId, elementId: record.elementId })}
       >
+        {linked && <span className="visually-hidden">{t('evidence.linked')}</span>}
         <span className="evidence-meta">
           <span className={`source-chip source-${record.source}`}>{t(SOURCE_KEY[record.source])}</span>
           {record.readerName && <span className="reader-name">{record.readerName}</span>}

@@ -268,3 +268,51 @@
   padding: 2px 8px;
   white-space: nowrap;
 }
+
+/* R7: margin note markers — right page margin, aligned with revision marks.
+   Rendering-only; never reflows Courier content or pagination. */
+.sp-note-marker {
+  position: absolute;
+  right: -0.55in;
+  top: 1px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 4px;
+  border: 1px solid var(--divider);
+  border-radius: 4px;
+  background: var(--surface-panel);
+  color: var(--accent);
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: var(--font-weight-label);
+  line-height: 13px;
+  cursor: pointer;
+}
+
+.sp-parenthetical .sp-note-marker {
+  right: -2.95in;
+}
+
+.sp-dialogue .sp-note-marker {
+  right: -2.05in;
+}
+
+/* Selected line with evidence: connector stub from the line to its marker.
+   Drawn from the marker so revision asterisks (::after) keep their slot. */
+.sp-selected .sp-note-marker {
+  border-color: var(--accent);
+}
+
+.sp-selected .sp-note-marker::before {
+  content: '';
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  width: 14px;
+  border-top: 1px solid var(--accent);
+}
+
+.sp-note-marker:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}

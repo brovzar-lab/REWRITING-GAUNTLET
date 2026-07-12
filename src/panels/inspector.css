@@ -500,3 +500,21 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* R7: the record for the selected line joins visibly to the script */
+.evidence-card.is-linked {
+  box-shadow: inset 2px 0 0 var(--accent);
+  border-color: var(--accent);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

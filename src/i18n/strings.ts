@@ -240,6 +240,8 @@ const dictionaries = {
     'tray.nonotes': 'No notes yet',
     'tray.detail': 'Active pass detail',
     'tray.resolved': '{a} of {b} proposals resolved',
+    'marker.notes': '{n} notes on this line',
+    'evidence.linked': 'Linked to the selected line',
   },
   es: {
     'app.title': 'Rewrite Studio',
@@ -478,6 +480,8 @@ const dictionaries = {
     'tray.nonotes': 'Aún sin notas',
     'tray.detail': 'Detalle de la pasada activa',
     'tray.resolved': '{a} de {b} propuestas resueltas',
+    'marker.notes': '{n} notas en esta línea',
+    'evidence.linked': 'Vinculada a la línea seleccionada',
   },
 } as const satisfies Record<Lang, Record<string, string>>;
 

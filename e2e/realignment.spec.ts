@@ -77,6 +77,24 @@ test.describe('visual realignment', () => {
     await expect(page.getByRole('tab', { name: /rewrite pass/i })).toHaveAttribute('aria-selected', 'true');
   });
 
+  test('a line with a note shows a marker and links to board and evidence', async ({ page }) => {
+    await page.setViewportSize({ width: 1600, height: 900 });
+    await freshApp(page);
+    await pasteImport(page);
+    // Add a note through the UI on the first action line.
+    await page.locator('.sp-action', { hasText: 'Marta cooks.' }).click();
+    await page.locator('.status-bar').getByRole('button', { name: 'Add note' }).click();
+    await page.getByLabel('Note text').fill('The radio should already be broken.');
+    await page.getByRole('button', { name: 'Save note' }).click();
+
+    const marker = page.locator('.sp-note-marker').first();
+    await expect(marker).toBeVisible();
+    await marker.click();
+    await expect(page.getByRole('tab', { name: /evidence/i })).toHaveAttribute('aria-selected', 'true');
+    await expect(page.locator('.ds-story-card.is-selected')).toHaveCount(1);
+    await expect(page.locator('.evidence-card.is-linked')).toBeVisible();
+  });
+
   test('evidence Go to script selects the exact cited line', async ({ page }) => {
     await freshApp(page);
     await pasteImport(page);
