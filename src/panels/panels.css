@@ -361,3 +361,50 @@
   gap: var(--space-sm);
   justify-content: flex-end;
 }
+
+/* Private annotated read bar. */
+.read-bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--surface-panel);
+  border-bottom: 1px solid var(--divider);
+}
+
+.read-bar-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.read-bar-title {
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-label);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+.read-bar-progress,
+.read-bar-privacy {
+  font-size: var(--font-size-label);
+  color: var(--text-secondary);
+}
+
+.read-bar input[type='text'] {
+  flex: 1;
+  min-width: 160px;
+  background: var(--surface-frame);
+  color: var(--text-primary);
+  border: 1px solid var(--divider);
+  border-radius: var(--rounded-control);
+  padding: 5px 8px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-body);
+}
+
+.read-complete:not(:disabled) {
+  border-color: var(--color-confirmed);
+}

@@ -41,6 +41,12 @@ export interface AppState {
 
   /** Rewrite workflow: annotated read, readers, findings, approvals. */
   workflow: WorkflowState;
+  /** Guided private annotated read (scene by scene). */
+  readModeActive: boolean;
+  enterReadMode: () => void;
+  exitReadMode: () => void;
+  /** Move the read to a scene by index; clamps, selects, and records the visit. */
+  goToReadScene: (index: number) => void;
   addReader: (name: string, role: Reader['role']) => void;
   removeReader: (readerId: string) => void;
   markSceneVisited: (sceneId: string) => void;
@@ -106,6 +112,23 @@ export const useAppStore = create<AppState>((set, get) => ({
   setImportOpen: (importOpen) => set({ importOpen }),
 
   workflow: emptyWorkflow(),
+
+  readModeActive: false,
+
+  enterReadMode: () => {
+    set({ readModeActive: true });
+    get().goToReadScene(0);
+  },
+
+  exitReadMode: () => set({ readModeActive: false }),
+
+  goToReadScene: (index) => {
+    const scenes = get().screenplay.scenes;
+    const scene = scenes[Math.min(scenes.length - 1, Math.max(0, index))];
+    if (!scene) return;
+    get().select({ sceneId: scene.id, elementId: scene.elements[0].id });
+    get().markSceneVisited(scene.id);
+  },
 
   addReader: (name, role) => {
     const readers = get().workflow.readers;
@@ -200,6 +223,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       revisionBaseline: null,
       revisionSetLabel: null,
       workflow: emptyWorkflow(),
+      readModeActive: false,
     }),
 
   loadWorkflow: (workflow, evidence, connections) => set({ workflow, evidence, connections }),
@@ -292,6 +316,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       revisionBaseline: null,
       revisionSetLabel: null,
       workflow: emptyWorkflow(),
+      readModeActive: false,
     }),
 }));
 

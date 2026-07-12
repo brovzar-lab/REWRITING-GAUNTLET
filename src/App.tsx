@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { PanelLayout } from './panels/PanelLayout';
 import { GoToPage } from './panels/GoToPage';
 import { ImportDialog } from './panels/ImportDialog';
+import { AnnotatedReadBar } from './panels/AnnotatedReadBar';
 import { SceneNavigator } from './panels/SceneNavigator';
 import { EvidenceInspector } from './panels/EvidenceInspector';
 import { PassTray } from './panels/PassTray';
@@ -25,6 +26,9 @@ function TopBar() {
   const focusMode = useAppStore((s) => s.focusMode);
   const setFocusMode = useAppStore((s) => s.setFocusMode);
   const setImportOpen = useAppStore((s) => s.setImportOpen);
+  const enterReadMode = useAppStore((s) => s.enterReadMode);
+  const readModeActive = useAppStore((s) => s.readModeActive);
+  const readComplete = useAppStore((s) => s.workflow.annotatedReadComplete);
   const title = useAppStore((s) => s.screenplay.title);
   const draftLabel = useAppStore((s) => s.screenplay.draftLabel);
   const t = useT();
@@ -38,6 +42,9 @@ function TopBar() {
       <span className="top-bar-spacer" />
       <button type="button" className="seg-button" onClick={() => setImportOpen(true)}>
         {t('import.open')}
+      </button>
+      <button type="button" className="seg-button" aria-pressed={readModeActive} onClick={enterReadMode}>
+        {readComplete ? t('read.completeDone') : t('read.enter')}
       </button>
       <button
         type="button"
@@ -109,7 +116,12 @@ export default function App() {
       <PanelLayout
         topBar={<TopBar />}
         navigator={<SceneNavigator />}
-        editor={<ScreenplayEditor />}
+        editor={
+          <>
+            <AnnotatedReadBar />
+            <ScreenplayEditor />
+          </>
+        }
         board={<Board />}
         inspector={<EvidenceInspector />}
         tray={<PassTray />}
