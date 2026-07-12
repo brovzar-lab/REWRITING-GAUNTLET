@@ -124,3 +124,77 @@
 .evidence-status.status-clear { color: var(--color-confirmed); }
 .evidence-status.status-uncertain { color: var(--text-secondary); }
 .evidence-status.status-priority_concern { color: var(--color-concern); }
+
+/* Note composer and readers manager. */
+.note-add {
+  align-self: flex-start;
+  margin-top: var(--space-sm);
+}
+
+.note-composer,
+.reader-add {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-top: var(--space-sm);
+  border: 1px solid var(--divider);
+  border-radius: var(--rounded-control);
+  padding: var(--space-sm);
+}
+
+.note-composer select,
+.note-composer textarea,
+.reader-add input,
+.reader-add select {
+  background: var(--surface-frame);
+  color: var(--text-primary);
+  border: 1px solid var(--divider);
+  border-radius: var(--rounded-control);
+  padding: 5px 8px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-body);
+}
+
+.note-composer textarea {
+  min-height: 64px;
+  resize: vertical;
+}
+
+.note-actions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+}
+
+.readers-manager {
+  margin-top: var(--space-lg);
+  border-top: 1px solid var(--divider);
+  padding-top: var(--space-sm);
+}
+
+.readers-list {
+  list-style: none;
+  margin: 0 0 var(--space-sm);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.reader-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.reader-row-name {
+  flex: 1;
+  font-size: var(--font-size-body);
+  color: var(--text-primary);
+}
+
+.inspector-error {
+  margin: var(--space-xs) 0 0;
+  font-size: var(--font-size-label);
+  color: var(--color-concern);
+}

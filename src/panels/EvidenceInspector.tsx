@@ -1,6 +1,8 @@
 import { useAppStore } from '../store/appStore';
 import { useT } from '../i18n/strings';
 import type { EvidenceRecord, EvidenceStatus, NoteSource } from '../model/evidence';
+import { NoteComposer } from './NoteComposer';
+import { ReadersManager } from './ReadersManager';
 import './inspector.css';
 
 const SOURCE_KEY: Record<NoteSource, `source.${NoteSource}`> = {
@@ -77,6 +79,7 @@ export function EvidenceInspector() {
               ))}
             </ul>
           )}
+          <NoteComposer selection={selection} />
           {sceneEvidence.length > 0 && (
             <>
               <h3 className="inspector-section">{scene?.slug}</h3>
@@ -89,6 +92,7 @@ export function EvidenceInspector() {
           )}
         </>
       )}
+      <ReadersManager />
     </aside>
   );
 }
