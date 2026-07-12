@@ -4,6 +4,8 @@ import { GoToPage } from './panels/GoToPage';
 import { ImportDialog } from './panels/ImportDialog';
 import { AnnotatedReadBar } from './panels/AnnotatedReadBar';
 import { AiSettings } from './panels/AiSettings';
+import { ExportMenu } from './panels/ExportMenu';
+import { PrintView } from './panels/PrintView';
 import { SceneNavigator } from './panels/SceneNavigator';
 import { InspectorTabs } from './panels/InspectorTabs';
 import { PassTray } from './panels/PassTray';
@@ -27,6 +29,7 @@ function TopBar() {
   const focusMode = useAppStore((s) => s.focusMode);
   const setFocusMode = useAppStore((s) => s.setFocusMode);
   const setImportOpen = useAppStore((s) => s.setImportOpen);
+  const setExportOpen = useAppStore((s) => s.setExportOpen);
   const enterReadMode = useAppStore((s) => s.enterReadMode);
   const readModeActive = useAppStore((s) => s.readModeActive);
   const readComplete = useAppStore((s) => s.workflow.annotatedReadComplete);
@@ -43,6 +46,9 @@ function TopBar() {
       <span className="top-bar-spacer" />
       <button type="button" className="seg-button" onClick={() => setImportOpen(true)}>
         {t('import.open')}
+      </button>
+      <button type="button" className="seg-button" onClick={() => setExportOpen(true)}>
+        {t('export.open')}
       </button>
       <button type="button" className="seg-button" aria-pressed={readModeActive} onClick={enterReadMode}>
         {readComplete ? t('read.completeDone') : t('read.enter')}
@@ -130,6 +136,8 @@ export default function App() {
       <GoToPage />
       <ImportDialog />
       <AiSettings />
+      <ExportMenu />
+      <PrintView />
     </>
   );
 }

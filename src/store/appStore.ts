@@ -43,6 +43,10 @@ export interface AppState {
   setAiSettingsOpen: (open: boolean) => void;
   inspectorTab: 'evidence' | 'ai';
   setInspectorTab: (tab: 'evidence' | 'ai') => void;
+  exportOpen: boolean;
+  setExportOpen: (open: boolean) => void;
+  printViewOpen: boolean;
+  setPrintViewOpen: (open: boolean) => void;
 
   /** Rewrite workflow: annotated read, readers, findings, approvals. */
   workflow: WorkflowState;
@@ -122,6 +126,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   setAiSettingsOpen: (aiSettingsOpen) => set({ aiSettingsOpen }),
   inspectorTab: 'evidence',
   setInspectorTab: (inspectorTab) => set({ inspectorTab }),
+  exportOpen: false,
+  setExportOpen: (exportOpen) => set({ exportOpen }),
+  printViewOpen: false,
+  setPrintViewOpen: (printViewOpen) => set({ printViewOpen }),
 
   workflow: emptyWorkflow(),
 
