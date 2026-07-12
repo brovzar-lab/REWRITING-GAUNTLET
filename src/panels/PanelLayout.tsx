@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, type ReactNode } from 'react';
 import { useAppStore } from '../store/appStore';
 import { StatusBar } from './StatusBar';
+import { WorkflowStrip } from './WorkflowStrip';
 import { useT } from '../i18n/strings';
 import './panels.css';
 
@@ -116,6 +117,7 @@ export function PanelLayout({ topBar, navigator, editor, board, inspector, tray 
   return (
     <div className={`workspace${focusMode ? ' focus-mode' : ''}${fullBoard ? ' full-board' : ''}`}>
       <header className="top-bar">{topBar}</header>
+      <WorkflowStrip />
       {fullBoard ? (
         <div className="middle board-only">{board}</div>
       ) : (

@@ -836,3 +836,42 @@
 .history-confirm-btn:not(:disabled) {
   border-color: var(--color-concern);
 }
+
+/* R8: always-visible rewrite journey strip */
+.workflow-strip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  height: 24px;
+  padding: 0 var(--space-md);
+  background: var(--surface-panel);
+  border-bottom: 1px solid var(--divider);
+  overflow-x: auto;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.journey-step {
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-label);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  padding: 2px 0;
+}
+
+.journey-step.is-done {
+  color: var(--text-secondary);
+}
+
+/* Current step: bold + accent underline — two signals, never color alone. */
+.journey-step.is-current {
+  color: var(--text-primary);
+  font-weight: 700;
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+.journey-arrow {
+  color: var(--text-secondary);
+  font-size: var(--font-size-label);
+}

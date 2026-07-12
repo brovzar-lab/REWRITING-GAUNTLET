@@ -242,6 +242,10 @@ const dictionaries = {
     'tray.resolved': '{a} of {b} proposals resolved',
     'marker.notes': '{n} notes on this line',
     'evidence.linked': 'Linked to the selected line',
+    'journey.label': 'Rewrite journey',
+    'journey.read': 'Private read',
+    'journey.choose': 'Choose pass',
+    'journey.review': 'Review proposals',
   },
   es: {
     'app.title': 'Rewrite Studio',
@@ -482,6 +486,10 @@ const dictionaries = {
     'tray.resolved': '{a} de {b} propuestas resueltas',
     'marker.notes': '{n} notas en esta línea',
     'evidence.linked': 'Vinculada a la línea seleccionada',
+    'journey.label': 'Recorrido de reescritura',
+    'journey.read': 'Lectura privada',
+    'journey.choose': 'Elegir pasada',
+    'journey.review': 'Revisar propuestas',
   },
 } as const satisfies Record<Lang, Record<string, string>>;
 
