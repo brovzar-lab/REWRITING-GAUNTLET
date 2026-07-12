@@ -58,6 +58,9 @@ const dictionaries = {
     'rev.pink': 'Pink',
     'rev.yellow': 'Yellow',
     'rev.green': 'Green',
+    'goto.title': 'Go to page',
+    'goto.go': 'Go',
+    'smart.suggestions': 'Character suggestions',
   },
   es: {
     'app.title': 'Rewrite Studio',
@@ -114,6 +117,9 @@ const dictionaries = {
     'rev.pink': 'Rosa',
     'rev.yellow': 'Amarilla',
     'rev.green': 'Verde',
+    'goto.title': 'Ir a la página',
+    'goto.go': 'Ir',
+    'smart.suggestions': 'Sugerencias de personajes',
   },
 } as const satisfies Record<Lang, Record<string, string>>;
 

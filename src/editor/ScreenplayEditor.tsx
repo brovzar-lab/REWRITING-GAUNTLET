@@ -1,25 +1,20 @@
-import { useEffect, useRef } from 'react';
-import { EditorState, TextSelection, type Transaction } from 'prosemirror-state';
+import { useEffect, useRef, useState } from 'react';
+import { EditorState, Plugin, TextSelection, type Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { keymap } from 'prosemirror-keymap';
 import { baseKeymap, chainCommands, newlineInCode } from 'prosemirror-commands';
 import { history, redo, undo } from 'prosemirror-history';
-import type { Node as PMNode } from 'prosemirror-model';
 import { screenplaySchema } from './schema';
 import { buildDoc, parseDoc } from './docSync';
 import { nextElementOnEnter, nextElementOnTab } from './elementCycling';
 import { paginationPlugin } from './paginationPlugin';
 import { revisionPlugin } from './revisionPlugin';
-import { zoomKeymap } from './editorKeymap';
+import { currentBlock, professionalKeymap, zoomKeymap } from './editorKeymap';
+import { suggestCharacters } from './smartType';
 import type { ElementType } from '../model/screenplay';
 import { useAppStore } from '../store/appStore';
+import { useT } from '../i18n/strings';
 import './editor.css';
-
-function currentBlock(state: EditorState): { node: PMNode; pos: number } | null {
-  const { $from } = state.selection;
-  if ($from.depth < 1) return null;
-  return { node: $from.node(1), pos: $from.before(1) };
-}
 
 /** Enter: split and retype the new block per the Final Draft table, with a fresh stable id. */
 function enterCommand(state: EditorState, dispatch?: (tr: Transaction) => void): boolean {
@@ -51,24 +46,78 @@ function tabCommand(state: EditorState, dispatch?: (tr: Transaction) => void): b
   return true;
 }
 
+interface SmartTypeState {
+  items: string[];
+  index: number;
+  left: number;
+  top: number;
+}
+
 export interface ScreenplayEditorProps {
   onReady?: (view: EditorView) => void;
 }
 
 export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
   const hostRef = useRef<HTMLDivElement>(null);
+  const scrollerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const syncingFromEditor = useRef(false);
   const zoom = useAppStore((s) => s.zoom);
+  const t = useT();
+
+  const [smartType, setSmartType] = useState<SmartTypeState | null>(null);
+  const smartTypeRef = useRef<SmartTypeState | null>(null);
+  const updateSmartType = (next: SmartTypeState | null) => {
+    smartTypeRef.current = next;
+    setSmartType(next);
+  };
 
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
 
     const store = useAppStore;
+
+    /** Accept a smart-type suggestion into the current character cue. */
+    const acceptSuggestion = (view: EditorView, name: string, thenEnter: boolean) => {
+      const block = currentBlock(view.state);
+      if (!block) return;
+      const from = block.pos + 1;
+      const to = from + block.node.content.size;
+      view.dispatch(view.state.tr.insertText(name, from, to));
+      updateSmartType(null);
+      if (thenEnter) enterCommand(view.state, view.dispatch);
+      view.focus();
+    };
+
+    /** Runs before every other keymap while the suggestion popup is open. */
+    const smartTypeKeys = new Plugin({
+      props: {
+        handleKeyDown(view, event) {
+          const st = smartTypeRef.current;
+          if (!st) return false;
+          if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+            const delta = event.key === 'ArrowDown' ? 1 : -1;
+            updateSmartType({ ...st, index: (st.index + delta + st.items.length) % st.items.length });
+            return true;
+          }
+          if (event.key === 'Enter' || event.key === 'Tab') {
+            acceptSuggestion(view, st.items[st.index], event.key === 'Enter');
+            return true;
+          }
+          if (event.key === 'Escape') {
+            updateSmartType(null);
+            return true;
+          }
+          return false;
+        },
+      },
+    });
+
     const state = EditorState.create({
       doc: buildDoc(store.getState().screenplay),
       plugins: [
+        smartTypeKeys,
         history(),
         keymap({
           Enter: chainCommands(newlineInCode, enterCommand),
@@ -83,6 +132,7 @@ export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
           'Mod-y': redo,
           'Shift-Mod-z': redo,
         }),
+        professionalKeymap(),
         keymap(baseKeymap),
         zoomKeymap(),
         paginationPlugin(
@@ -95,6 +145,34 @@ export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
         revisionPlugin(() => store.getState().revisionBaseline),
       ],
     });
+
+    const refreshSmartType = (view: EditorView, docChanged: boolean) => {
+      const block = currentBlock(view.state);
+      if (!block || block.node.type.name !== 'character') {
+        if (smartTypeRef.current) updateSmartType(null);
+        return;
+      }
+      if (!docChanged && !smartTypeRef.current) return; // open only while typing
+      const text = block.node.textContent;
+      const items = text.trim().length > 0 ? suggestCharacters(store.getState().screenplay, text).slice(0, 6) : [];
+      if (items.length === 0) {
+        if (smartTypeRef.current) updateSmartType(null);
+        return;
+      }
+      let left = 0;
+      let top = 0;
+      try {
+        const coords = view.coordsAtPos(block.pos + 1 + block.node.content.size);
+        const scroller = scrollerRef.current?.getBoundingClientRect();
+        if (scroller) {
+          left = coords.left - scroller.left + (scrollerRef.current?.scrollLeft ?? 0);
+          top = coords.bottom - scroller.top + (scrollerRef.current?.scrollTop ?? 0) + 4;
+        }
+      } catch {
+        /* jsdom has no layout; keep 0,0 */
+      }
+      updateSmartType({ items, index: 0, left, top });
+    };
 
     const view = new EditorView(host, {
       state,
@@ -118,6 +196,7 @@ export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
               syncingFromEditor.current = false;
             }
           }
+          refreshSmartType(view, tr.docChanged);
         }
       },
     });
@@ -171,9 +250,42 @@ export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
       role="region"
       aria-label="Screenplay"
       tabIndex={0}
-      style={{ ['--sp-zoom' as string]: zoom }}
+      ref={scrollerRef}
+      style={{ ['--sp-zoom' as string]: zoom, position: 'relative' }}
     >
       <div className="sp-page" ref={hostRef} aria-label="Screenplay page" />
+      {smartType && (
+        <ul
+          className="smart-type-popup"
+          role="listbox"
+          aria-label={t('smart.suggestions')}
+          style={{ left: smartType.left, top: smartType.top }}
+        >
+          {smartType.items.map((name, i) => (
+            <li
+              key={name}
+              id={`smart-type-option-${i}`}
+              role="option"
+              aria-selected={i === smartType.index}
+              className={i === smartType.index ? 'is-active' : ''}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                const view = viewRef.current;
+                if (!view) return;
+                const block = currentBlock(view.state);
+                if (!block) return;
+                const from = block.pos + 1;
+                const to = from + block.node.content.size;
+                view.dispatch(view.state.tr.insertText(name, from, to));
+                updateSmartType(null);
+                view.focus();
+              }}
+            >
+              {name}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

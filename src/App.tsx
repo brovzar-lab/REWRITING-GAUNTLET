@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { PanelLayout } from './panels/PanelLayout';
+import { GoToPage } from './panels/GoToPage';
 import { SceneNavigator } from './panels/SceneNavigator';
 import { EvidenceInspector } from './panels/EvidenceInspector';
 import { PassTray } from './panels/PassTray';
@@ -140,13 +141,16 @@ export default function App() {
   }, []);
 
   return (
-    <PanelLayout
-      topBar={<TopBar />}
-      navigator={<SceneNavigator />}
-      editor={<ScreenplayEditor />}
-      board={<Board />}
-      inspector={<EvidenceInspector />}
-      tray={<PassTray />}
-    />
+    <>
+      <PanelLayout
+        topBar={<TopBar />}
+        navigator={<SceneNavigator />}
+        editor={<ScreenplayEditor />}
+        board={<Board />}
+        inspector={<EvidenceInspector />}
+        tray={<PassTray />}
+      />
+      <GoToPage />
+    </>
   );
 }
