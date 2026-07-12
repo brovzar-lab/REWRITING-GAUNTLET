@@ -41,6 +41,9 @@ export interface Finding {
   proposal?: Proposal;
   resolution: 'open' | 'approved' | 'rejected';
   createdAt: number;
+  /** 0..1, hypothesis confidence. Only the cloud provider may fill this;
+      the local analyzer never sets it. Never an overall screenplay score. */
+  confidence?: number;
 }
 
 /** Provenance for an applied change: who/what/why/when/which pass. */

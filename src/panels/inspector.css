@@ -416,3 +416,87 @@
   margin-left: auto;
   border-color: var(--accent);
 }
+
+/* R5: structured finding card sections */
+.finding-head {
+  align-items: center;
+}
+
+.finding-index {
+  font-size: var(--font-size-label);
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.severity-chip {
+  border: 1px solid var(--divider);
+  border-radius: var(--rounded-control);
+  padding: 1px 8px;
+}
+
+.finding-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.finding-rationale {
+  margin: 0;
+  font-size: var(--font-size-body);
+  color: var(--text-primary);
+}
+
+.confidence-value {
+  font-size: var(--font-size-label);
+  color: var(--text-primary);
+}
+
+.confidence-meter {
+  display: block;
+  height: 4px;
+  border: 1px solid var(--divider);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.confidence-meter > i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.finding-citations,
+.finding-notes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.finding-citation {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  justify-content: space-between;
+}
+
+.finding-citation-where {
+  font-size: var(--font-size-label);
+  color: var(--text-secondary);
+}
+
+.finding-note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.finding-note-summary {
+  font-size: var(--font-size-label);
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

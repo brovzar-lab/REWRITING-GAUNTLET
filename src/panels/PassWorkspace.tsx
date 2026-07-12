@@ -12,8 +12,9 @@ const STATUS_ICON: Record<EvidenceStatus, string> = {
   priority_concern: '!',
 };
 
-function FindingCard({ finding }: { finding: Finding }) {
+function FindingCard({ finding, index }: { finding: Finding; index: number }) {
   const screenplay = useAppStore((s) => s.screenplay);
+  const evidence = useAppStore((s) => s.evidence);
   const select = useAppStore((s) => s.select);
   const approveProposal = useAppStore((s) => s.approveProposal);
   const rejectFinding = useAppStore((s) => s.rejectFinding);
@@ -21,46 +22,89 @@ function FindingCard({ finding }: { finding: Finding }) {
   const [error, setError] = useState<string | null>(null);
 
   const sceneOf = (sceneId: string) => screenplay.scenes.find((s) => s.id === sceneId);
+  const citedElementIds = new Set(finding.citations.map((c) => c.elementId));
+  const notes = evidence.filter((e) => e.passId === finding.passId && citedElementIds.has(e.elementId));
 
   return (
-    <li className={`ai-finding source-ai resolution-${finding.resolution}`}>
-      <span className="evidence-meta">
-        <span className="source-chip source-ai">{t('source.ai')}</span>
+    <li
+      className={`ai-finding source-ai resolution-${finding.resolution}`}
+      data-cited-element={finding.citations[0]?.elementId}
+    >
+      <span className="evidence-meta finding-head">
+        <span className="finding-index">#{index}</span>
+        <span className={`severity-chip evidence-status status-${finding.status}`}>
+          <span data-status-icon aria-hidden="true">
+            {STATUS_ICON[finding.status]}
+          </span>
+          {t(`status.${finding.status}`)}
+        </span>
         <span className="claim-label">{t(`claim.${finding.claimType}`)}</span>
+      </span>
+      <p className="ai-finding-summary">{finding.summary}</p>
+      {finding.proposal && (
+        <div className="ai-proposal">
+          <div className="finding-section">
+            <span className="control-label">{t('finding.suggestion')}</span>
+            <p className="finding-rationale">{finding.proposal.rationale}</p>
+          </div>
+          <div className="finding-section">
+            <span className="control-label">{t('finding.example')}</span>
+            <p className="ai-proposal-text ai-proposal-new">{finding.proposal.newText}</p>
+          </div>
+          <div className="finding-section">
+            <span className="control-label">{t('finding.current')}</span>
+            <p className="ai-proposal-text ai-proposal-old">{finding.proposal.oldText}</p>
+          </div>
+        </div>
+      )}
+      <div className="finding-section">
+        <span className="control-label">{t('finding.source')}</span>
         <span className="ai-provider-label">
           {finding.provider === 'local' ? t('ai.providerLocal') : t('ai.providerCloud')}
         </span>
-      </span>
-      <p className="ai-finding-summary">{finding.summary}</p>
-      <span className={`evidence-status status-${finding.status}`}>
-        <span data-status-icon aria-hidden="true">
-          {STATUS_ICON[finding.status]}
-        </span>
-        {t(`status.${finding.status}`)}
-      </span>
-      <span className="control-label">{t('ai.evidenceCited')}</span>
-      <span className="ai-citations">
-        {finding.citations.map((c) => {
-          const scene = sceneOf(c.sceneId);
-          return (
-            <button
-              key={`${finding.id}-${c.elementId}`}
-              type="button"
-              className="seg-button ai-citation"
-              onClick={() => select({ sceneId: c.sceneId, elementId: c.elementId })}
-            >
-              {scene ? `${scene.number} · ${scene.slug}` : c.sceneId}
-            </button>
-          );
-        })}
-      </span>
-      {finding.proposal && (
-        <div className="ai-proposal">
-          <span className="control-label">{t('ai.current')}</span>
-          <p className="ai-proposal-text ai-proposal-old">{finding.proposal.oldText}</p>
-          <span className="control-label">{t('ai.proposed')}</span>
-          <p className="ai-proposal-text ai-proposal-new">{finding.proposal.newText}</p>
-          <p className="import-note">{finding.proposal.rationale}</p>
+      </div>
+      {finding.confidence != null && (
+        <div className="finding-section">
+          <span className="control-label">{t('finding.confidence')}</span>
+          <span className="confidence-value">{Math.round(finding.confidence * 100)}%</span>
+          <span className="confidence-meter" aria-hidden="true">
+            <i style={{ width: `${Math.round(finding.confidence * 100)}%` }} />
+          </span>
+        </div>
+      )}
+      <div className="finding-section">
+        <span className="control-label">{t('finding.linked')}</span>
+        <ul className="finding-citations">
+          {finding.citations.map((c) => {
+            const scene = sceneOf(c.sceneId);
+            const where = scene ? `${t('status.scene')} ${scene.number} · ${scene.slug}` : c.sceneId;
+            return (
+              <li key={`${finding.id}-${c.elementId}`} className="finding-citation">
+                <span className="finding-citation-where">{where}</span>
+                <button
+                  type="button"
+                  className="seg-button ai-citation"
+                  aria-label={`${t('finding.goto')} — ${where}`}
+                  onClick={() => select({ sceneId: c.sceneId, elementId: c.elementId })}
+                >
+                  {t('finding.goto')}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+      {notes.length > 0 && (
+        <div className="finding-section">
+          <span className="control-label">{t('finding.notes')}</span>
+          <ul className="finding-notes">
+            {notes.map((n) => (
+              <li key={n.id} className="finding-note">
+                <span className={`source-chip source-${n.source}`}>{t(`source.${n.source}`)}</span>
+                <span className="finding-note-summary">{n.summary}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
       {finding.resolution === 'open' ? (
@@ -232,8 +276,8 @@ export function PassWorkspace() {
           {passFindings.length === 0 && !busy && !error && <p className="inspector-hint">{t('ai.noFindings')}</p>}
           {passFindings.length > 0 && (
             <ul className="ai-findings">
-              {[...open, ...resolved].map((f) => (
-                <FindingCard key={f.id} finding={f} />
+              {[...open, ...resolved].map((f, i) => (
+                <FindingCard key={f.id} finding={f} index={i + 1} />
               ))}
             </ul>
           )}

@@ -38,8 +38,9 @@ function systemPrompt(passName: string, blurb: string): string {
     '"status": "clear"|"uncertain"|"priority_concern",',
     '"citations": [{"sceneId": string, "elementId": string}] (exact ids from the script, at least one),',
     'optional "proposal": {"sceneId": string, "elementId": string, "newText": string, "rationale": string}',
-    'where the proposal element MUST be one of your citations and newText replaces that single element only.',
-    'Never give a numeric score. Never propose changes across scenes you did not cite.',
+    'where the proposal element MUST be one of your citations and newText replaces that single element only,',
+    'optional "confidence": number between 0 and 1 (how confident you are in this one hypothesis).',
+    'Never give a numeric score for the screenplay. Never propose changes across scenes you did not cite.',
   ].join(' ');
 }
 
@@ -48,6 +49,7 @@ interface RawFinding {
   status?: unknown;
   citations?: unknown;
   proposal?: { sceneId?: unknown; elementId?: unknown; newText?: unknown; rationale?: unknown };
+  confidence?: unknown;
 }
 
 const STATUSES = new Set(['clear', 'uncertain', 'priority_concern']);
@@ -156,6 +158,10 @@ function mapFindings(text: string, request: DiagnoseRequest): Finding[] {
       proposal,
       resolution: 'open',
       createdAt: request.now,
+      confidence:
+        typeof raw.confidence === 'number' && raw.confidence >= 0 && raw.confidence <= 1
+          ? raw.confidence
+          : undefined,
     });
   }
   return findings;

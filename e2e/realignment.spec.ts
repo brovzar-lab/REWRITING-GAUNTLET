@@ -9,6 +9,40 @@ async function freshApp(page: Page) {
   await expect(page.locator('.sp-page .ProseMirror')).toBeVisible();
 }
 
+const SCRIPT = `Title: THE LEDGER
+Draft date: First draft
+
+INT. KITCHEN - NIGHT
+
+Marta cooks.  The radio hums.
+
+MARTA
+Nobody comes home this late for good news.
+
+EXT. STREET - NIGHT
+
+A taxi waits  outside.
+`;
+
+async function pasteImport(page: Page) {
+  await page.getByRole('button', { name: 'Import', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: 'Open a screenplay' });
+  await dialog.getByRole('button', { name: 'Paste screenplay' }).click();
+  await dialog.getByLabel(/Paste your script/).fill(SCRIPT);
+  await dialog.getByRole('button', { name: 'Import and replace draft' }).click();
+  await expect(page.locator('.top-bar')).toContainText('THE LEDGER');
+}
+
+async function diagnosePolish(page: Page) {
+  await page.getByRole('banner').getByRole('button', { name: 'Annotated read', exact: true }).click();
+  const readBar = page.getByRole('region', { name: 'Private annotated read' });
+  await readBar.getByRole('button', { name: 'Next scene' }).click();
+  await readBar.getByRole('button', { name: 'Mark read complete' }).click();
+  await page.getByRole('button', { name: /11.*POLISH/ }).click();
+  await page.getByRole('button', { name: 'Diagnose', exact: true }).click();
+  await expect(page.locator('.ai-finding')).toHaveCount(2);
+}
+
 test.describe('visual realignment', () => {
   test('board sits beside the script on desktop and drops to a bottom drawer when narrow', async ({ page }) => {
     await page.setViewportSize({ width: 1600, height: 900 });
@@ -31,5 +65,16 @@ test.describe('visual realignment', () => {
     await page.locator('.scene-row').nth(1).click();
     await expect(page.locator('.ds-story-card.is-selected')).toHaveCount(1);
     await expect(page.locator('.ds-story-card.is-selected')).toContainText('2');
+  });
+
+  test('evidence Go to script selects the exact cited line', async ({ page }) => {
+    await freshApp(page);
+    await pasteImport(page);
+    await diagnosePolish(page);
+    const first = page.locator('.ai-finding').first();
+    const cited = await first.getAttribute('data-cited-element');
+    expect(cited).toBeTruthy();
+    await first.getByRole('button', { name: /Go to script/ }).first().click();
+    await expect(page.locator(`.sp-selected[data-element-id="${cited}"]`)).toBeVisible();
   });
 });
