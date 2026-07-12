@@ -408,3 +408,42 @@
 .read-complete:not(:disabled) {
   border-color: var(--color-confirmed);
 }
+
+/* AI settings dialog. */
+.ai-settings .ai-active {
+  margin: 0;
+  font-size: var(--font-size-body);
+  color: var(--text-primary);
+  font-weight: var(--font-weight-title);
+}
+
+.ai-provider-block {
+  border: 1px solid var(--divider);
+  border-radius: var(--rounded-control);
+  padding: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.ai-consent-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  font-size: var(--font-size-body);
+  color: var(--text-primary);
+}
+
+.ai-consent-row input {
+  margin-top: 2px;
+}
+
+.ai-settings input[type='password'] {
+  background: var(--surface-frame);
+  color: var(--text-primary);
+  border: 1px solid var(--divider);
+  border-radius: var(--rounded-control);
+  padding: 5px 8px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-body);
+}

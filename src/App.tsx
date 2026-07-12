@@ -3,6 +3,7 @@ import { PanelLayout } from './panels/PanelLayout';
 import { GoToPage } from './panels/GoToPage';
 import { ImportDialog } from './panels/ImportDialog';
 import { AnnotatedReadBar } from './panels/AnnotatedReadBar';
+import { AiSettings } from './panels/AiSettings';
 import { SceneNavigator } from './panels/SceneNavigator';
 import { EvidenceInspector } from './panels/EvidenceInspector';
 import { PassTray } from './panels/PassTray';
@@ -128,6 +129,7 @@ export default function App() {
       />
       <GoToPage />
       <ImportDialog />
+      <AiSettings />
     </>
   );
 }
