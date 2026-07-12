@@ -146,7 +146,7 @@
 .note-composer textarea,
 .reader-add input,
 .reader-add select {
-  background: var(--surface-frame);
+  background: var(--surface-inset);
   color: var(--text-primary);
   border: 1px solid var(--divider);
   border-radius: var(--rounded-control);
@@ -343,11 +343,13 @@
 .ai-proposal-old {
   border: 1px solid var(--color-concern);
   color: var(--text-secondary);
+  background: var(--surface-inset);
 }
 
 .ai-proposal-new {
   border: 1px solid var(--color-confirmed);
   color: var(--text-primary);
+  background: var(--surface-inset);
 }
 
 .ai-finding-actions {

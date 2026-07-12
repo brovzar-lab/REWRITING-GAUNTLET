@@ -213,7 +213,7 @@
 
 .goto-dialog input {
   width: 70px;
-  background: var(--surface-frame);
+  background: var(--surface-inset);
   color: var(--text-primary);
   border: 1px solid var(--divider);
   border-radius: var(--rounded-control);
@@ -229,8 +229,8 @@
   gap: var(--space-sm);
   height: 36px;
   padding: 0 var(--space-md);
-  background: var(--surface-panel);
-  border-bottom: 1px solid var(--divider);
+  background: var(--surface-toolbar);
+  border-bottom: 1px solid var(--divider-strong);
   flex: 0 0 auto;
 }
 
@@ -242,7 +242,7 @@
 }
 
 .toolbar-element-select {
-  background: var(--surface-frame);
+  background: var(--surface-inset);
   color: var(--text-primary);
   border: 1px solid var(--divider);
   border-radius: var(--rounded-control);

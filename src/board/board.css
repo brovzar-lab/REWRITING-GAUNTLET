@@ -23,6 +23,15 @@
   margin: 0;
   font-size: var(--font-size-label);
   color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The side dock is too narrow for the drag hint; full board keeps it.
+   Keyboard drag instructions are still announced by the cards themselves. */
+.board-side:not(.is-full) .board-hint {
+  display: none;
 }
 
 .board-canvas {
