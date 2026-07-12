@@ -1,4 +1,5 @@
-import type { Element, ElementType, Scene, Screenplay } from '../model/screenplay';
+import { assembleScreenplay, contentHash, type ParsedElement } from './assemble';
+import type { ElementType, Screenplay } from '../model/screenplay';
 
 /** Fountain import/export against the canonical model.
     Import never throws: anything unrecognized becomes an action line.
@@ -53,11 +54,7 @@ export function parseFountain(text: string): Screenplay {
   // Collapse the body into logical lines (paragraphs already split by newline).
   const lines = rawLines.slice(bodyStart);
 
-  interface Parsed {
-    type: ElementType;
-    text: string;
-  }
-  const parsed: Parsed[] = [];
+  const parsed: ParsedElement[] = [];
   let inDialogueBlock = false;
 
   for (let i = 0; i < lines.length; i++) {
@@ -86,39 +83,11 @@ export function parseFountain(text: string): Screenplay {
     }
   }
 
-  if (parsed.length === 0) parsed.push({ type: 'action', text: '' });
-
-  // Group into scenes at each scene heading; a preamble before the first
-  // heading becomes its own scene block.
-  const groups: Parsed[][] = [];
-  let current: Parsed[] = [];
-  for (const p of parsed) {
-    if (p.type === 'scene_heading' && current.length > 0) {
-      groups.push(current);
-      current = [];
-    }
-    current.push(p);
-  }
-  if (current.length > 0) groups.push(current);
-
-  const docId = `imported-${hashOf(text)}`;
-  const sceneCount = groups.length;
-  const scenes: Scene[] = groups.map((group, i) => {
-    const sceneId = `${docId}-s${i + 1}`;
-    const elements: Element[] = group.map((p, j) => ({ id: `${sceneId}-e${j + 1}`, type: p.type, text: p.text }));
-    const heading = group.find((p) => p.type === 'scene_heading');
-    return {
-      id: sceneId,
-      number: i + 1,
-      // Act assignment is a thirds-based GUESS (Fountain has no acts); the UI says so.
-      act: (Math.min(2, Math.floor((i / Math.max(1, sceneCount)) * 3)) + 1) as 1 | 2 | 3,
-      slug: heading?.text ?? (group[0]?.text.slice(0, 40) || 'OPENING'),
-      storyFunction: 'plot',
-      elements,
-    };
+  return assembleScreenplay(parsed, {
+    id: `imported-${contentHash(text)}`,
+    title,
+    draftLabel,
   });
-
-  return { id: docId, title, draftLabel, scenes };
 }
 
 export function serializeFountain(screenplay: Screenplay): string {
@@ -135,10 +104,4 @@ export function serializeFountain(screenplay: Screenplay): string {
     }
   }
   return out.join('\n') + '\n';
-}
-
-function hashOf(text: string): string {
-  let h = 5381;
-  for (let i = 0; i < text.length; i++) h = ((h << 5) + h + text.charCodeAt(i)) >>> 0;
-  return h.toString(36);
 }
