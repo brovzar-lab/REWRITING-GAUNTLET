@@ -20,7 +20,8 @@ interface DesignJson {
   };
 }
 
-const root = resolve(__dirname, '../..');
+// Vitest runs with the project root as cwd (vite root).
+const root = process.cwd();
 const tokensCss = readFileSync(resolve(root, 'src/theme/tokens.css'), 'utf8');
 const designMd = readFileSync(resolve(root, 'DESIGN.md'), 'utf8');
 const designJson: DesignJson = JSON.parse(readFileSync(resolve(root, 'DESIGN.json'), 'utf8'));

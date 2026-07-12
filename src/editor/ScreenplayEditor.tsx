@@ -106,6 +106,12 @@ export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
         keymap({
           Enter: chainCommands(newlineInCode, enterCommand),
           Tab: tabCommand,
+          // Tab is reserved for element switching, so Escape is the keyboard
+          // exit from the page: it moves focus to the next workspace region.
+          Escape: () => {
+            document.querySelector<HTMLElement>('[data-editor-exit]')?.focus();
+            return true;
+          },
           'Mod-z': undo,
           'Mod-y': redo,
           'Shift-Mod-z': redo,
@@ -179,7 +185,13 @@ export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
   }, []);
 
   return (
-    <div className="sp-page-scroller" data-testid="screenplay-editor">
+    <div
+      className="sp-page-scroller"
+      data-testid="screenplay-editor"
+      role="region"
+      aria-label="Screenplay"
+      tabIndex={0}
+    >
       <div className="sp-page" ref={hostRef} aria-label="Screenplay page" />
     </div>
   );

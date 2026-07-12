@@ -47,7 +47,13 @@ export function Board() {
       <div className="board-header">
         <h2 className="panel-title">{t('board.title')}</h2>
         <p className="board-hint">{t('board.dragHint')}</p>
-        <button type="button" className="seg-button" aria-pressed={fullBoard} onClick={() => setFullBoard(!fullBoard)}>
+        <button
+          type="button"
+          className="seg-button"
+          aria-pressed={fullBoard}
+          data-editor-exit
+          onClick={() => setFullBoard(!fullBoard)}
+        >
           {fullBoard ? t('board.collapse') : t('board.expand')}
         </button>
       </div>

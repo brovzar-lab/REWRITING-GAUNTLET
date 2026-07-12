@@ -1,6 +1,6 @@
 import Dexie, { type Table } from 'dexie';
 import type { Screenplay } from '../model/screenplay';
-import { useAppStore, type ThemeChoice } from './appStore';
+import { useAppStore, type ThemeChoice, type UiLang } from './appStore';
 
 export interface DocumentRow {
   id: string;
@@ -11,6 +11,7 @@ export interface DocumentRow {
 export interface UiRow {
   id: 'ui';
   theme: ThemeChoice;
+  lang?: UiLang;
   activePassId: string | null;
   panelSizes: Record<string, number>;
   collapsedPanels: Record<string, boolean>;
@@ -42,6 +43,7 @@ export async function initPersistence(options: PersistenceOptions = {}): Promise
   if (savedDoc) store.getState().loadScreenplay(savedDoc.screenplay);
   const savedUi = await db.ui.get('ui');
   if (savedUi) {
+    if (savedUi.lang) store.getState().setLang(savedUi.lang);
     store.getState().loadUiState({
       theme: savedUi.theme,
       activePassId: savedUi.activePassId,
@@ -62,6 +64,7 @@ export async function initPersistence(options: PersistenceOptions = {}): Promise
       void db.ui.put({
         id: 'ui',
         theme: state.theme,
+        lang: state.lang,
         activePassId: state.activePassId,
         panelSizes: state.panelSizes,
         collapsedPanels: state.collapsedPanels,

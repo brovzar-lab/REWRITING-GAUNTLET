@@ -24,7 +24,8 @@
   --text-primary: var(--color-ink);
   --text-secondary: rgba(32, 35, 33, 0.72);
   --accent: var(--color-selection-blue);
-  --accent-contrast: var(--color-day-panel);
+  /* White (not day-panel) on selection blue: 4.85:1, meets WCAG AA at 11px. */
+  --accent-contrast: #FFFFFF;
   --focus-ring: var(--color-selection-blue);
   --row-hover: rgba(32, 35, 33, 0.06);
   --row-selected: rgba(44, 114, 199, 0.14);
@@ -40,7 +41,7 @@
     --text-primary: var(--color-ink);
     --text-secondary: rgba(32, 35, 33, 0.72);
     --accent: var(--color-selection-blue);
-    --accent-contrast: var(--color-day-panel);
+    --accent-contrast: #FFFFFF;
     --focus-ring: var(--color-selection-blue);
     --row-hover: rgba(32, 35, 33, 0.06);
     --row-selected: rgba(44, 114, 199, 0.14);
