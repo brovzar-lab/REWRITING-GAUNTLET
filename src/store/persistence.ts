@@ -1,42 +1,8 @@
-import Dexie, { type Table } from 'dexie';
-import type { Screenplay } from '../model/screenplay';
-import { useAppStore, type ThemeChoice, type UiLang } from './appStore';
+import { db } from './db';
+import { useAppStore } from './appStore';
 
-export interface DocumentRow {
-  id: string;
-  screenplay: Screenplay;
-  updatedAt: number;
-}
-
-export interface UiRow {
-  id: 'ui';
-  theme: ThemeChoice;
-  lang?: UiLang;
-  zoom?: number;
-  activePassId: string | null;
-  panelSizes: Record<string, number>;
-  collapsedPanels: Record<string, boolean>;
-}
-
-export interface BaselineRow {
-  id: string; // screenplay id
-  label: string;
-  texts: Record<string, string>;
-}
-
-class RewriteStudioDB extends Dexie {
-  documents!: Table<DocumentRow, string>;
-  ui!: Table<UiRow, string>;
-  baselines!: Table<BaselineRow, string>;
-
-  constructor() {
-    super('rewrite-studio');
-    this.version(1).stores({ documents: 'id', ui: 'id' });
-    this.version(2).stores({ documents: 'id', ui: 'id', baselines: 'id' });
-  }
-}
-
-export const db = new RewriteStudioDB();
+export { db } from './db';
+export type { DocumentRow, UiRow, BaselineRow, SnapshotRow, WorkflowRow } from './db';
 
 export interface PersistenceOptions {
   debounceMs?: number;
@@ -48,11 +14,20 @@ export async function initPersistence(options: PersistenceOptions = {}): Promise
   const debounceMs = options.debounceMs ?? 500;
   const store = useAppStore;
 
-  const savedDoc = await db.documents.get(store.getState().screenplay.id);
-  if (savedDoc) store.getState().loadScreenplay(savedDoc.screenplay);
-  const savedBaseline = await db.baselines.get(store.getState().screenplay.id);
-  if (savedBaseline) store.getState().loadRevision(savedBaseline.texts, savedBaseline.label);
   const savedUi = await db.ui.get('ui');
+  const targetDocId = savedUi?.activeDocumentId ?? store.getState().screenplay.id;
+
+  const savedDoc = await db.documents.get(targetDocId);
+  if (savedDoc) store.getState().loadScreenplay(savedDoc.screenplay);
+
+  const savedWorkflow = await db.workflow.get(targetDocId);
+  if (savedWorkflow) {
+    store.getState().loadWorkflow(savedWorkflow.state, savedWorkflow.evidence, savedWorkflow.connections);
+  }
+
+  const savedBaseline = await db.baselines.get(targetDocId);
+  if (savedBaseline) store.getState().loadRevision(savedBaseline.texts, savedBaseline.label);
+
   if (savedUi) {
     if (savedUi.lang) store.getState().setLang(savedUi.lang);
     if (savedUi.zoom) store.getState().setZoom(savedUi.zoom);
@@ -73,6 +48,12 @@ export async function initPersistence(options: PersistenceOptions = {}): Promise
         screenplay: state.screenplay,
         updatedAt: Date.now(),
       });
+      void db.workflow.put({
+        id: state.screenplay.id,
+        state: state.workflow,
+        evidence: state.evidence,
+        connections: state.connections,
+      });
       if (state.revisionBaseline && state.revisionSetLabel) {
         void db.baselines.put({
           id: state.screenplay.id,
@@ -87,6 +68,7 @@ export async function initPersistence(options: PersistenceOptions = {}): Promise
         theme: state.theme,
         lang: state.lang,
         zoom: state.zoom,
+        activeDocumentId: state.screenplay.id,
         activePassId: state.activePassId,
         panelSizes: state.panelSizes,
         collapsedPanels: state.collapsedPanels,

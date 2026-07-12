@@ -2,6 +2,15 @@ import { create } from 'zustand';
 import type { Connection, Screenplay } from '../model/screenplay';
 import type { EvidenceRecord } from '../model/evidence';
 import { sampleConnections, sampleEvidence, sampleScreenplay } from '../model/sample/gauntlet-sample';
+import {
+  emptyWorkflow,
+  MAX_INITIAL_READERS,
+  MAX_INTERIM_READERS,
+  type Finding,
+  type Reader,
+  type WorkflowState,
+} from '../workflow/types';
+import { db } from './db';
 
 export interface Selection {
   sceneId: string;
@@ -27,6 +36,26 @@ export interface AppState {
   revisionSetLabel: string | null;
   goToPageOpen: boolean;
   setGoToPageOpen: (open: boolean) => void;
+
+  /** Rewrite workflow: annotated read, readers, findings, approvals. */
+  workflow: WorkflowState;
+  addReader: (name: string, role: Reader['role']) => void;
+  removeReader: (readerId: string) => void;
+  markSceneVisited: (sceneId: string) => void;
+  completeAnnotatedRead: () => void;
+  /** Store-level AI gate: throws until the private annotated read is complete. */
+  setFindings: (passRunId: string, findings: Finding[]) => void;
+  approveProposal: (findingId: string) => void;
+  rejectFinding: (findingId: string) => void;
+  setPassRunState: (passId: string, state: WorkflowState['passRuns'][string]) => void;
+  setCloudAiConsent: (consented: boolean) => void;
+  addEvidenceNote: (record: EvidenceRecord) => void;
+  /** Replace the working draft (import). Caller is responsible for snapshotting first. */
+  replaceDocument: (screenplay: Screenplay) => void;
+  loadWorkflow: (state: WorkflowState, evidence: EvidenceRecord[], connections: Connection[]) => void;
+  takeSnapshot: (label: string) => Promise<string>;
+  restoreSnapshot: (snapshotId: string) => Promise<void>;
+
   startRevisionSet: (label: string) => void;
   endRevisionSet: () => void;
   loadRevision: (baseline: Record<string, string>, label: string) => void;
@@ -58,7 +87,7 @@ export interface AppState {
 
 const clone = <T>(v: T): T => (typeof structuredClone === 'function' ? structuredClone(v) : JSON.parse(JSON.stringify(v)));
 
-export const useAppStore = create<AppState>((set) => ({
+export const useAppStore = create<AppState>((set, get) => ({
   lang: 'en',
   setLang: (lang) => set({ lang }),
   focusMode: false,
@@ -71,6 +100,124 @@ export const useAppStore = create<AppState>((set) => ({
   revisionSetLabel: null,
   goToPageOpen: false,
   setGoToPageOpen: (goToPageOpen) => set({ goToPageOpen }),
+
+  workflow: emptyWorkflow(),
+
+  addReader: (name, role) => {
+    const readers = get().workflow.readers;
+    if (role === 'initial' && readers.filter((r) => r.role === 'initial').length >= MAX_INITIAL_READERS) {
+      throw new Error('Epps rule: never more than five initial readers (three are recommended).');
+    }
+    if (role === 'interim' && readers.filter((r) => r.role === 'interim').length >= MAX_INTERIM_READERS) {
+      throw new Error('Epps rule: exactly one trusted interim reader.');
+    }
+    const reader: Reader = { id: `reader-${crypto.randomUUID()}`, name, role, addedAt: Date.now() };
+    set((s) => ({ workflow: { ...s.workflow, readers: [...s.workflow.readers, reader] } }));
+  },
+
+  removeReader: (readerId) =>
+    set((s) => ({ workflow: { ...s.workflow, readers: s.workflow.readers.filter((r) => r.id !== readerId) } })),
+
+  markSceneVisited: (sceneId) =>
+    set((s) =>
+      s.workflow.visitedScenes.includes(sceneId)
+        ? s
+        : { workflow: { ...s.workflow, visitedScenes: [...s.workflow.visitedScenes, sceneId] } },
+    ),
+
+  completeAnnotatedRead: () => set((s) => ({ workflow: { ...s.workflow, annotatedReadComplete: true } })),
+
+  setFindings: (passRunId, findings) => {
+    if (!get().workflow.annotatedReadComplete) {
+      throw new Error('AI diagnosis stays sealed until the private annotated read is complete.');
+    }
+    set((s) => ({
+      workflow: {
+        ...s.workflow,
+        findings: [...s.workflow.findings.filter((f) => f.passRunId !== passRunId), ...findings],
+      },
+    }));
+  },
+
+  approveProposal: (findingId) => {
+    const state = get();
+    const finding = state.workflow.findings.find((f) => f.id === findingId);
+    if (!finding || finding.resolution !== 'open') throw new Error('Finding is not open for approval.');
+    const proposal = finding.proposal;
+    if (!proposal) throw new Error('Finding has no proposal to apply.');
+    if (!finding.citations.some((c) => c.elementId === proposal.elementId)) {
+      throw new Error('Scene lock: the proposal targets an element the finding does not cite.');
+    }
+    state.updateElementText(proposal.sceneId, proposal.elementId, proposal.newText);
+    set((s) => ({
+      workflow: {
+        ...s.workflow,
+        findings: s.workflow.findings.map((f) => (f.id === findingId ? { ...f, resolution: 'approved' } : f)),
+        approvals: [
+          ...s.workflow.approvals,
+          {
+            id: `approval-${crypto.randomUUID()}`,
+            findingId,
+            passId: finding.passId,
+            sceneId: proposal.sceneId,
+            elementId: proposal.elementId,
+            oldText: proposal.oldText,
+            newText: proposal.newText,
+            why: proposal.rationale,
+            approvedAt: Date.now(),
+          },
+        ],
+      },
+    }));
+  },
+
+  rejectFinding: (findingId) =>
+    set((s) => ({
+      workflow: {
+        ...s.workflow,
+        findings: s.workflow.findings.map((f) => (f.id === findingId ? { ...f, resolution: 'rejected' } : f)),
+      },
+    })),
+
+  setPassRunState: (passId, runState) =>
+    set((s) => ({ workflow: { ...s.workflow, passRuns: { ...s.workflow.passRuns, [passId]: runState } } })),
+
+  setCloudAiConsent: (cloudAiConsent) => set((s) => ({ workflow: { ...s.workflow, cloudAiConsent } })),
+
+  addEvidenceNote: (record) => set((s) => ({ evidence: [...s.evidence, record] })),
+
+  replaceDocument: (screenplay) =>
+    set({
+      screenplay,
+      evidence: [],
+      connections: [],
+      selection: null,
+      activePassId: null,
+      revisionBaseline: null,
+      revisionSetLabel: null,
+      workflow: emptyWorkflow(),
+    }),
+
+  loadWorkflow: (workflow, evidence, connections) => set({ workflow, evidence, connections }),
+
+  takeSnapshot: async (label) => {
+    const s = get();
+    const id = `snap-${crypto.randomUUID()}`;
+    await db.snapshots.put({
+      id,
+      screenplayId: s.screenplay.id,
+      label,
+      takenAt: Date.now(),
+      screenplay: clone(s.screenplay),
+    });
+    return id;
+  },
+
+  restoreSnapshot: async (snapshotId) => {
+    const row = await db.snapshots.get(snapshotId);
+    if (!row) throw new Error('Snapshot not found.');
+    set({ screenplay: clone(row.screenplay), selection: null });
+  },
   startRevisionSet: (label) =>
     set((s) => ({
       revisionSetLabel: label,
@@ -130,6 +277,8 @@ export const useAppStore = create<AppState>((set) => ({
   resetToSample: () =>
     set({
       screenplay: clone(sampleScreenplay),
+      evidence: sampleEvidence,
+      connections: sampleConnections,
       selection: null,
       theme: 'night',
       activePassId: null,
@@ -138,6 +287,7 @@ export const useAppStore = create<AppState>((set) => ({
       zoom: 1,
       revisionBaseline: null,
       revisionSetLabel: null,
+      workflow: emptyWorkflow(),
     }),
 }));
 
