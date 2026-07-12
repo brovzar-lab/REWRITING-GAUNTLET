@@ -23,4 +23,13 @@ test.describe('visual realignment', () => {
     await expect(page.locator('.board-shelf .board')).toBeVisible();
     await expect(page.locator('.board-panel')).toHaveCount(0);
   });
+
+  test('board shows act headers and a selected scene highlights its card', async ({ page }) => {
+    await page.setViewportSize({ width: 1600, height: 900 });
+    await freshApp(page);
+    await expect(page.locator('.board-act-header')).toHaveCount(3);
+    await page.locator('.scene-row').nth(1).click();
+    await expect(page.locator('.ds-story-card.is-selected')).toHaveCount(1);
+    await expect(page.locator('.ds-story-card.is-selected')).toContainText('2');
+  });
 });

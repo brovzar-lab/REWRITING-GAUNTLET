@@ -9,6 +9,15 @@ beforeEach(() => {
 });
 
 describe('Board', () => {
+  it('groups cards by act with act headers in side dock', () => {
+    useAppStore.getState().setBoardDock('side');
+    render(<Board />);
+    const headers = screen.getAllByRole('heading', { level: 3 });
+    expect(headers.map((h) => h.textContent)).toEqual(
+      expect.arrayContaining(['ACT ONE', 'ACT TWO', 'ACT THREE']),
+    );
+  });
+
   it('renders one card per scene with slug, number, and a story-function text label', () => {
     render(<Board />);
     const cards = screen.getAllByRole('button', { name: /Scene \d+/ });

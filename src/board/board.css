@@ -37,6 +37,56 @@
   overflow: auto;
 }
 
+.board-count {
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-label);
+  letter-spacing: var(--letter-spacing-label);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* Side dock: vertical corkboard, acts stacked, cards wrap. */
+.board-side .board-canvas,
+.board.is-full .board-canvas {
+  overflow: hidden auto;
+  padding-top: var(--space-sm);
+}
+
+.board-act-header {
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-label);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--divider);
+  margin: 0;
+  padding: var(--space-sm) 0 var(--space-xs);
+}
+
+.board-side .card-row,
+.board.is-full .card-row {
+  flex-wrap: wrap;
+  padding: var(--space-sm) 0 var(--space-md);
+}
+
+/* Bottom dock: single filmstrip row; act sections lay out inline. */
+.board-bottom:not(.is-full) .board-canvas {
+  display: flex;
+  gap: var(--space-lg);
+  align-items: stretch;
+}
+
+.board-bottom:not(.is-full) .board-act {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+}
+
+.board-bottom:not(.is-full) .board-act-header {
+  border-bottom: 0;
+  padding: 0 0 var(--space-xs);
+}
+
 .connection-layer {
   position: absolute;
   inset: 0;
@@ -65,7 +115,6 @@
 }
 
 .board.is-full .card-row {
-  flex-wrap: wrap;
   row-gap: 48px;
 }
 
@@ -87,6 +136,16 @@
 
 .board.is-full .ds-story-card {
   width: 168px;
+}
+
+.board-side:not(.is-full) .ds-story-card {
+  width: 124px;
+  min-height: 76px;
+}
+
+/* Depth explains interaction: cards lift only in hand, not on hover. */
+.ds-story-card:hover {
+  transform: translateY(-1px);
 }
 
 /* Story-function colors (always paired with the text label on the card). */
