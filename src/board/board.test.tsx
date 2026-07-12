@@ -12,7 +12,7 @@ describe('Board', () => {
   it('renders one card per scene with slug, number, and a story-function text label', () => {
     render(<Board />);
     const cards = screen.getAllByRole('button', { name: /Scene \d+/ });
-    expect(cards).toHaveLength(12);
+    expect(cards).toHaveLength(16);
     const card6 = screen.getByRole('button', { name: /Scene 6/ });
     expect(card6).toHaveTextContent('EXT. CANAL SIETE - DAWN');
     expect(card6).toHaveTextContent('Opposition'); // color never carries meaning alone
@@ -36,7 +36,7 @@ describe('Board', () => {
   it('renders one connection per sample relationship with kind label and distinct style', () => {
     render(<Board />);
     const lines = document.querySelectorAll('[data-connection-id]');
-    expect(lines).toHaveLength(5);
+    expect(lines).toHaveLength(7);
     expect(document.querySelector('[data-connection-kind="setup_payoff"]')).not.toBeNull();
     expect(document.querySelector('[data-connection-kind="escalation"]')).not.toBeNull();
     expect(document.querySelector('[data-connection-kind="relationship"]')).not.toBeNull();

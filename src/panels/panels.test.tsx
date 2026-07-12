@@ -18,7 +18,7 @@ describe('SceneNavigator', () => {
     expect(screen.getByText('ACT ONE')).toBeInTheDocument();
     expect(screen.getByText('ACT TWO')).toBeInTheDocument();
     expect(screen.getByText('ACT THREE')).toBeInTheDocument();
-    expect(within(acts[1]).getAllByRole('button').length).toBe(5); // sc5..sc9
+    expect(within(acts[1]).getAllByRole('button').length).toBe(8); // sc5,sc6,sc14,sc7,sc13,sc8,sc9,sc15
   });
 
   it('shows slug, scene number, and approximate page reference per scene', () => {
@@ -31,7 +31,7 @@ describe('SceneNavigator', () => {
   it('clicking a scene selects its heading element in the store', async () => {
     const user = userEvent.setup();
     render(<SceneNavigator />);
-    await user.click(screen.getByRole('button', { name: /INT\. MUNICIPAL ARCHIVE - DAY/ }));
+    await user.click(screen.getByRole('button', { name: /^8 INT\. MUNICIPAL ARCHIVE - DAY/ }));
     expect(useAppStore.getState().selection).toEqual({ sceneId: 'sc7', elementId: 'sc7-e1' });
   });
 

@@ -13,17 +13,17 @@ test.describe('workspace', () => {
     await expect(page.getByRole('heading', { name: 'Rewrite Studio' })).toBeVisible();
     // Screenplay page with real content
     await expect(page.locator('.sp-scene_heading').first()).toHaveText('EXT. HIGHWAY 2 - SONORAN DESERT - DAY');
-    // Navigator: three acts, 12 scenes
+    // Navigator: three acts, 16 scenes
     await expect(page.locator('.act-header')).toHaveCount(3);
-    await expect(page.locator('.scene-row')).toHaveCount(12);
+    await expect(page.locator('.scene-row')).toHaveCount(16);
     // Pass tray: the 11 Epps passes in order
     const chips = page.locator('.ds-pass-chip');
     await expect(chips).toHaveCount(11);
     await expect(chips.first()).toContainText('FOUNDATION');
     await expect(chips.last()).toContainText('POLISH');
-    // Board: one card per scene + 5 connections
-    await expect(page.locator('.ds-story-card')).toHaveCount(12);
-    await expect(page.locator('[data-connection-id]')).toHaveCount(5);
+    // Board: one card per scene + 7 connections
+    await expect(page.locator('.ds-story-card')).toHaveCount(16);
+    await expect(page.locator('[data-connection-id]')).toHaveCount(7);
   });
 
   test('Day and Night themes switch the workspace but never the paper (Page Rule)', async ({ page }) => {
@@ -42,7 +42,7 @@ test.describe('workspace', () => {
 
   test('navigator click travels to the scene and selects it everywhere', async ({ page }) => {
     await freshApp(page);
-    await page.locator('.scene-navigator').getByRole('button', { name: /INT\. MUNICIPAL ARCHIVE - DAY/ }).click();
+    await page.locator('.scene-navigator').getByRole('button', { name: /^8 INT\. MUNICIPAL ARCHIVE - DAY/ }).click();
     // Board card highlights with non-color marker
     const card = page.locator('[data-scene-card="sc7"]');
     await expect(card).toHaveAttribute('aria-pressed', 'true');

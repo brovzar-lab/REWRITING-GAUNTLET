@@ -1,0 +1,23 @@
+{
+  "pageCount": 7,
+  "breakBeforeElement": [
+    "fs2-e3",
+    "fs3-e9"
+  ],
+  "splitElements": {
+    "fs2-e6": 4,
+    "fs4-e15": 29
+  },
+  "moreContdPairs": [
+    "3:MARISOL (CONT'D)"
+  ],
+  "bodyLinesPerPage": [
+    53,
+    55,
+    50,
+    55,
+    55,
+    54,
+    2
+  ]
+}
