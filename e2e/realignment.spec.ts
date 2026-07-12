@@ -65,6 +65,8 @@ test.describe('visual realignment', () => {
     await page.locator('.scene-row').nth(1).click();
     await expect(page.locator('.ds-story-card.is-selected')).toHaveCount(1);
     await expect(page.locator('.ds-story-card.is-selected')).toContainText('2');
+    // Scene selection reaches all three surfaces: script, board, inspector.
+    await expect(page.locator('.inspector-context')).toContainText(/kitchen/i);
   });
 
   test('clicking a pass opens the pass control surface', async ({ page }) => {

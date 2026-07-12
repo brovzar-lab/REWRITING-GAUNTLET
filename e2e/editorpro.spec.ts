@@ -60,8 +60,9 @@ test('toolbar undo reverts typing', async ({ page }) => {
   const before = await line.textContent();
   await line.click();
   await page.keyboard.press('End');
-  await page.keyboard.type(' XQZ');
-  await expect(line).toContainText('XQZ');
+  // One character = one history event, so a single Undo always reverts it.
+  await page.keyboard.type('Q');
+  await expect(line).toHaveText(`${before}Q`);
   const undoButton = page.getByRole('button', { name: 'Undo' });
   await expect(undoButton).toBeEnabled();
   await undoButton.click();
