@@ -118,6 +118,27 @@ describe('approvals and the scene lock', () => {
     expect(elementText(useAppStore.getState().screenplay, 'sc9', 'sc9-e2')).not.toBe('HACKED');
   });
 
+  it('approving with no revision set auto-starts one so the change is marked', () => {
+    expect(useAppStore.getState().revisionBaseline).toBeNull();
+    useAppStore.getState().setFindings('run1', [fakeFinding()]);
+    useAppStore.getState().approveProposal('f1');
+    const s = useAppStore.getState();
+    expect(s.revisionBaseline).not.toBeNull();
+    expect(s.revisionBaseline!['sc2-e5']).toBe('You never stopped keeping score, Papá.');
+    expect(s.revisionSetLabel).toBeTruthy();
+  });
+
+  it('approving records an AI evidence link on the changed line', () => {
+    useAppStore.getState().setFindings('run1', [fakeFinding()]);
+    useAppStore.getState().approveProposal('f1');
+    const linked = useAppStore
+      .getState()
+      .evidence.filter((e) => e.elementId === 'sc2-e5' && e.source === 'ai');
+    expect(linked).toHaveLength(1);
+    expect(linked[0].claimType).toBe('writer_confirmed');
+    expect(linked[0].summary).toBe('Test hypothesis');
+  });
+
   it('an approved change shows as revised when a revision set is active', () => {
     useAppStore.getState().startRevisionSet('Blue');
     useAppStore.getState().setFindings('run1', [fakeFinding()]);

@@ -10,6 +10,7 @@ import {
   type Reader,
   type WorkflowState,
 } from '../workflow/types';
+import { EPPS_PASSES } from '../model/passes';
 import { db } from './db';
 
 export interface Selection {
@@ -40,6 +41,8 @@ export interface AppState {
   setImportOpen: (open: boolean) => void;
   aiSettingsOpen: boolean;
   setAiSettingsOpen: (open: boolean) => void;
+  inspectorTab: 'evidence' | 'ai';
+  setInspectorTab: (tab: 'evidence' | 'ai') => void;
 
   /** Rewrite workflow: annotated read, readers, findings, approvals. */
   workflow: WorkflowState;
@@ -114,6 +117,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   setImportOpen: (importOpen) => set({ importOpen }),
   aiSettingsOpen: false,
   setAiSettingsOpen: (aiSettingsOpen) => set({ aiSettingsOpen }),
+  inspectorTab: 'evidence',
+  setInspectorTab: (inspectorTab) => set({ inspectorTab }),
 
   workflow: emptyWorkflow(),
 
@@ -179,15 +184,33 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (!finding.citations.some((c) => c.elementId === proposal.elementId)) {
       throw new Error('Scene lock: the proposal targets an element the finding does not cite.');
     }
+    // Every applied change must show a revision mark: start a set if none is open.
+    if (!state.revisionBaseline) {
+      const pass = EPPS_PASSES.find((p) => p.id === finding.passId);
+      state.startRevisionSet(pass ? `${pass.name} pass` : finding.passId);
+    }
     state.updateElementText(proposal.sceneId, proposal.elementId, proposal.newText);
+    const approvalId = `approval-${crypto.randomUUID()}`;
     set((s) => ({
+      evidence: [
+        ...s.evidence,
+        {
+          id: `ev-${approvalId}`,
+          source: 'ai',
+          claimType: 'writer_confirmed',
+          status: finding.status,
+          summary: finding.summary,
+          sceneId: proposal.sceneId,
+          elementId: proposal.elementId,
+        },
+      ],
       workflow: {
         ...s.workflow,
         findings: s.workflow.findings.map((f) => (f.id === findingId ? { ...f, resolution: 'approved' } : f)),
         approvals: [
           ...s.workflow.approvals,
           {
-            id: `approval-${crypto.randomUUID()}`,
+            id: approvalId,
             findingId,
             passId: finding.passId,
             sceneId: proposal.sceneId,

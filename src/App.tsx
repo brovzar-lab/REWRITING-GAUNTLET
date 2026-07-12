@@ -5,7 +5,7 @@ import { ImportDialog } from './panels/ImportDialog';
 import { AnnotatedReadBar } from './panels/AnnotatedReadBar';
 import { AiSettings } from './panels/AiSettings';
 import { SceneNavigator } from './panels/SceneNavigator';
-import { EvidenceInspector } from './panels/EvidenceInspector';
+import { InspectorTabs } from './panels/InspectorTabs';
 import { PassTray } from './panels/PassTray';
 import { ScreenplayEditor } from './editor/ScreenplayEditor';
 import { Board } from './board/Board';
@@ -124,7 +124,7 @@ export default function App() {
           </>
         }
         board={<Board />}
-        inspector={<EvidenceInspector />}
+        inspector={<InspectorTabs />}
         tray={<PassTray />}
       />
       <GoToPage />
