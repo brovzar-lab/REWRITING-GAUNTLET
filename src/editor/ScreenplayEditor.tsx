@@ -9,6 +9,7 @@ import { screenplaySchema } from './schema';
 import { buildDoc, parseDoc } from './docSync';
 import { nextElementOnEnter, nextElementOnTab } from './elementCycling';
 import { paginationPlugin } from './paginationPlugin';
+import { revisionPlugin } from './revisionPlugin';
 import { zoomKeymap } from './editorKeymap';
 import type { ElementType } from '../model/screenplay';
 import { useAppStore } from '../store/appStore';
@@ -84,7 +85,14 @@ export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
         }),
         keymap(baseKeymap),
         zoomKeymap(),
-        paginationPlugin(() => store.getState().screenplay),
+        paginationPlugin(
+          () => store.getState().screenplay,
+          () => {
+            const label = store.getState().revisionSetLabel;
+            return label ? `REV. ${label.toUpperCase()}` : null;
+          },
+        ),
+        revisionPlugin(() => store.getState().revisionBaseline),
       ],
     });
 
@@ -116,17 +124,22 @@ export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
     viewRef.current = view;
     onReady?.(view);
 
-    // Outside changes (navigator, board, hydration) rebuild the doc and move the cursor.
+    // Outside changes (navigator, board, hydration, revision set) rebuild the
+    // doc/decorations and move the cursor.
     let prevScreenplay = store.getState().screenplay;
     let prevSelection = store.getState().selection;
+    let prevBaseline = store.getState().revisionBaseline;
     const unsubscribe = store.subscribe((s) => {
-      if (s.screenplay !== prevScreenplay && !syncingFromEditor.current) {
-        const doc = buildDoc(s.screenplay);
+      const outsideDocChange = s.screenplay !== prevScreenplay && !syncingFromEditor.current;
+      const revisionChange = s.revisionBaseline !== prevBaseline;
+      if (outsideDocChange || revisionChange) {
+        const doc = outsideDocChange ? buildDoc(s.screenplay) : view.state.doc;
         view.updateState(
           EditorState.create({ doc, plugins: view.state.plugins }),
         );
       }
       prevScreenplay = s.screenplay;
+      prevBaseline = s.revisionBaseline;
 
       if (s.selection !== prevSelection && s.selection && !syncingFromEditor.current) {
         let targetPos: number | null = null;

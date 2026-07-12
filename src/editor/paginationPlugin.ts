@@ -98,7 +98,8 @@ function buildDecorations(doc: PMNode, previous: Screenplay, revisionLabel: stri
     decorations.push(
       Decoration.widget(widgetPos, boundaryWidget(page.number, more, contd?.text ?? null, revisionLabel), {
         side: -1,
-        key: `page-${page.number}`,
+        // the key must change with everything the widget renders, or the view reuses stale DOM
+        key: `page-${page.number}-${more ? 'm' : ''}-${contd?.text ?? ''}-${revisionLabel ?? ''}`,
       }),
     );
   }

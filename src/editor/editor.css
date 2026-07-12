@@ -119,11 +119,29 @@
   margin-left: -0.5in;
 }
 
-/* Scene number in the left margin of each heading. */
-.sp-scene_heading {
+.sp-element {
   position: relative;
 }
 
+/* Revision mark: margin asterisk on every changed element (position, not color,
+   carries the meaning). Offsets align all marks at the right page margin. */
+.sp-revised::after {
+  content: '*';
+  position: absolute;
+  top: 0;
+  right: -0.3in;
+  font-weight: 700;
+}
+
+.sp-parenthetical.sp-revised::after {
+  right: -2.7in;
+}
+
+.sp-dialogue.sp-revised::after {
+  right: -1.8in;
+}
+
+/* Scene number in the left margin of each heading. */
 .sp-scene_heading[data-scene-number]::before {
   content: attr(data-scene-number);
   position: absolute;

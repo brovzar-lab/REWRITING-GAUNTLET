@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useAppStore } from '../store/appStore';
 import { paginate } from '../pagination/engine';
+import { computeRevisedElements } from '../editor/revision';
 import { useT } from '../i18n/strings';
 import type { Scene } from '../model/screenplay';
 
@@ -12,7 +13,12 @@ export function SceneNavigator() {
   const select = useAppStore((s) => s.select);
   const t = useT();
 
+  const revisionBaseline = useAppStore((s) => s.revisionBaseline);
   const pagination = useMemo(() => paginate(screenplay), [screenplay]);
+  const revisedElements = useMemo(
+    () => (revisionBaseline ? computeRevisedElements(screenplay, revisionBaseline) : new Set<string>()),
+    [screenplay, revisionBaseline],
+  );
 
   const acts = useMemo(() => {
     const byAct = new Map<1 | 2 | 3, Scene[]>([[1, []], [2, []], [3, []]]);
@@ -33,6 +39,7 @@ export function SceneNavigator() {
               const heading = scene.elements[0];
               const page = pagination.pageOfElement.get(heading.id) ?? 1;
               const selected = selection?.sceneId === scene.id;
+              const revised = scene.elements.some((e) => revisedElements.has(e.id));
               return (
                 <li key={scene.id}>
                   <button
@@ -42,7 +49,14 @@ export function SceneNavigator() {
                     onClick={() => select({ sceneId: scene.id, elementId: heading.id })}
                   >
                     <span className="scene-number">{scene.number}</span>
-                    <span className="scene-slug">{scene.slug}</span>
+                    <span className="scene-slug">
+                      {scene.slug}
+                      {revised && (
+                        <span className="scene-revised" role="img" aria-label={t('rev.revised')}>
+                          {' '}*
+                        </span>
+                      )}
+                    </span>
                     <span className="scene-page">
                       {t('nav.page')} {page}
                     </span>

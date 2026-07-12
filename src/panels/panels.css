@@ -162,6 +162,10 @@
   color: var(--text-secondary);
 }
 
+.scene-revised {
+  font-weight: 700;
+}
+
 /* Pass tray */
 .pass-tray {
   display: flex;

@@ -22,6 +22,12 @@ export interface AppState {
   /** Screenplay rendering zoom, 0.5–2.0. Rendering only — never affects pagination. */
   zoom: number;
   setZoom: (zoom: number) => void;
+  /** Revision set: element texts snapshotted when the set started, or null. */
+  revisionBaseline: Record<string, string> | null;
+  revisionSetLabel: string | null;
+  startRevisionSet: (label: string) => void;
+  endRevisionSet: () => void;
+  loadRevision: (baseline: Record<string, string>, label: string) => void;
   screenplay: Screenplay;
   evidence: EvidenceRecord[];
   connections: Connection[];
@@ -59,6 +65,17 @@ export const useAppStore = create<AppState>((set) => ({
   setFullBoard: (fullBoard) => set({ fullBoard }),
   zoom: 1,
   setZoom: (zoom) => set({ zoom: Math.min(2, Math.max(0.5, zoom)) }),
+  revisionBaseline: null,
+  revisionSetLabel: null,
+  startRevisionSet: (label) =>
+    set((s) => ({
+      revisionSetLabel: label,
+      revisionBaseline: Object.fromEntries(
+        s.screenplay.scenes.flatMap((scene) => scene.elements.map((e) => [e.id, e.text])),
+      ),
+    })),
+  endRevisionSet: () => set({ revisionBaseline: null, revisionSetLabel: null }),
+  loadRevision: (revisionBaseline, revisionSetLabel) => set({ revisionBaseline, revisionSetLabel }),
   screenplay: clone(sampleScreenplay),
   evidence: sampleEvidence,
   connections: sampleConnections,
@@ -114,6 +131,9 @@ export const useAppStore = create<AppState>((set) => ({
       activePassId: null,
       panelSizes: {},
       collapsedPanels: {},
+      zoom: 1,
+      revisionBaseline: null,
+      revisionSetLabel: null,
     }),
 }));
 

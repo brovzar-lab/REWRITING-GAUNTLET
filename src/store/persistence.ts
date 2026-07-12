@@ -18,13 +18,21 @@ export interface UiRow {
   collapsedPanels: Record<string, boolean>;
 }
 
+export interface BaselineRow {
+  id: string; // screenplay id
+  label: string;
+  texts: Record<string, string>;
+}
+
 class RewriteStudioDB extends Dexie {
   documents!: Table<DocumentRow, string>;
   ui!: Table<UiRow, string>;
+  baselines!: Table<BaselineRow, string>;
 
   constructor() {
     super('rewrite-studio');
     this.version(1).stores({ documents: 'id', ui: 'id' });
+    this.version(2).stores({ documents: 'id', ui: 'id', baselines: 'id' });
   }
 }
 
@@ -42,6 +50,8 @@ export async function initPersistence(options: PersistenceOptions = {}): Promise
 
   const savedDoc = await db.documents.get(store.getState().screenplay.id);
   if (savedDoc) store.getState().loadScreenplay(savedDoc.screenplay);
+  const savedBaseline = await db.baselines.get(store.getState().screenplay.id);
+  if (savedBaseline) store.getState().loadRevision(savedBaseline.texts, savedBaseline.label);
   const savedUi = await db.ui.get('ui');
   if (savedUi) {
     if (savedUi.lang) store.getState().setLang(savedUi.lang);
@@ -63,6 +73,15 @@ export async function initPersistence(options: PersistenceOptions = {}): Promise
         screenplay: state.screenplay,
         updatedAt: Date.now(),
       });
+      if (state.revisionBaseline && state.revisionSetLabel) {
+        void db.baselines.put({
+          id: state.screenplay.id,
+          label: state.revisionSetLabel,
+          texts: state.revisionBaseline,
+        });
+      } else {
+        void db.baselines.delete(state.screenplay.id);
+      }
       void db.ui.put({
         id: 'ui',
         theme: state.theme,
