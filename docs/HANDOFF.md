@@ -1,21 +1,27 @@
-# HANDOFF — Rewrite Studio / REWRITING-GAUNTLET (2026-07-12, alpha complete)
+# HANDOFF — Rewrite Studio / REWRITING-GAUNTLET (2026-07-12, alpha + UX repair complete)
 
 ## Where we left off
 
-The **End-to-End Alpha is built, tested, and committed** (plan: `docs/plans/2026-07-12-alpha-end-to-end.md`, tasks A1-A11 all done). The complete journey works and is proven by an e2e test and a screenshot pack:
+The **End-to-End Alpha** (plan: `docs/plans/2026-07-12-alpha-end-to-end.md`, A1-A11) was built and Billy tested it. His verdict: technically complete, UX not clear enough. He dictated an **Alpha UX Repair Pass** (plan: `docs/plans/2026-07-12-alpha-ux-repair.md`, U1-U7), now also **complete and committed**:
 
-paste/import a screenplay (Fountain or FDX) → private annotated read (AI locked until complete) → margin + reader/producer notes with Epps caps → run an Epps pass → AI diagnosis (deterministic Local analyzer by default; cloud adapter only behind consent + user key) → approve/reject each proposal (scene-locked, provenance, revision marks, auto revision set) → complete pass (snapshot + "Rewrite N" label) → export Fountain/FDX/Print-PDF where the file contains approved changes only.
+- U1: Import is an app-style menu (Paste / Open Fountain / Open Final Draft, PDF-paste note), then one focused step with preview.
+- U2: Clicking a pass chip opens a guided pass workspace in the inspector column (auto tab switch): objective, "what this pass examines" (EN/ES for all 11 passes), Diagnose, approve/reject queue, progress, Complete pass, recommended next pass. Guidance visible before the read; only diagnosis stays locked.
+- U3: Add note lives in the status bar (always visible), composer opens ready; notes stamped with the active pass; per-scene note badges in the navigator; per-pass note count in the workspace.
+- U4: Complete pass opens a summary (approved with applied text / rejected / unresolved / snapshot / Rewrite N / Export now / next pass).
+- U5: The page reads as the center: desk backdrop (--desk in themes.css), scroll head/foot room, and a REAL fix — sp-selected was a dead CSS class nothing applied; a ProseMirror decoration plugin now marks the caret's line (tint + accent bar).
+- U6: History button → snapshot list across documents, two-step restore with an automatic safety snapshot first.
+- U7: e2e/usability.spec.ts — Billy's six acceptance checks, all passing.
 
-Verified at handoff: **174 unit tests**, **32 Playwright tests** (incl. the full journey + axe WCAG 2.1 AA scans of every new surface in both themes), **build exit 0**, worktree clean. Proof pack: `docs/proof/alpha/` (11 screenshots + exported .fountain + README with the honest approximations list).
+Verified at handoff: **192 unit tests**, **38 Playwright tests**, **build exit 0**, worktree clean. Proof pack refreshed: `docs/proof/alpha/` (14 screenshots + exported .fountain + honest approximations).
 
-Commits: A1 `5ed616c`, A3 `1e6a058`, A4 `39c32dd`, A2 `32c0c9a`, A5 `33749a6`, A6 `2e6b388`, A7 `ceebcce`, A8 `a6f00ff`, A9 `666b64b`, A10 `4153265`, A11 `15b3c98`+`a24ed12`.
+Alpha commits: A1 `5ed616c` … A11 `a24ed12`. UX repair commits: U1 `af9285d`, U2 `57239a6`, U3 `1156ea5`, U4 `cad5d1e`, U5 `e5020b9`, U6 `9c3f3fd`, U7 `b7acaf0`+`2fd5ea7`.
 
 ## Next action
 
-Billy tests the alpha by hand and reports. Specifically ask him to:
-1. Paste one of his real scripts (or open a .fountain/.fdx) and walk the whole journey.
-2. Round-trip one exported .fdx through his real Final Draft copy (our FDX is structurally tested but never opened in FD — open risk).
-3. React to the "honest approximations" list in `docs/proof/alpha/README.md` (act reassignment UI, snapshot browser, per-approval undo, ES-localized findings are the likely next asks).
+Billy re-tests the repaired alpha. Ask him to:
+1. Walk the journey again with a real script and judge whether passes now "feel active".
+2. Round-trip one exported .fdx through his real Final Draft copy (still never validated in FD — open risk).
+3. React to the approximations list in `docs/proof/alpha/README.md` (likely next asks: act reassignment UI, per-approval undo, ES-localized analyzer findings).
 
 ## Locked decisions (unchanged)
 
@@ -57,6 +63,9 @@ cd /Users/quantumcode/CODE/REWRITING-GAUNTLET && npm run dev
 
 - Billy dictates by voice; plain language, short ordered lists, no em dashes, one copy-paste terminal block starting with cd.
 - parseFountain TRIMS every line: trailing whitespace never survives paste-import (matters when crafting polish-pass fixtures; use internal double spaces).
+- Import dialog is two-step now (menu → paste/file); e2e must click "Paste screenplay" before filling. Pass workspace lives on the "Rewrite pass" tab; the lock message only shows once a pass is selected.
+- The pass-summary dialog opens automatically after Complete pass and overlays everything: e2e must close it (or use its Export now) before clicking the top bar.
+- alpha-a11y.spec.ts is marked test.slow() (five sequential axe scans; times out at default 30s under load).
 - testing-library normalizes whitespace in matchers: assert doubled-space strings via raw DOM textContent, not getByText.
 - jsdom Blob has no .text(); read blobs with FileReader in tests.
 - Two "Annotated read" buttons exist when the AI panel is locked (top bar + panel); scope Playwright locators with getByRole('banner').
