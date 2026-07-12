@@ -153,6 +153,45 @@ describe('rule 3: dialogue splits with (MORE) / NAME (CONT\'D)', () => {
   });
 });
 
+describe('rule 2/3 combined: cue + parenthetical + dialogue near the page bottom', () => {
+  it('keeps cue, parenthetical, and two dialogue lines together before (MORE)', () => {
+    // heading(1) blank(2) action 47 (=49) blank(50) cue(51) paren(52) dial 53,54 + MORE(55)
+    const sp = fx([
+      [['scene_heading', 'INT. ONE - DAY'], ['action', actionLines(47)], ['character', 'CARMEN'], ['parenthetical', '(soft)'], ['dialogue', dialogueLines(10)]],
+    ]);
+    const r = paginate(sp);
+    const [cue, paren, dialogue] = sp.scenes[0].elements.slice(2);
+    expect(r.pageOfElement.get(cue.id)).toBe(1);
+    expect(r.pageOfElement.get(paren.id)).toBe(1);
+    const page1 = bodyLines(r.pages[0]);
+    expect(page1.filter((l) => l.elementId === dialogue.id && l.kind === 'text').length).toBe(2);
+    expect(page1[page1.length - 1].kind).toBe('more');
+  });
+
+  it('never lets a (MORE) line follow zero dialogue lines', () => {
+    // sweep action padding so the stack lands at every offset around the page bottom
+    for (let pad = 42; pad <= 53; pad++) {
+      const sp = fx([
+        [['scene_heading', 'INT. ONE - DAY'], ['action', actionLines(pad)], ['character', 'CARMEN'], ['parenthetical', '(low, not looking at her)'], ['dialogue', dialogueLines(6)]],
+      ]);
+      const r = paginate(sp);
+      for (const page of r.pages) {
+        const body = bodyLines(page).filter((l) => l.kind !== 'blank');
+        const moreIdx = body.findIndex((l) => l.kind === 'more');
+        if (moreIdx === -1) continue;
+        const dialogueBefore = body
+          .slice(0, moreIdx)
+          .filter((l) => l.kind === 'text' && typeOf(l.elementId) === 'dialogue').length;
+        expect(dialogueBefore, `pad=${pad} page=${page.number}`).toBeGreaterThanOrEqual(2);
+      }
+    }
+  });
+
+  function typeOf(elementId: string) {
+    return elementId.includes('-e5') ? 'dialogue' : 'other';
+  }
+});
+
 describe('rule 4: parenthetical never splits', () => {
   it('pushes the whole stack when the break would land inside cue+parenthetical', () => {
     // heading(1) blank(2) action 50 (=52) blank(53) cue(54) paren(55) -> dialogue would

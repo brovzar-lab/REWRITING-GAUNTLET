@@ -1,33 +1,32 @@
 {
   "pageCount": 10,
   "breakBeforeElement": [
+    "sc10-e15",
     "sc14-e4",
-    "sc15-e8",
-    "sc16-e1",
-    "sc2-e13",
+    "sc16-e3",
     "sc4-e5",
     "sc5-e10",
     "sc7-e12",
     "sc8-e11"
   ],
   "splitElements": {
-    "sc10-e14": 3
+    "sc15-e9": 3,
+    "sc2-e14": 2
   },
   "moreContdPairs": [
     "2:CARMEN (CONT'D)",
-    "8:RAÚL (CONT'D)",
-    "9:CHUY (CONT'D)"
+    "8:RAÚL (CONT'D)"
   ],
   "bodyLinesPerPage": [
-    51,
     55,
+    51,
     55,
     52,
     55,
     55,
-    51,
     55,
+    53,
     51,
-    45
+    40
   ]
 }

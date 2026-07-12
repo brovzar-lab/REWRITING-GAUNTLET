@@ -82,6 +82,64 @@ function stackSplitNeed(chunk: Chunk): number {
   return need + 1; // the (MORE) line
 }
 
+/** A stack part while it is being distributed across pages: `lines` is what
+    remains to place and `base` its offset into the original element. */
+interface WorkPart {
+  id: string;
+  sceneId: string;
+  elType: ElementType;
+  lines: string[];
+  base: number;
+}
+
+interface Take {
+  part: WorkPart;
+  take: number;
+}
+
+/** Plan how many lines of each stack part legally fit in `capacity` body lines:
+    parentheticals never split; a dialogue split keeps ≥2 lines and moves ≥2;
+    an incomplete plan reserves one line for (MORE) and must include at least
+    `minDialogue` dialogue lines. Null when no legal prefix exists. */
+function planPrefix(parts: WorkPart[], capacity: number, minDialogue: number): { takes: Take[] } | null {
+  const budget = capacity - 1; // reserve the (MORE) line
+  const takes: Take[] = [];
+  let used = 0;
+  let dialogueTaken = 0;
+  for (const part of parts) {
+    const n = part.lines.length;
+    if (used + n <= budget) {
+      takes.push({ part, take: n });
+      used += n;
+      if (part.elType === 'dialogue') dialogueTaken += n;
+      continue;
+    }
+    if (part.elType === 'dialogue') {
+      let k = budget - used;
+      if (k > n - 2) k = n - 2; // at least two lines must move
+      if (k >= 2) {
+        takes.push({ part, take: k });
+        dialogueTaken += k;
+      }
+    }
+    break; // the page break lands here (inside dialogue or at this boundary)
+  }
+  if (takes.length === 0 || dialogueTaken < minDialogue) return null;
+  return { takes };
+}
+
+/** What is left of the stack after executing a plan's takes. */
+function remainderOf(parts: WorkPart[], takes: Take[]): WorkPart[] {
+  const taken = new Map(takes.map((t) => [t.part, t.take]));
+  const rest: WorkPart[] = [];
+  for (const part of parts) {
+    const t = taken.get(part) ?? 0;
+    if (t >= part.lines.length) continue;
+    rest.push(t === 0 ? part : { ...part, lines: part.lines.slice(t), base: part.base + t });
+  }
+  return rest;
+}
+
 class Paginator {
   pages: PageModel[] = [];
   current: PaginatedLine[] = [];
@@ -212,7 +270,8 @@ class Paginator {
       return;
     }
 
-    // A mid-stack break is now inevitable, so the start must also fit the (MORE) line.
+    // A mid-stack break is now inevitable, so the start must also fit
+    // cue + leading parentheticals + 2 dialogue lines + the (MORE) line.
     const startNeed = stackSplitNeed(chunk) - (this.blankCost() === 0 ? 1 : 0);
     if (startNeed > this.remaining()) {
       this.newPage();
@@ -222,92 +281,52 @@ class Paginator {
 
     this.pushBlank();
     this.pushPieceLines(cue, 0, cue.lines.length);
-    this.pageOfElement.set(cue.element.id, this.pageNumber);
 
-    let dialoguePlaced = false;
-    for (let pi = 0; pi < parts.length; pi++) {
-      const part = parts[pi];
-      const rest = parts.slice(pi + 1);
-      const restLines = rest.reduce((s, p) => s + p.lines.length, 0);
-      const wholeRemainderFits = part.lines.length + restLines <= this.remaining();
+    let work: WorkPart[] = parts.map((p) => ({
+      id: p.element.id,
+      sceneId: p.sceneId,
+      elType: p.elType,
+      lines: p.lines,
+      base: 0,
+    }));
+    let minDialogue = 2; // rule 2: the cue keeps at least two dialogue lines
 
-      if (wholeRemainderFits) {
-        this.pushPieceLines(part, 0, part.lines.length);
-        if (part.elType === 'dialogue') dialoguePlaced = true;
-        continue;
-      }
-
-      if (part.elType === 'parenthetical') {
-        // never split a parenthetical: break before it (MORE/CONT'D) — cue guaranteed dialogue by minHead
-        this.breakStack(cueName, part.sceneId);
-        this.placeParts(parts.slice(pi), cueName);
+    for (;;) {
+      const totalRemaining = work.reduce((s, p) => s + p.lines.length, 0);
+      if (totalRemaining <= this.remaining()) {
+        for (const part of work) this.placeWorkLines(part, part.lines.length);
         return;
       }
-
-      // dialogue that cannot fully fit here (with its rest): try to split inside it
-      const avail = this.remaining() - 1; // reserve the (MORE) line
-      let k = Math.min(avail, part.lines.length);
-      if (part.lines.length - k === 1) k -= 1;
-      if (k >= 2) {
-        this.pushPieceLines(part, 0, k);
-        if (!this.splitElements.has(part.element.id) && k < part.lines.length) {
-          this.splitElements.set(part.element.id, k);
-        }
-        this.breakStack(cueName, part.sceneId);
-        const remainder: Piece[] = k < part.lines.length ? [{ ...part, lines: part.lines.slice(k) }] : [];
-        this.placeParts([...remainder, ...rest], cueName, part.element.id, k);
-        return;
-      }
-
-      // cannot keep two dialogue lines here: break before this part
-      if (dialoguePlaced) {
-        this.breakStack(cueName, part.sceneId);
-        this.placeParts(parts.slice(pi), cueName);
-      } else {
-        // nothing meaningful placed: retract is impossible, but minHead guaranteed
-        // ≥2 dialogue lines fit, so this branch is unreachable for legal input.
+      const plan =
+        planPrefix(work, this.remaining(), minDialogue) ?? planPrefix(work, this.remaining(), 0);
+      if (!plan) {
+        // No part fits at all (theoretical): continue on a fresh page.
         this.newPage();
-        this.placeParts(parts.slice(pi), cueName);
+        this.pushContd(cueName, work[0].sceneId);
+      } else {
+        for (const take of plan.takes) this.placeWorkLines(take.part, take.take);
+        work = remainderOf(work, plan.takes);
+        this.pushMore();
+        this.newPage();
+        this.pushContd(cueName, work[0].sceneId);
       }
-      return;
+      minDialogue = 1; // a (CONT'D) cue needs at least one dialogue line under it
     }
   }
 
-  private breakStack(cueName: string, sceneId: string): void {
-    this.pushMore();
-    this.newPage();
-    this.pushContd(cueName, sceneId);
-  }
-
-  /** Place stack parts at a page top (after a CONT'D cue), chaining further pages. */
-  private placeParts(parts: Piece[], cueName: string, splitOriginId?: string, alreadyPlaced = 0): void {
-    for (let pi = 0; pi < parts.length; pi++) {
-      const part = parts[pi];
-      if (part.lines.length <= this.remaining() - (pi < parts.length - 1 ? 0 : 0)) {
-        if (part.lines.length > this.remaining()) break;
-        // record continuation line indexes relative to the original element
-        const baseIndex = part.element.id === splitOriginId ? alreadyPlaced : 0;
-        for (let i = 0; i < part.lines.length; i++) {
-          this.pushLine({ elementId: part.element.id, sceneId: part.sceneId, lineIndex: baseIndex + i, text: part.lines[i], kind: 'text' });
-        }
-        continue;
-      }
-      // part longer than the remaining page: split again with MORE/CONT'D
-      const avail = this.remaining() - 1;
-      let k = Math.min(avail, part.lines.length);
-      if (part.lines.length - k === 1) k -= 1;
-      if (part.elType === 'dialogue' && k >= 2) {
-        const baseIndex = part.element.id === splitOriginId ? alreadyPlaced : 0;
-        for (let i = 0; i < k; i++) {
-          this.pushLine({ elementId: part.element.id, sceneId: part.sceneId, lineIndex: baseIndex + i, text: part.lines[i], kind: 'text' });
-        }
-        this.breakStack(cueName, part.sceneId);
-        this.placeParts([{ ...part, lines: part.lines.slice(k) }, ...parts.slice(pi + 1)], cueName, part.element.id === splitOriginId ? splitOriginId : part.element.id, baseIndex + k);
-        return;
-      }
-      this.newPage();
-      this.placeParts(parts.slice(pi), cueName, splitOriginId, alreadyPlaced);
-      return;
+  /** Emit `count` lines from the front of a work part, tracking splits. */
+  private placeWorkLines(part: WorkPart, count: number): void {
+    for (let i = 0; i < count; i++) {
+      this.pushLine({
+        elementId: part.id,
+        sceneId: part.sceneId,
+        lineIndex: part.base + i,
+        text: part.lines[i],
+        kind: 'text',
+      });
+    }
+    if (count > 0 && count < part.lines.length && !this.splitElements.has(part.id)) {
+      this.splitElements.set(part.id, part.base + count);
     }
   }
 
