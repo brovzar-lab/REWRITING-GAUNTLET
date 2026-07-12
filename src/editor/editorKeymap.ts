@@ -1,6 +1,7 @@
 import { keymap } from 'prosemirror-keymap';
 import { TextSelection, type EditorState, type Plugin, type Transaction } from 'prosemirror-state';
 import type { Node as PMNode } from 'prosemirror-model';
+import type { EditorView } from 'prosemirror-view';
 import { screenplaySchema } from './schema';
 import { useAppStore } from '../store/appStore';
 import type { ElementType } from '../model/screenplay';
