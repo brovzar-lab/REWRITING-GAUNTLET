@@ -22,11 +22,13 @@ for (const theme of ['Night', 'Day'] as const) {
     await page.getByRole('button', { name: theme, exact: true }).click();
     await expect(page.locator('.sp-page .ProseMirror')).toBeVisible();
 
-    // Import dialog (with a preview showing).
+    // Import menu, then the paste step with a preview showing.
     await page.getByRole('button', { name: 'Import', exact: true }).click();
+    await expectClean(page, 'import-menu');
+    await page.getByRole('button', { name: 'Paste screenplay' }).click();
     await page.getByLabel(/Paste your script/).fill('INT. ROOM - DAY\n\nA table.\n');
     await expect(page.getByText('Scenes: 1')).toBeVisible();
-    await expectClean(page, 'import-dialog');
+    await expectClean(page, 'import-paste-step');
     await page.getByRole('button', { name: 'Cancel', exact: true }).click();
 
     // AI Assist tab in its locked state.

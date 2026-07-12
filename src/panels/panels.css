@@ -598,3 +598,9 @@
     page-break-after: always;
   }
 }
+
+.import-file-name {
+  margin: 0;
+  font-size: var(--font-size-body);
+  color: var(--text-primary);
+}

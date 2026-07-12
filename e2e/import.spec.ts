@@ -21,9 +21,16 @@ test('paste-import replaces the draft and paginates it', async ({ page }) => {
   await page.reload();
 
   await page.getByRole('button', { name: 'Import', exact: true }).click();
-  const dialog = page.getByRole('dialog', { name: 'Import screenplay' });
+  const dialog = page.getByRole('dialog', { name: 'Open a screenplay' });
   await expect(dialog).toBeVisible();
 
+  // App-style menu: all import choices visible up front.
+  await expect(dialog.getByRole('button', { name: 'Paste screenplay' })).toBeVisible();
+  await expect(dialog.getByRole('button', { name: 'Open Fountain file' })).toBeVisible();
+  await expect(dialog.getByRole('button', { name: 'Open Final Draft file' })).toBeVisible();
+  await expect(dialog.getByText(/PDF import is not available yet/)).toBeVisible();
+
+  await dialog.getByRole('button', { name: 'Paste screenplay' }).click();
   await dialog.getByLabel(/Paste your script/).fill(FOUNTAIN);
   await expect(dialog.getByText('Scenes: 2')).toBeVisible();
   await expect(dialog.getByText(/Acts are assigned by thirds/)).toBeVisible();
@@ -47,7 +54,8 @@ test('cancelling the import leaves the current draft untouched', async ({ page }
   await page.reload();
 
   await page.getByRole('button', { name: 'Import', exact: true }).click();
-  const dialog = page.getByRole('dialog', { name: 'Import screenplay' });
+  const dialog = page.getByRole('dialog', { name: 'Open a screenplay' });
+  await dialog.getByRole('button', { name: 'Paste screenplay' }).click();
   await dialog.getByLabel(/Paste your script/).fill(FOUNTAIN);
   await dialog.getByRole('button', { name: 'Cancel' }).click();
   await expect(dialog).toBeHidden();

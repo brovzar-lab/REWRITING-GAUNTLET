@@ -33,7 +33,8 @@ test('the full alpha journey', async ({ page }) => {
 
   // 1. Import by pasting.
   await page.getByRole('button', { name: 'Import', exact: true }).click();
-  const importDialog = page.getByRole('dialog', { name: 'Import screenplay' });
+  const importDialog = page.getByRole('dialog', { name: 'Open a screenplay' });
+  await importDialog.getByRole('button', { name: 'Paste screenplay' }).click();
   await importDialog.getByLabel(/Paste your script/).fill(SCRIPT);
   await expect(importDialog.getByText('Scenes: 3')).toBeVisible();
   await importDialog.getByRole('button', { name: 'Import and replace draft' }).click();
