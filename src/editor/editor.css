@@ -71,16 +71,63 @@
   text-transform: uppercase;
 }
 
-/* Approximate page-break marker (Slice 1 heuristic; true pagination in Slice 2). */
-.sp-page-break {
-  margin: 24pt -1in 24pt -1.5in;
-  border-top: 1px dashed rgba(32, 35, 33, 0.35);
-  color: rgba(32, 35, 33, 0.6);
-  font: var(--font-weight-label) var(--font-size-label) var(--font-ui);
-  letter-spacing: var(--letter-spacing-label);
-  text-align: center;
-  padding-top: var(--space-xs);
+/* True page boundary: end of page N, workspace gap, header of page N+1. */
+.sp-page-boundary {
   user-select: none;
+}
+
+.sp-more {
+  font-family: var(--font-screenplay);
+  font-size: var(--font-size-screenplay);
+  margin-left: 1in; /* dialogue indent */
+  padding-top: 2pt;
+}
+
+.sp-contd {
+  font-family: var(--font-screenplay);
+  font-size: var(--font-size-screenplay);
+  margin-left: 2.2in; /* character-cue indent */
+  padding-top: 12pt;
+}
+
+.sp-page-gap {
+  margin: 0.9in -1in 0 -1.5in; /* fills the bottom margin, spans full paper width */
+  height: 44px;
+  background: var(--surface-frame);
+  border-top: 1px solid var(--divider);
+  border-bottom: 1px solid var(--divider);
+  box-shadow: inset 0 6px 8px -6px rgba(12, 18, 22, 0.35), inset 0 -6px 8px -6px rgba(12, 18, 22, 0.35);
+}
+
+.sp-page-header {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-md);
+  align-items: baseline;
+  margin: 0.35in -0.5in 0.35in 0;
+  font-family: var(--font-screenplay);
+  font-size: var(--font-size-screenplay);
+  color: var(--color-ink);
+}
+
+.sp-rev-label {
+  font-size: 10pt;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-right: auto;
+  margin-left: -0.5in;
+}
+
+/* Scene number in the left margin of each heading. */
+.sp-scene_heading {
+  position: relative;
+}
+
+.sp-scene_heading[data-scene-number]::before {
+  content: attr(data-scene-number);
+  position: absolute;
+  left: -0.7in;
+  font-weight: 400;
 }
 
 /* Selected element indicator: accent bar + tint, never color alone (cursor is present). */

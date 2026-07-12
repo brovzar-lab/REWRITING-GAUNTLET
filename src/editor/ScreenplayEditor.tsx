@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { EditorState, Plugin, TextSelection, type Transaction } from 'prosemirror-state';
-import { EditorView, Decoration, DecorationSet } from 'prosemirror-view';
+import { EditorState, TextSelection, type Transaction } from 'prosemirror-state';
+import { EditorView } from 'prosemirror-view';
 import { keymap } from 'prosemirror-keymap';
 import { baseKeymap, chainCommands, newlineInCode } from 'prosemirror-commands';
 import { history, redo, undo } from 'prosemirror-history';
@@ -8,8 +8,8 @@ import type { Node as PMNode } from 'prosemirror-model';
 import { screenplaySchema } from './schema';
 import { buildDoc, parseDoc } from './docSync';
 import { nextElementOnEnter, nextElementOnTab } from './elementCycling';
-import { approximatePagination } from './layout';
-import type { ElementType, Screenplay } from '../model/screenplay';
+import { paginationPlugin } from './paginationPlugin';
+import type { ElementType } from '../model/screenplay';
 import { useAppStore } from '../store/appStore';
 import './editor.css';
 
@@ -49,42 +49,6 @@ function tabCommand(state: EditorState, dispatch?: (tr: Transaction) => void): b
   return true;
 }
 
-/** Widget decorations marking APPROXIMATE page breaks (true pagination is Slice 2). */
-function pageBreakPlugin(getScreenplay: () => Screenplay): Plugin {
-  const build = (doc: PMNode) => {
-    const { pageBreakBefore, pageOfElement } = approximatePagination(getScreenplay());
-    const decorations: Decoration[] = [];
-    doc.forEach((node, offset) => {
-      const id = node.attrs.elementId as string;
-      if (pageBreakBefore.has(id)) {
-        const page = pageOfElement.get(id) ?? 0;
-        decorations.push(
-          Decoration.widget(offset, () => {
-            const el = document.createElement('div');
-            el.className = 'sp-page-break';
-            el.setAttribute('aria-hidden', 'true');
-            el.setAttribute('contenteditable', 'false');
-            el.textContent = `— ${page} —`;
-            return el;
-          }, { side: -1 }),
-        );
-      }
-    });
-    return DecorationSet.create(doc, decorations);
-  };
-  return new Plugin({
-    state: {
-      init: (_config, state) => build(state.doc),
-      apply: (tr, old) => (tr.docChanged ? build(tr.doc) : old),
-    },
-    props: {
-      decorations(state) {
-        return this.getState(state);
-      },
-    },
-  });
-}
-
 export interface ScreenplayEditorProps {
   onReady?: (view: EditorView) => void;
 }
@@ -117,7 +81,7 @@ export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
           'Shift-Mod-z': redo,
         }),
         keymap(baseKeymap),
-        pageBreakPlugin(() => store.getState().screenplay),
+        paginationPlugin(() => store.getState().screenplay),
       ],
     });
 

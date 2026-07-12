@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useAppStore } from '../store/appStore';
-import { approximatePagination } from '../editor/layout';
+import { paginate } from '../pagination/engine';
 import { useT } from '../i18n/strings';
 import type { Scene } from '../model/screenplay';
 
@@ -12,7 +12,7 @@ export function SceneNavigator() {
   const select = useAppStore((s) => s.select);
   const t = useT();
 
-  const pagination = useMemo(() => approximatePagination(screenplay), [screenplay]);
+  const pagination = useMemo(() => paginate(screenplay), [screenplay]);
 
   const acts = useMemo(() => {
     const byAct = new Map<1 | 2 | 3, Scene[]>([[1, []], [2, []], [3, []]]);
