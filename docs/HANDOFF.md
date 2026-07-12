@@ -14,7 +14,7 @@ The alpha plan was written and committed: `docs/plans/2026-07-12-alpha-end-to-en
 
 ## Next action
 
-Get Billy's verdict on the alpha plan (he said he has his answer ready; expect it as his first message). If approved: invoke `superpowers:executing-plans` and build `docs/plans/2026-07-12-alpha-end-to-end.md` continuously, task A1 (Fountain parser, tests first) through A11 (alpha journey proof), committing at every green, stopping only for destructive actions, broken assumptions, or genuine product decisions. If he has corrections: fold them into the plan file first, then build.
+Billy APPROVED the alpha plan on 2026-07-12 and ordered a continuous build (no micro-approvals, no stopping between tasks). Build `docs/plans/2026-07-12-alpha-end-to-end.md` tasks A1 through A11 with `superpowers:executing-plans`, committing at every green, until the full journey is testable: paste/import → private annotated read → notes → AI pass diagnosis (local analyzer default, cloud behind consent) → approve/reject → draft updates → export. Then produce the proof pack (URL, clean worktree, test counts, build result, a11y result, journey screenshots, Fountain-export diff showing approved-only changes, honest approximations list). Check `git log` for `Alpha A<n>` commits to see which tasks are already done before starting one.
 
 ## Locked decisions
 
@@ -31,7 +31,7 @@ Get Billy's verdict on the alpha plan (he said he has his answer ready; expect i
 
 ## Open loops
 
-1. **Alpha plan approval** — pending. Done when Billy says yes (or gives corrections that get folded in).
+1. **Alpha plan approval** — DONE 2026-07-12: approved verbatim, build continuously, local analyzer default (testable with no API key), cloud adapter strictly behind consent, "not another demo."
 2. **The alpha build itself** (tasks A1-A11) — not started. Done when the journey e2e passes: paste script, annotated read, note, run pass, approve one / reject one, export contains only the approved change; plus proof pack in `docs/proof/alpha/`.
 3. **FDX validation in real Final Draft** — deferred risk. Done when Billy round-trips one exported .fdx in his Final Draft copy during alpha testing.
 4. **claude-goal repo location** — a separate tool repo (jthack/claude-goal) sits accidentally inside this repo at `claude-goal/` (gitignored, harmless). Billy's `~/.claude/settings.json` Stop hook and `~/.claude/skills/goal` symlink point INTO it, so it must not be deleted. Done when Billy decides: leave it, or approve moving it to `~/CODE/claude-goal` plus repointing the symlink and the hook path (agent was permission-blocked from doing this unilaterally).
