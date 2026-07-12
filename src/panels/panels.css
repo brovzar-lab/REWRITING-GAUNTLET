@@ -166,6 +166,26 @@
   font-weight: 700;
 }
 
+/* Status bar under the page */
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-xs) var(--space-md);
+  background: var(--surface-panel);
+  border-top: 1px solid var(--divider);
+  flex: 0 0 auto;
+}
+
+.status-position {
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-label);
+  letter-spacing: var(--letter-spacing-label);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 /* Pass tray */
 .pass-tray {
   display: flex;

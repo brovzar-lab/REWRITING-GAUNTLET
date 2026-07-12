@@ -45,3 +45,20 @@ test('zoom scales the page but never changes pagination', async ({ page }) => {
 test('scene numbers appear beside scene headings', async ({ page }) => {
   await expect(page.locator('[data-element-id="sc6-e1"]')).toHaveAttribute('data-scene-number', '6');
 });
+
+test('status bar tracks page and scene, and its zoom buttons match the keyboard', async ({ page }) => {
+  const status = page.getByTestId('status-bar');
+  await expect(status).toContainText(/Page 1 of \d+/);
+  // jump deep into the script via the navigator
+  await page.locator('.scene-navigator .scene-row').last().click();
+  await expect(status).toContainText('Scene 16');
+  await expect(status).not.toContainText('Page 1 of');
+  // zoom buttons scale the page without changing pagination
+  const headers = await page.locator('.sp-page-header').count();
+  await page.getByRole('button', { name: 'Zoom in' }).click();
+  await page.getByRole('button', { name: 'Zoom in' }).click();
+  await expect(status).toContainText('120%');
+  expect(await page.locator('.sp-page-header').count()).toBe(headers);
+  await page.getByRole('button', { name: 'Reset zoom' }).click();
+  await expect(status).toContainText('100%');
+});

@@ -1,5 +1,6 @@
 import { useCallback, useRef, type ReactNode } from 'react';
 import { useAppStore } from '../store/appStore';
+import { StatusBar } from './StatusBar';
 import { useT } from '../i18n/strings';
 import './panels.css';
 
@@ -110,7 +111,10 @@ export function PanelLayout({ topBar, navigator, editor, board, inspector, tray 
               {navigator}
             </div>
             <Resizer panel="navigator" orientation="vertical" min={160} max={420} label={t('nav.title')} />
-            <main className="editor-panel">{editor}</main>
+            <main className="editor-panel">
+              {editor}
+              <StatusBar />
+            </main>
             <Resizer panel="inspector" orientation="vertical" min={220} max={480} invert label={t('inspector.title')} />
             <div className="panel inspector-panel" hidden={inspectorWidth === 0}>
               {inspector}

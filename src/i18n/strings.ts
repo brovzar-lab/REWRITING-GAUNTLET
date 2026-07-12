@@ -61,6 +61,12 @@ const dictionaries = {
     'goto.title': 'Go to page',
     'goto.go': 'Go',
     'smart.suggestions': 'Character suggestions',
+    'status.page': 'Page',
+    'status.of': 'of',
+    'status.scene': 'Scene',
+    'status.zoomOut': 'Zoom out',
+    'status.zoomIn': 'Zoom in',
+    'status.zoomReset': 'Reset zoom',
   },
   es: {
     'app.title': 'Rewrite Studio',
@@ -120,6 +126,12 @@ const dictionaries = {
     'goto.title': 'Ir a la página',
     'goto.go': 'Ir',
     'smart.suggestions': 'Sugerencias de personajes',
+    'status.page': 'Página',
+    'status.of': 'de',
+    'status.scene': 'Escena',
+    'status.zoomOut': 'Alejar',
+    'status.zoomIn': 'Acercar',
+    'status.zoomReset': 'Restablecer zoom',
   },
 } as const satisfies Record<Lang, Record<string, string>>;
 
