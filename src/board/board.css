@@ -1,0 +1,145 @@
+/* Tactile spatial board: index cards on a corkboard-quiet surface. */
+
+.board {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.board-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding-right: var(--space-md);
+}
+
+.board-header .panel-title {
+  padding-bottom: var(--space-sm);
+}
+
+.board-hint {
+  flex: 1;
+  margin: 0;
+  font-size: var(--font-size-label);
+  color: var(--text-secondary);
+}
+
+.board-canvas {
+  position: relative;
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 34px var(--space-md) var(--space-md);
+}
+
+.board.is-full .board-canvas {
+  overflow: auto;
+}
+
+.connection-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.connection path {
+  stroke: var(--text-secondary);
+  stroke-width: 1.5;
+}
+
+.connection-glyph {
+  fill: var(--text-secondary);
+  font-size: 9px;
+  font-family: var(--font-ui);
+}
+
+.card-row {
+  display: flex;
+  gap: var(--space-md);
+  align-items: flex-start;
+  min-height: 100%;
+}
+
+.board.is-full .card-row {
+  flex-wrap: wrap;
+  row-gap: 48px;
+}
+
+.ds-story-card {
+  width: 132px;
+  flex: 0 0 auto;
+  color: var(--color-ink);
+  border: 1px solid rgba(32, 35, 33, 0.24);
+  border-radius: var(--rounded-card);
+  padding: 10px;
+  display: grid;
+  gap: 5px;
+  font: 500 12px var(--font-ui);
+  text-align: left;
+  cursor: grab;
+  position: relative;
+  transition: box-shadow var(--motion-state-fast), transform var(--motion-state-fast);
+}
+
+.board.is-full .ds-story-card {
+  width: 168px;
+}
+
+/* Story-function colors (always paired with the text label on the card). */
+.ds-story-card.fn-plot { background: var(--color-card-blue); }
+.ds-story-card.fn-setup { background: var(--color-card-ochre); }
+.ds-story-card.fn-opposition { background: var(--color-card-brick); }
+.ds-story-card.fn-resolution { background: var(--color-card-sage); }
+.ds-story-card.fn-relationship { background: var(--color-card-plum); }
+
+.ds-story-card.is-dragging {
+  box-shadow: var(--shadow-card-lift);
+  z-index: 3;
+  cursor: grabbing;
+}
+
+.ds-story-card.is-drop-target {
+  outline: 2px dashed var(--accent);
+  outline-offset: 2px;
+}
+
+.ds-story-card.is-selected {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-number {
+  font-size: 12px;
+}
+
+.card-selected-marker {
+  font-size: 11px;
+}
+
+.card-slug {
+  font-size: 10px;
+  font-weight: 650;
+  line-height: 1.3;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.card-function {
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-label);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  opacity: 0.75;
+}
