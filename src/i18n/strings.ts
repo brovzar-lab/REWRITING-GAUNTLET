@@ -2,7 +2,7 @@ import { useAppStore } from '../store/appStore';
 
 export type Lang = 'en' | 'es';
 
-const dictionaries = {
+export const dictionaries = {
   en: {
     'app.title': 'Rewrite Studio',
     'nav.title': 'Scenes',
@@ -429,6 +429,8 @@ const dictionaries = {
     'ai.approved': 'Aprobado',
     'ai.rejected': 'Rechazado',
     'ai.error': 'El diagnóstico falló',
+    'ai.errorHelp': 'Tu guion no cambió. Intenta Diagnosticar de nuevo; si sigue fallando, abre la configuración de IA.',
+    'ai.approveErrorHelp': 'No se cambió nada en el guion.',
     'inspector.tabEvidence': 'Evidencia y notas',
     'inspector.tabPass': 'Pasada de reescritura',
     'pass.pass': 'Pasada',
