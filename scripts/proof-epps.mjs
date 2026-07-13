@@ -51,6 +51,31 @@ await page.getByLabel('Appearance').selectOption('night');
 await page.locator('.game-plan .inspector-section').last().scrollIntoViewIfNeeded();
 await shot('01c-game-plan-compass.png');
 
+// M2: Scene Point card + board chips + writer-marked cut candidates.
+// Fresh state so the "No point yet" chips are honest.
+await page.evaluate(() => indexedDB.deleteDatabase('rewrite-studio'));
+await page.reload();
+await page.waitForSelector('.sp-page .ProseMirror');
+
+const board = page.getByRole('region', { name: 'Story Board' }).first();
+await board.getByRole('button', { name: /Scene 2/ }).click();
+await page.getByRole('tab', { name: 'Evidence & Notes' }).click();
+await page.getByLabel('Scene point').fill('The wake reopens the ledger Marisol swore she closed.');
+await page.getByRole('button', { name: 'Earns it' }).click();
+await page.locator('.sp-dynamics summary').click();
+await page.getByLabel('Conflict').fill('Grief vs arithmetic.');
+await page.getByLabel('Turn', { exact: true }).fill('She pockets the ledger instead of burning it.');
+
+// A second scene marked as a cut candidate, surfaced in the Scene pass.
+await board.getByRole('button', { name: /Scene 3/ }).click();
+await page.getByLabel('Scene point').fill('A drive-by of the cemetery.');
+await page.getByRole('button', { name: 'Cut candidate' }).click();
+await board.getByRole('button', { name: /Scene 2/ }).click();
+await shot('02-scene-point.png');
+
+await page.getByRole('button', { name: /8.*SCENE/ }).click();
+await shot('02b-scene-pass-cutlist.png');
+
 // Leave no demo data behind.
 await page.evaluate(() => indexedDB.deleteDatabase('rewrite-studio'));
 await browser.close();

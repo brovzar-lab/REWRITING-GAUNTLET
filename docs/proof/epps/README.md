@@ -20,4 +20,16 @@ cd /Users/quantumcode/CODE/REWRITING-GAUNTLET && node scripts/proof-epps.mjs
    theme through action, and the Herons motif with a clickable Scene 1
    occurrence.
 
-Later slices (M2–M7) append shots 02–08 here.
+## M2 — Scene Point (2026-07-13)
+
+4. `02-scene-point.png` — Scene 2 selected: the Scene Point card in the
+   Evidence tab with the stated point, "Earns it" pressed (word + icon, no
+   color-alone), and the EXT-chipped Scene dynamics sub-fields. On the board,
+   every scene without a stated point wears its dashed "No point yet" chip;
+   Scene 2's chip is gone.
+5. `02b-scene-pass-cutlist.png` — the Scene pass workspace: the writer-marked
+   cut candidate (Scene 3, with its stated point) listed under a WRITER chip,
+   visibly separate from AI findings; AI diagnosis still locked behind the
+   private read.
+
+Later slices (M3–M7) append shots 03–08 here.
