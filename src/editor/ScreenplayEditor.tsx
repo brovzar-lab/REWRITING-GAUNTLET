@@ -78,6 +78,8 @@ interface SmartTypeState {
   index: number;
   left: number;
   top: number;
+  /** Open upward when the cue sits near the bottom of the visible page area. */
+  flip: boolean;
 }
 
 export interface ScreenplayEditorProps {
@@ -190,17 +192,21 @@ export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
       }
       let left = 0;
       let top = 0;
+      let flip = false;
       try {
         const coords = view.coordsAtPos(block.pos + 1 + block.node.content.size);
-        const scroller = scrollerRef.current?.getBoundingClientRect();
-        if (scroller) {
-          left = coords.left - scroller.left + (scrollerRef.current?.scrollLeft ?? 0);
-          top = coords.bottom - scroller.top + (scrollerRef.current?.scrollTop ?? 0) + 4;
+        const scrollerEl = scrollerRef.current;
+        const scroller = scrollerEl?.getBoundingClientRect();
+        if (scrollerEl && scroller) {
+          left = coords.left - scroller.left + scrollerEl.scrollLeft;
+          top = coords.bottom - scroller.top + scrollerEl.scrollTop + 4;
+          // Six items plus padding is ~170px; flip before the scroller edge cuts it.
+          flip = coords.bottom + 170 > scroller.bottom;
         }
       } catch {
         /* jsdom has no layout; keep 0,0 */
       }
-      updateSmartType({ items, index: 0, left, top });
+      updateSmartType({ items, index: 0, left, top, flip });
     };
 
     const view = new EditorView(host, {
@@ -292,7 +298,7 @@ export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
       <div className="sp-page" ref={hostRef} aria-label="Screenplay page" />
       {smartType && (
         <ul
-          className="smart-type-popup"
+          className={`smart-type-popup${smartType.flip ? ' is-flipped' : ''}`}
           role="listbox"
           aria-label={t('smart.suggestions')}
           style={{ left: smartType.left, top: smartType.top }}

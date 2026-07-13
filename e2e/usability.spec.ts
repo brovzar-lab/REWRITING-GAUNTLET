@@ -126,6 +126,12 @@ test('the snapshot history is reachable and lists restorable versions', async ({
 });
 
 test('the screenplay page stays visually centered and substantial', async ({ page }) => {
+  // Wide enough that the paper truly fits its column. Centering used to be
+  // asserted at 1280, but that only passed because flex centering clipped
+  // both paper edges (scene numbers unreachable). When the paper does not
+  // fit, it now left-aligns and scrolls — covered by the realignment
+  // narrow-window test.
+  await page.setViewportSize({ width: 1900, height: 900 });
   await freshApp(page);
   const pageBox = (await page.locator('.sp-page').boundingBox())!;
   const editorBox = (await page.locator('.sp-page-scroller').boundingBox())!;

@@ -4,15 +4,17 @@
   overflow: auto;
   height: 100%;
   /* The desk: generous head/foot room so the page never glues to an edge,
-     and a recessed surface that makes the paper read as the center. */
+     and a recessed surface that makes the paper read as the center.
+     No flex centering: it made the paper's left edge unreachable once the
+     page was wider than the window (narrow windows, high zoom). Auto margins
+     center when there is room and left-align + scroll when there is not. */
   padding: var(--space-xl) var(--space-lg) 120px;
   scroll-padding-block: 96px;
   background: var(--desk);
-  display: flex;
-  justify-content: center;
 }
 
 .sp-page {
+  margin-inline: auto;
   zoom: var(--sp-zoom, 1); /* rendering only; pagination comes from the engine */
   background: var(--color-screenplay-paper);
   color: var(--color-ink);
@@ -206,6 +208,15 @@
 .smart-type-popup {
   position: absolute;
   z-index: 20;
+}
+
+/* Near the bottom of the visible page area the popup opens upward instead
+   of being cut off by the scroller edge. */
+.smart-type-popup.is-flipped {
+  transform: translateY(calc(-100% - 28px));
+}
+
+.smart-type-popup {
   margin: 0;
   padding: var(--space-xs);
   list-style: none;

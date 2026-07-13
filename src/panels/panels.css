@@ -10,11 +10,17 @@
 .top-bar {
   display: flex;
   align-items: center;
+  flex-wrap: wrap; /* narrow windows: controls flow to a second row, never clip */
   gap: var(--space-sm);
   padding: var(--space-xs) var(--space-md);
   min-height: 44px;
   background: var(--surface-toolbar);
   border-bottom: 1px solid var(--divider-strong);
+}
+
+.top-bar button,
+.top-bar select {
+  white-space: nowrap;
 }
 
 /* Quiet document-action buttons: labels, not boxes, until touched. */
@@ -874,4 +880,12 @@
 .journey-arrow {
   color: var(--text-secondary);
   font-size: var(--font-size-label);
+}
+
+/* Narrow windows (board in the bottom drawer): the tray detail band would
+   crowd out the page, and the open pass workspace shows the same information. */
+@media (max-width: 1279px) {
+  .tray-detail {
+    display: none;
+  }
 }

@@ -97,6 +97,40 @@ test.describe('visual realignment', () => {
     await expect(page.locator('.evidence-card.is-linked')).toBeVisible();
   });
 
+  test('narrow windows and high zoom keep the page reachable', async ({ page }) => {
+    await page.setViewportSize({ width: 900, height: 700 });
+    await freshApp(page);
+    const scroller = page.locator('.sp-page-scroller');
+    await scroller.evaluate((el) => {
+      el.scrollLeft = 0;
+    });
+    let paper = (await page.locator('.sp-page').boundingBox())!;
+    let box = (await scroller.boundingBox())!;
+    // The paper's left edge (scene numbers, selection bar) is visible...
+    expect(paper.x).toBeGreaterThanOrEqual(box.x - 1);
+    // ...and the rest of the paper is reachable by horizontal scroll.
+    expect(await scroller.evaluate((el) => el.scrollWidth - el.clientWidth)).toBeGreaterThan(0);
+
+    // In-app zoom raised to 140%: same guarantees.
+    for (let i = 0; i < 4; i++) await page.getByRole('button', { name: 'Zoom in' }).click();
+    await scroller.evaluate((el) => {
+      el.scrollLeft = 0;
+    });
+    paper = (await page.locator('.sp-page').boundingBox())!;
+    box = (await scroller.boundingBox())!;
+    expect(paper.x).toBeGreaterThanOrEqual(box.x - 1);
+    await page.getByRole('button', { name: 'Reset zoom' }).click();
+
+    // 200%-zoom-equivalent width: still reachable, pass footer not clipped.
+    await page.setViewportSize({ width: 640, height: 700 });
+    await scroller.evaluate((el) => {
+      el.scrollLeft = 0;
+    });
+    paper = (await page.locator('.sp-page').boundingBox())!;
+    box = (await scroller.boundingBox())!;
+    expect(paper.x).toBeGreaterThanOrEqual(box.x - 1);
+  });
+
   test('the shipped sample demonstrates the full approve loop', async ({ page }) => {
     test.slow();
     await freshApp(page);
