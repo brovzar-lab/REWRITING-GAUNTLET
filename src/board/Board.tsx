@@ -17,6 +17,18 @@ import './board.css';
 
 const ACT_KEYS = { 1: 'nav.act1', 2: 'nav.act2', 3: 'nav.act3' } as const;
 
+/** Legend vocabulary: card colors and line styles, always paired with words. */
+const FUNCTION_ORDER = ['plot', 'setup', 'opposition', 'resolution', 'relationship'] as const;
+const FUNCTION_KEYS = {
+  plot: 'function.plot',
+  setup: 'function.setup',
+  opposition: 'function.opposition',
+  resolution: 'function.resolution',
+  relationship: 'function.relationship',
+} as const;
+const CONNECTION_ORDER = ['setup_payoff', 'escalation', 'relationship'] as const;
+const CONNECTION_GLYPH = { setup_payoff: '●—', escalation: '▲--', relationship: '◆··' } as const;
+
 /** Pure drop resolution so reordering is testable without simulating a drag. */
 export function resolveDragEnd(activeId: string, overId: string | null): void {
   if (!overId || activeId === overId) return;
@@ -90,6 +102,22 @@ export function Board() {
           ))}
         </div>
       </DndContext>
+      <dl className="board-legend" aria-label={t('board.legend')}>
+        {FUNCTION_ORDER.map((fn) => (
+          <div key={fn} className="legend-item">
+            <dt className={`legend-swatch fn-${fn}`} aria-hidden="true" />
+            <dd>{t(FUNCTION_KEYS[fn])}</dd>
+          </div>
+        ))}
+        {CONNECTION_ORDER.map((kind) => (
+          <div key={kind} className="legend-item">
+            <dt className={`legend-line kind-${kind}`} aria-hidden="true">
+              {CONNECTION_GLYPH[kind]}
+            </dt>
+            <dd>{t(`connection.${kind}`)}</dd>
+          </div>
+        ))}
+      </dl>
     </section>
   );
 }

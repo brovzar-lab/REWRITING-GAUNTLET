@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AnnotatedReadBar } from './AnnotatedReadBar';
+import { EvidenceInspector } from './EvidenceInspector';
 import { useAppStore } from '../store/appStore';
 
 beforeEach(() => {
@@ -9,6 +10,24 @@ beforeEach(() => {
 });
 
 describe('annotated read mode', () => {
+  it('a saved margin note stays a margin note, never re-voiced as a hypothesis', async () => {
+    useAppStore.getState().enterReadMode();
+    const user = userEvent.setup();
+    render(
+      <>
+        <AnnotatedReadBar />
+        <EvidenceInspector />
+      </>,
+    );
+    await user.type(screen.getByLabelText(/margin note/i), 'Opening feels slow.');
+    await user.click(screen.getByRole('button', { name: /save margin note/i }));
+    const added = useAppStore.getState().evidence.at(-1)!;
+    expect(added.kind).toBe('margin_note');
+    // The inspector labels it as the writer's margin note, in the writer's voice.
+    expect(document.querySelector('.evidence-card .claim-label')?.textContent).toBe('Margin note');
+    expect(screen.queryByText('Unresolved hypothesis')).not.toBeInTheDocument();
+  });
+
   it('entering the read selects scene 1 and marks it visited', () => {
     useAppStore.getState().enterReadMode();
     const s = useAppStore.getState();

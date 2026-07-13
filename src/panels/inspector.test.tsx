@@ -26,11 +26,15 @@ describe('EvidenceInspector', () => {
     expect(status.closest('.evidence-status')?.querySelector('[data-status-icon]')).not.toBeNull();
   });
 
-  it('lists other evidence in the same scene under a scene section', () => {
+  it('labels line evidence and scene evidence as separate sections', () => {
     // sc4-e1 (heading) has no direct evidence, but the scene has ev2
     useAppStore.getState().select({ sceneId: 'sc4', elementId: 'sc4-e1' });
     render(<EvidenceInspector />);
+    // The empty message sits under a "This line" heading, and the scene's
+    // evidence under its own labeled section, so the two never contradict.
+    expect(screen.getByText('This line')).toBeInTheDocument();
     expect(screen.getByText('No evidence is attached to this line yet.')).toBeInTheDocument();
+    expect(screen.getByText(/Elsewhere in this scene/)).toBeInTheDocument();
     expect(screen.getByText(/Raúl’s buyout offer lands before/)).toBeInTheDocument();
   });
 

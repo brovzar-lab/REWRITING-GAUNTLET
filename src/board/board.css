@@ -210,3 +210,46 @@
   letter-spacing: var(--letter-spacing-label);
   text-transform: uppercase;
 }
+
+/* R-trust: board legend — colors and line styles always paired with words */
+.board-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs) var(--space-md);
+  margin: 0;
+  padding: var(--space-xs) var(--space-md) var(--space-sm);
+  border-top: 1px solid var(--divider);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.legend-item dd {
+  margin: 0;
+  font-size: var(--font-size-label);
+  color: var(--text-secondary);
+}
+
+.legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  border: 1px solid var(--divider);
+  margin: 0;
+}
+
+.legend-swatch.fn-plot { background: var(--color-card-blue); }
+.legend-swatch.fn-setup { background: var(--color-card-ochre); }
+.legend-swatch.fn-opposition { background: var(--color-card-brick); }
+.legend-swatch.fn-resolution { background: var(--color-card-sage); }
+.legend-swatch.fn-relationship { background: var(--color-card-plum); }
+
+.legend-line {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-secondary);
+  letter-spacing: 1px;
+}

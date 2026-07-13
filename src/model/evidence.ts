@@ -23,4 +23,7 @@ export interface EvidenceRecord {
   readerName?: string;
   /** Rewrite pass that was active when the note was made, if any. */
   passId?: string;
+  /** How the note was authored. Margin notes from the private read keep the
+      writer's own voice in the UI instead of a claim-taxonomy label. */
+  kind?: 'margin_note';
 }

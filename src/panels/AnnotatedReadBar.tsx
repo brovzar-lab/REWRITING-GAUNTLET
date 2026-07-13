@@ -34,6 +34,7 @@ export function AnnotatedReadBar() {
       source: 'writer',
       claimType: 'unresolved_hypothesis',
       status: 'uncertain',
+      kind: 'margin_note',
       summary: note.trim(),
       sceneId: scene.id,
       elementId: scene.elements[0].id,

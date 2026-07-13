@@ -9,7 +9,7 @@ export function RevisionControl() {
   const startRevisionSet = useAppStore((s) => s.startRevisionSet);
   const endRevisionSet = useAppStore((s) => s.endRevisionSet);
   const t = useT();
-  const [choice, setChoice] = useState<string>(() => t('rev.blue'));
+  const [choice, setChoice] = useState<string>('');
 
   if (label) {
     return (
@@ -29,13 +29,20 @@ export function RevisionControl() {
         value={choice}
         onChange={(e) => setChoice(e.target.value)}
       >
+        <option value="">{t('rev.choose')}</option>
         {REV_LABEL_KEYS.map((key) => (
           <option key={key} value={t(key)}>
             {t(key)}
           </option>
         ))}
       </select>
-      <button type="button" className="seg-button" data-testid="rev-start" onClick={() => startRevisionSet(choice)}>
+      <button
+        type="button"
+        className="seg-button"
+        data-testid="rev-start"
+        disabled={choice === ''}
+        onClick={() => startRevisionSet(choice)}
+      >
         {t('rev.start')}
       </button>
     </span>

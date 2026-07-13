@@ -26,6 +26,16 @@ describe('professional top toolbar', () => {
     expect(screen.getByRole('button', { name: 'Start revision set' })).toBeInTheDocument();
   });
 
+  it('the revision dropdown does not imply an active set before one starts', async () => {
+    const user = userEvent.setup();
+    render(<TopBar />);
+    const select = screen.getByLabelText('Revision set') as HTMLSelectElement;
+    expect(select.value).toBe('');
+    expect(screen.getByTestId('rev-start')).toBeDisabled();
+    await user.selectOptions(select, 'Blue');
+    expect(screen.getByTestId('rev-start')).toBeEnabled();
+  });
+
   it('appearance select switches the theme', async () => {
     const user = userEvent.setup();
     render(<TopBar />);

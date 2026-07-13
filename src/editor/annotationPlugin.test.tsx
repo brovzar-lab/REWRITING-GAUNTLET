@@ -45,4 +45,23 @@ describe('annotation markers', () => {
     const marker = document.querySelector('[data-element-id="sc2-e2"] .sp-note-marker');
     expect(marker!.textContent).toBe('2');
   });
+
+  it('marker labels pluralize correctly', () => {
+    render(<ScreenplayEditor />);
+    const one = document.querySelector('[data-element-id="sc2-e2"] .sp-note-marker');
+    expect(one!.getAttribute('aria-label')).toBe('1 note on this line');
+    act(() => {
+      useAppStore.getState().addEvidenceNote({
+        id: 'ev-test-2',
+        source: 'writer',
+        claimType: 'textual_fact',
+        status: 'uncertain',
+        summary: 'Another note.',
+        sceneId: 'sc2',
+        elementId: 'sc2-e2',
+      });
+    });
+    const two = document.querySelector('[data-element-id="sc2-e2"] .sp-note-marker');
+    expect(two!.getAttribute('aria-label')).toBe('2 notes on this line');
+  });
 });

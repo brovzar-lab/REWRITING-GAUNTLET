@@ -36,7 +36,10 @@ describe('active pass detail band', () => {
     expect(screen.getByText('Goals')).toBeInTheDocument();
     expect(screen.getByText('Status')).toBeInTheDocument();
     expect(screen.getByText('No notes yet')).toBeInTheDocument();
-    expect(screen.getByText(/0 of 0 proposals resolved/)).toBeInTheDocument();
+    // Before any diagnosis there are no proposals to count: the status shows
+    // the run state alone, never "0 of 0 proposals resolved".
+    expect(screen.queryByText(/0 of 0/)).not.toBeInTheDocument();
+    expect(screen.getByText('Not started')).toBeInTheDocument();
   });
 
   it('Open pass switches the inspector to the pass workspace tab', async () => {

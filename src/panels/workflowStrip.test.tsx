@@ -75,6 +75,14 @@ describe('workflow strip', () => {
     useAppStore.getState().resetToSample();
   });
 
+  it('never marks Choose pass done while the private read is pending', () => {
+    expect(currentStep({ ...base, activePassId: 'character' })).toBe(1);
+    useAppStore.getState().setActivePass('character');
+    render(<WorkflowStrip />);
+    expect(screen.getByText('Choose pass').className).not.toContain('is-done');
+    expect(screen.getByText('Private read')).toHaveAttribute('aria-current', 'step');
+  });
+
   it('fresh app marks Private read as the current step and Import as done', () => {
     render(<WorkflowStrip />);
     const current = screen.getByText('Private read');

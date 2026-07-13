@@ -29,7 +29,8 @@ export function annotationPlugin(getCounts: () => Map<string, number>): Plugin {
             button.className = 'sp-note-marker';
             button.contentEditable = 'false';
             const lang = useAppStore.getState().lang;
-            button.setAttribute('aria-label', translate(lang, 'marker.notes').replace('{n}', String(count)));
+            const labelKey = count === 1 ? 'marker.note.one' : 'marker.note.many';
+            button.setAttribute('aria-label', translate(lang, labelKey).replace('{n}', String(count)));
             button.textContent = String(count);
             // Keep the caret where it is; the click is a navigation action.
             button.addEventListener('mousedown', (e) => e.preventDefault());

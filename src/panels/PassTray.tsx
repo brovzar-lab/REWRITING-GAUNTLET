@@ -98,15 +98,21 @@ export function PassTray() {
           <div className="tray-col">
             <span className="control-label">{t('tray.status')}</span>
             <p className="tray-status">
-              {t('tray.resolved')
-                .replace('{a}', String(resolvedCount))
-                .replace('{b}', String(proposals.length))}
-              {' · '}
+              {proposals.length > 0 && (
+                <>
+                  {t('tray.resolved')
+                    .replace('{a}', String(resolvedCount))
+                    .replace('{b}', String(proposals.length))}
+                  {' · '}
+                </>
+              )}
               {t(`passState.${runState}`)}
             </p>
-            <span className="tray-progress" aria-hidden="true">
-              <i style={{ width: `${progressPct}%` }} />
-            </span>
+            {proposals.length > 0 && (
+              <span className="tray-progress" aria-hidden="true">
+                <i style={{ width: `${progressPct}%` }} />
+              </span>
+            )}
           </div>
           <button
             type="button"

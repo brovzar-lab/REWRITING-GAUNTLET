@@ -98,6 +98,7 @@ export function NoteComposer({ selection }: { selection: Selection }) {
           </option>
         ))}
       </select>
+      <p className="inspector-hint claim-definition">{t(`claimdef.${claimType}`)}</p>
 
       <label className="control-label" htmlFor="note-status">
         {t('notes.status')}

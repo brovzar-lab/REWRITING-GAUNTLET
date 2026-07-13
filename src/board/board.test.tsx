@@ -1,11 +1,23 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Board, resolveDragEnd } from './Board';
 import { useAppStore } from '../store/appStore';
 
 beforeEach(() => {
   useAppStore.getState().resetToSample();
+});
+
+describe('board legend', () => {
+  it('explains card colors and connection line styles in words', () => {
+    render(<Board />);
+    const legend = screen.getByLabelText('Board legend');
+    for (const word of ['Plot', 'Set-up', 'Opposition', 'Resolution', 'Relationship']) {
+      expect(within(legend).getAllByText(word).length).toBeGreaterThanOrEqual(1);
+    }
+    expect(within(legend).getByText('Set-up / pay-off')).toBeInTheDocument();
+    expect(within(legend).getByText('Escalation')).toBeInTheDocument();
+  });
 });
 
 describe('Board', () => {

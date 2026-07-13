@@ -36,15 +36,23 @@ function EvidenceCard({ record }: { record: EvidenceRecord }) {
         <span className="evidence-meta">
           <span className={`source-chip source-${record.source}`}>{t(SOURCE_KEY[record.source])}</span>
           {record.readerName && <span className="reader-name">{record.readerName}</span>}
-          <span className="claim-label">{t(`claim.${record.claimType}`)}</span>
+          {record.kind === 'margin_note' ? (
+            <span className="claim-label">{t('claim.margin')}</span>
+          ) : (
+            <span className="claim-label" title={t(`claimdef.${record.claimType}`)}>
+              {t(`claim.${record.claimType}`)}
+            </span>
+          )}
         </span>
         <span className="evidence-summary">{record.summary}</span>
-        <span className={`evidence-status status-${record.status}`}>
-          <span data-status-icon aria-hidden="true">
-            {STATUS_ICON[record.status]}
+        {record.kind !== 'margin_note' && (
+          <span className={`evidence-status status-${record.status}`}>
+            <span data-status-icon aria-hidden="true">
+              {STATUS_ICON[record.status]}
+            </span>
+            {t(`status.${record.status}`)}
           </span>
-          {t(`status.${record.status}`)}
-        </span>
+        )}
       </button>
     </li>
   );
@@ -73,6 +81,7 @@ export function EvidenceInspector() {
           <p className="inspector-context">
             <span className="scene-number">{scene?.number}</span> {scene?.slug}
           </p>
+          <h3 className="inspector-section">{t('inspector.thisline')}</h3>
           {lineEvidence.length === 0 ? (
             <p className="inspector-hint">{t('inspector.none')}</p>
           ) : (
@@ -85,7 +94,7 @@ export function EvidenceInspector() {
           <NoteComposer selection={selection} />
           {sceneEvidence.length > 0 && (
             <>
-              <h3 className="inspector-section">{scene?.slug}</h3>
+              <h3 className="inspector-section">{t('inspector.scenewide')}</h3>
               <ul className="evidence-list">
                 {sceneEvidence.map((record) => (
                   <EvidenceCard key={record.id} record={record} />

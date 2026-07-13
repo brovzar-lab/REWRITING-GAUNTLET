@@ -100,7 +100,7 @@ test('the snapshot history is reachable and lists restorable versions', async ({
   await freshApp(page);
   await pasteImport(page); // creates the "Before import" snapshot
   await page.getByRole('button', { name: 'History', exact: true }).click();
-  const dialog = page.getByRole('dialog', { name: 'Snapshots' });
+  const dialog = page.getByRole('dialog', { name: 'History' });
   await expect(dialog).toBeVisible();
   // The draft that was just replaced is right there, restorable.
   await expect(dialog.getByText('Before import: LAS GARZAS')).toBeVisible();

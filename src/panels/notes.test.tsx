@@ -62,6 +62,16 @@ describe('note authoring in the inspector', () => {
     expect(useAppStore.getState().evidence.at(-1)!.source).toBe('interim_reader');
   });
 
+  it('shows a plain-language definition for the selected claim type', async () => {
+    const user = userEvent.setup();
+    render(<EvidenceInspector />);
+    await user.click(screen.getByRole('button', { name: /add note/i }));
+    // Default claim: textual fact.
+    expect(screen.getByText(/something the script actually says/i)).toBeInTheDocument();
+    await user.selectOptions(screen.getByLabelText(/claim type/i), 'unresolved_hypothesis');
+    expect(screen.getByText(/an open question no one has confirmed/i)).toBeInTheDocument();
+  });
+
   it('cannot save an empty note', async () => {
     const user = userEvent.setup();
     render(<EvidenceInspector />);

@@ -111,9 +111,9 @@ console.log('saved exported-the-ledger.fountain');
 
 // 10. Snapshot history with safe restore.
 await page.getByRole('button', { name: 'History', exact: true }).click();
-await page.getByRole('dialog', { name: 'Snapshots' }).getByText('After Polish pass').waitFor();
+await page.getByRole('dialog', { name: 'History' }).getByText('After Polish pass').waitFor();
 await shot('snapshot-history');
-await page.getByRole('dialog', { name: 'Snapshots' }).getByRole('button', { name: 'Close', exact: true }).click();
+await page.getByRole('dialog', { name: 'History' }).getByRole('button', { name: 'Close', exact: true }).click();
 
 // 11. Print view and the consent screen.
 await page.getByRole('button', { name: 'Export', exact: true }).click();
