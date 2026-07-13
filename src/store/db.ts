@@ -2,6 +2,7 @@ import Dexie, { type Table } from 'dexie';
 import type { Connection, Screenplay } from '../model/screenplay';
 import type { EvidenceRecord } from '../model/evidence';
 import type { WorkflowState } from '../workflow/types';
+import type { GamePlan } from '../model/gameplan';
 import type { ThemeChoice, UiLang } from './appStore';
 
 export interface DocumentRow {
@@ -40,6 +41,8 @@ export interface WorkflowRow {
   state: WorkflowState;
   evidence: EvidenceRecord[];
   connections: Connection[];
+  /** Added in the Epps methodology phase. Optional: pre-phase rows lack it. */
+  gamePlan?: GamePlan;
 }
 
 class RewriteStudioDB extends Dexie {

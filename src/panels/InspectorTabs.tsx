@@ -1,11 +1,12 @@
 import { useAppStore } from '../store/appStore';
 import { EvidenceInspector } from './EvidenceInspector';
 import { PassWorkspace } from './PassWorkspace';
+import { GamePlanPanel } from './GamePlanPanel';
 import { useT } from '../i18n/strings';
 
 /** The inspector column: human evidence & notes on one tab, the guided pass
-    workspace (with its AI assist) on the other. Separate tabs keep note
-    sources visibly apart, as the method demands. */
+    workspace (with its AI assist) on another, the writer's Game Plan on the
+    third. Separate tabs keep note sources visibly apart, as the method demands. */
 export function InspectorTabs() {
   const tab = useAppStore((s) => s.inspectorTab);
   const setTab = useAppStore((s) => s.setInspectorTab);
@@ -14,6 +15,7 @@ export function InspectorTabs() {
   const tabs = [
     { id: 'evidence' as const, label: t('inspector.tabEvidence') },
     { id: 'pass' as const, label: t('inspector.tabPass') },
+    { id: 'gameplan' as const, label: t('gp.tab') },
   ];
 
   return (
@@ -33,7 +35,9 @@ export function InspectorTabs() {
             onKeyDown={(e) => {
               if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
                 e.preventDefault();
-                const next = id === 'evidence' ? 'pass' : 'evidence';
+                const at = tabs.findIndex((entry) => entry.id === id);
+                const step = e.key === 'ArrowRight' ? 1 : -1;
+                const next = tabs[(at + step + tabs.length) % tabs.length].id;
                 setTab(next);
                 document.getElementById(`inspector-tab-${next}`)?.focus();
               }
@@ -49,7 +53,7 @@ export function InspectorTabs() {
         aria-labelledby={`inspector-tab-${tab}`}
         className="inspector-tabpanel"
       >
-        {tab === 'evidence' ? <EvidenceInspector /> : <PassWorkspace />}
+        {tab === 'evidence' ? <EvidenceInspector /> : tab === 'pass' ? <PassWorkspace /> : <GamePlanPanel />}
       </div>
     </div>
   );

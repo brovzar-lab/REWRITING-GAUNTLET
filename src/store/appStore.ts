@@ -12,6 +12,7 @@ import {
   type WorkflowState,
 } from '../workflow/types';
 import { EPPS_PASSES } from '../model/passes';
+import { emptyGamePlan, type Compass, type ElementAnchor, type GamePlan } from '../model/gameplan';
 import { db } from './db';
 
 export interface Selection {
@@ -54,8 +55,8 @@ export interface AppState {
   setImportOpen: (open: boolean) => void;
   aiSettingsOpen: boolean;
   setAiSettingsOpen: (open: boolean) => void;
-  inspectorTab: 'evidence' | 'pass';
-  setInspectorTab: (tab: 'evidence' | 'pass') => void;
+  inspectorTab: 'evidence' | 'pass' | 'gameplan';
+  setInspectorTab: (tab: 'evidence' | 'pass' | 'gameplan') => void;
   exportOpen: boolean;
   setExportOpen: (open: boolean) => void;
   noteComposerOpen: boolean;
@@ -64,6 +65,17 @@ export interface AppState {
   setHistoryOpen: (open: boolean) => void;
   printViewOpen: boolean;
   setPrintViewOpen: (open: boolean) => void;
+
+  /** The writer's Game Plan + Compass. Writer-authored only; the analyzer never fills it. */
+  gamePlan: GamePlan;
+  updateGamePlan: (patch: Partial<Omit<GamePlan, 'compass'>>) => void;
+  updateCompass: (patch: Partial<Omit<Compass, 'motifs'>>) => void;
+  setPassPriorities: (passIds: string[]) => void;
+  addMotif: (name: string) => void;
+  removeMotif: (motifId: string) => void;
+  addMotifOccurrence: (motifId: string, anchor: ElementAnchor) => void;
+  removeMotifOccurrence: (motifId: string, elementId: string) => void;
+  loadGamePlan: (gamePlan: GamePlan) => void;
 
   /** Rewrite workflow: annotated read, readers, findings, approvals. */
   workflow: WorkflowState;
@@ -160,6 +172,73 @@ export const useAppStore = create<AppState>((set, get) => ({
   setHistoryOpen: (historyOpen) => set({ historyOpen }),
   printViewOpen: false,
   setPrintViewOpen: (printViewOpen) => set({ printViewOpen }),
+
+  gamePlan: emptyGamePlan(),
+
+  updateGamePlan: (patch) => set((s) => ({ gamePlan: { ...s.gamePlan, ...patch } })),
+
+  updateCompass: (patch) =>
+    set((s) => ({ gamePlan: { ...s.gamePlan, compass: { ...s.gamePlan.compass, ...patch } } })),
+
+  setPassPriorities: (passPriorities) =>
+    set((s) => ({ gamePlan: { ...s.gamePlan, passPriorities: [...passPriorities] } })),
+
+  addMotif: (name) =>
+    set((s) => ({
+      gamePlan: {
+        ...s.gamePlan,
+        compass: {
+          ...s.gamePlan.compass,
+          motifs: [
+            ...s.gamePlan.compass.motifs,
+            { id: `motif-${crypto.randomUUID()}`, name, occurrences: [] },
+          ],
+        },
+      },
+    })),
+
+  removeMotif: (motifId) =>
+    set((s) => ({
+      gamePlan: {
+        ...s.gamePlan,
+        compass: {
+          ...s.gamePlan.compass,
+          motifs: s.gamePlan.compass.motifs.filter((m) => m.id !== motifId),
+        },
+      },
+    })),
+
+  addMotifOccurrence: (motifId, anchor) =>
+    set((s) => ({
+      gamePlan: {
+        ...s.gamePlan,
+        compass: {
+          ...s.gamePlan.compass,
+          motifs: s.gamePlan.compass.motifs.map((m) =>
+            m.id !== motifId || m.occurrences.some((o) => o.elementId === anchor.elementId)
+              ? m
+              : { ...m, occurrences: [...m.occurrences, anchor] },
+          ),
+        },
+      },
+    })),
+
+  removeMotifOccurrence: (motifId, elementId) =>
+    set((s) => ({
+      gamePlan: {
+        ...s.gamePlan,
+        compass: {
+          ...s.gamePlan.compass,
+          motifs: s.gamePlan.compass.motifs.map((m) =>
+            m.id !== motifId
+              ? m
+              : { ...m, occurrences: m.occurrences.filter((o) => o.elementId !== elementId) },
+          ),
+        },
+      },
+    })),
+
+  loadGamePlan: (gamePlan) => set({ gamePlan }),
 
   workflow: emptyWorkflow(),
 
@@ -321,6 +400,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       revisionBaseline: null,
       revisionSetLabel: null,
       workflow: emptyWorkflow(),
+      gamePlan: emptyGamePlan(),
       readModeActive: false,
     }),
 
@@ -420,6 +500,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       revisionBaseline: null,
       revisionSetLabel: null,
       workflow: emptyWorkflow(),
+      gamePlan: emptyGamePlan(),
       readModeActive: false,
       noteComposerOpen: false,
       inspectorTab: 'evidence',

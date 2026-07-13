@@ -1,5 +1,6 @@
 import { db } from './db';
 import { useAppStore } from './appStore';
+import { emptyGamePlan } from '../model/gameplan';
 
 export { db } from './db';
 export type { DocumentRow, UiRow, BaselineRow, SnapshotRow, WorkflowRow } from './db';
@@ -23,6 +24,8 @@ export async function initPersistence(options: PersistenceOptions = {}): Promise
   const savedWorkflow = await db.workflow.get(targetDocId);
   if (savedWorkflow) {
     store.getState().loadWorkflow(savedWorkflow.state, savedWorkflow.evidence, savedWorkflow.connections);
+    // Pre-methodology rows have no gamePlan; hydrate the default, lose nothing.
+    store.getState().loadGamePlan(savedWorkflow.gamePlan ?? emptyGamePlan());
   }
 
   const savedBaseline = await db.baselines.get(targetDocId);
@@ -56,6 +59,7 @@ export async function initPersistence(options: PersistenceOptions = {}): Promise
         state: state.workflow,
         evidence: state.evidence,
         connections: state.connections,
+        gamePlan: state.gamePlan,
       });
       if (state.revisionBaseline && state.revisionSetLabel) {
         void db.baselines.put({

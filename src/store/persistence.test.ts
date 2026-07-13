@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { useAppStore, elementText } from './appStore';
 import { db, initPersistence } from './persistence';
 import { sampleScreenplay } from '../model/sample/gauntlet-sample';
+import { emptyGamePlan } from '../model/gameplan';
 
 async function until(check: () => Promise<boolean> | boolean, timeoutMs = 2000): Promise<void> {
   const start = performance.now();
@@ -19,6 +20,8 @@ beforeEach(async () => {
   dispose?.();
   await db.documents.clear();
   await db.ui.clear();
+  await db.workflow.clear();
+  await db.baselines.clear();
   useAppStore.getState().resetToSample();
 });
 
@@ -64,5 +67,51 @@ describe('persistence', () => {
     expect(elementText(state.screenplay, 'sc2', 'sc2-e5')).toBe('RECOVERED AFTER RELOAD.');
     expect(state.theme).toBe('day');
     expect(state.activePassId).toBe('character');
+  });
+
+  it('the game plan survives a reload', async () => {
+    dispose = await initPersistence({ debounceMs: 5 });
+    const s = useAppStore.getState();
+    s.updateGamePlan({ statementOfIntent: 'Sharpen the father-daughter spine.' });
+    s.addMotif('Herons');
+    const motifId = useAppStore.getState().gamePlan.compass.motifs[0].id;
+    s.addMotifOccurrence(motifId, { sceneId: 'sc2', elementId: 'sc2-e5' });
+    await until(async () => {
+      const row = await db.workflow.get(sampleScreenplay.id);
+      return row?.gamePlan?.statementOfIntent === 'Sharpen the father-daughter spine.';
+    });
+    dispose();
+
+    useAppStore.getState().resetToSample();
+    expect(useAppStore.getState().gamePlan.statementOfIntent).toBe('');
+    dispose = await initPersistence({ debounceMs: 5 });
+    const gp = useAppStore.getState().gamePlan;
+    expect(gp.statementOfIntent).toBe('Sharpen the father-daughter spine.');
+    expect(gp.compass.motifs[0].name).toBe('Herons');
+    expect(gp.compass.motifs[0].occurrences).toEqual([{ sceneId: 'sc2', elementId: 'sc2-e5' }]);
+  });
+
+  it('a pre-methodology save (no gamePlan key) hydrates with defaults and loses nothing', async () => {
+    // Simulate a workflow row written before the Epps methodology phase.
+    await db.workflow.put({
+      id: sampleScreenplay.id,
+      state: {
+        annotatedReadComplete: true,
+        visitedScenes: ['sc1'],
+        readers: [],
+        findings: [],
+        approvals: [],
+        passRuns: { polish: 'complete' },
+        cloudAiConsent: false,
+      },
+      evidence: [],
+      connections: [],
+    });
+    dispose = await initPersistence({ debounceMs: 5 });
+    const state = useAppStore.getState();
+    expect(state.workflow.annotatedReadComplete).toBe(true);
+    expect(state.workflow.visitedScenes).toEqual(['sc1']);
+    expect(state.workflow.passRuns.polish).toBe('complete');
+    expect(state.gamePlan).toEqual(emptyGamePlan());
   });
 });

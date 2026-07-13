@@ -48,15 +48,20 @@ function tabCommand(state: EditorState, dispatch?: (tr: Transaction) => void): b
   return true;
 }
 
-/** Evidence records plus open finding citations, counted per element, feed the
-    margin note markers. */
-function annotationCounts(s: ReturnType<typeof useAppStore.getState>): Map<string, number> {
+/** Evidence records, open finding citations, motif occurrences, and the linked
+    ticking clock, counted per element, feed the margin note markers. */
+export function annotationCounts(s: ReturnType<typeof useAppStore.getState>): Map<string, number> {
   const counts = new Map<string, number>();
-  for (const e of s.evidence) counts.set(e.elementId, (counts.get(e.elementId) ?? 0) + 1);
+  const bump = (elementId: string) => counts.set(elementId, (counts.get(elementId) ?? 0) + 1);
+  for (const e of s.evidence) bump(e.elementId);
   for (const f of s.workflow.findings) {
     if (f.resolution !== 'open') continue;
-    for (const c of f.citations) counts.set(c.elementId, (counts.get(c.elementId) ?? 0) + 1);
+    for (const c of f.citations) bump(c.elementId);
   }
+  for (const motif of s.gamePlan.compass.motifs) {
+    for (const o of motif.occurrences) bump(o.elementId);
+  }
+  if (s.gamePlan.compass.tickingClockAnchor) bump(s.gamePlan.compass.tickingClockAnchor.elementId);
   return counts;
 }
 
