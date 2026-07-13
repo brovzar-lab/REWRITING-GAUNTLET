@@ -32,4 +32,15 @@ cd /Users/quantumcode/CODE/REWRITING-GAUNTLET && node scripts/proof-epps.mjs
    visibly separate from AI findings; AI diagnosis still locked behind the
    private read.
 
+## M2R — inline Scene Point on the board (2026-07-13, Billy's direct-manipulation note)
+
+6. `02c-inline-editor-open.png` — the in-place editor open on the Scene 4 card:
+   point typed, "Unsure" chosen in the same popover. Enter saves, Escape
+   cancels, clicking away saves. Neighboring cards show the three chip states
+   at once: "No point yet" (dashed), point preview, CUT CANDIDATE marker.
+7. `02d-inline-saved-inspector-matches.png` — after Enter: the card shows the
+   point preview and "? UNSURE" marker, and the Evidence tab's Scene Point
+   card carries the identical point with Unsure pressed — one store, two
+   surfaces, zero drift.
+
 Later slices (M3–M7) append shots 03–08 here.

@@ -6,7 +6,9 @@ Billy approved `docs/plans/2026-07-12-epps-methodology-phase.md` (M1–M7) with 
 
 **M2 (Scene Point) is built, committed (`epps M2:`), and proven** after Billy accepted M1 — ScenePointCard in the Evidence tab (book placeholder, earns/unsure/cut verdict as words+icons, EXT-chipped dynamics sub-fields), "No point yet" board chips, analyzer scene lens citing exactly the unpointed scenes, writer-marked cut candidates in the Scene pass workspace, additive persistence. Proof: `docs/proof/epps/02*.png`. Counts after M2: **268 unit / 52 Playwright / build exit 0**. (Axe lesson: no reduced-opacity text on tinted cards — it fails AA contrast.)
 
-**Next action: WAIT for Billy's verdict on M2, then execute M3 (Set-Up / Payoff map) per the plan. Do not start M3 unprompted.**
+**M2R (inline Scene Point on board cards, Billy's direct-manipulation note) is built, committed (`epps M2R:`), and proven** — the card is now a frame (div) holding the main select/drag button plus a chip button (nested buttons fail axe); clicking "No point yet" opens an in-place popover (Enter saves / Escape cancels / blur saves, focus returns to the chip), the same popover sets the verdict, cards show point previews and UNSURE/CUT CANDIDATE word markers, the popover scrolls itself into view on open. `data-scene-card` stays on the main button; connections and drag tests use `data-card-frame`. Counts after M2R: **273 unit / 53 Playwright / build exit 0**. Proof: `docs/proof/epps/02c-02d`. Billy's standing preference: direct manipulation on the object itself over panel-only editing — carry this into M3+ (e.g. marking set-ups/payoffs should work from the line/card, not only a panel).
+
+**Next action: WAIT for Billy's verdict on M2R, then execute M3 (Set-Up / Payoff map) per the plan. Do not start M3 unprompted.**
 
 ## Where the previous pass left off
 

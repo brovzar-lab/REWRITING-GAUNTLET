@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import type { Scene } from '../model/screenplay';
@@ -36,6 +36,12 @@ function ScenePointPopover({
   const updateScenePoint = useAppStore((s) => s.updateScenePoint);
   const [draft, setDraft] = useState(scenePoint.point);
   const closing = useRef(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  // The board scrolls; make sure the whole editor is visible when it opens.
+  useEffect(() => {
+    rootRef.current?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+  }, []);
 
   const save = (reason: 'enter' | 'blur') => {
     if (closing.current) return;
@@ -52,6 +58,7 @@ function ScenePointPopover({
 
   return (
     <div
+      ref={rootRef}
       role="dialog"
       aria-label={t('sp.title')}
       className="sp-card-pop"
