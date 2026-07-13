@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { localAnalyzer } from './localAnalyzer';
 import { EPPS_PASSES } from '../model/passes';
+import { sampleConnections, sampleScreenplay } from '../model/sample/gauntlet-sample';
 import type { Connection, Screenplay } from '../model/screenplay';
 import type { DiagnoseRequest } from './provider';
 
@@ -171,5 +172,35 @@ describe('local analyzer', () => {
   it('story and theme pass flags the unconnected scene', async () => {
     const findings = await localAnalyzer.diagnose(req('story-theme'));
     expect(findings.some((f) => f.citations.some((c) => c.sceneId === 'fx-s4'))).toBe(true);
+  });
+});
+
+describe('the shipped sample demonstrates the core loop', () => {
+  const request = (passId: string): DiagnoseRequest => ({
+    screenplay: sampleScreenplay,
+    connections: sampleConnections,
+    pass: EPPS_PASSES.find((p) => p.id === passId)!,
+    passRunId: 'run-sample-demo',
+    now: 1,
+  });
+
+  const textOf = (sceneId: string, elementId: string) =>
+    sampleScreenplay.scenes.find((s) => s.id === sceneId)!.elements.find((e) => e.id === elementId)!.text;
+
+  it('polish yields at least one approvable proposal citing real sample text', async () => {
+    const findings = await localAnalyzer.diagnose(request('polish'));
+    const proposals = findings.filter((f) => f.proposal);
+    expect(proposals.length).toBeGreaterThanOrEqual(1);
+    for (const f of proposals) {
+      expect(f.proposal!.oldText).toBe(textOf(f.proposal!.sceneId, f.proposal!.elementId));
+      expect(f.proposal!.newText).not.toBe(f.proposal!.oldText);
+    }
+  });
+
+  it('consistency yields at least one approvable proposal citing real sample text', async () => {
+    const findings = await localAnalyzer.diagnose(request('consistency'));
+    const proposals = findings.filter((f) => f.proposal);
+    expect(proposals.length).toBeGreaterThanOrEqual(1);
+    expect(proposals[0].proposal!.oldText).toBe(textOf(proposals[0].proposal!.sceneId, proposals[0].proposal!.elementId));
   });
 });

@@ -56,7 +56,7 @@ export const sampleScreenplay: Screenplay = {
       add('character', 'MARISOL');
       add('dialogue', 'And Papá gets smaller.');
       add('action', 'Through the doorway: RAÚL REYES (60) holds court among the mourners, linen shirt, easy laughter. He catches Marisol’s eye and raises his coffee to her like a toast.');
-      add('character', 'CARMEN');
+      add('character', 'CAMEN');
       add('parenthetical', '(low, not looking at her)');
       add('dialogue', 'Whatever your father hid from that man, mija — decide fast what you are going to do with it. Grief makes the house easy to search.');
     }),
@@ -72,7 +72,7 @@ export const sampleScreenplay: Screenplay = {
       add('dialogue', 'Is it true you audit narcos in the city?');
       add('character', 'MARISOL');
       add('dialogue', 'Banks. Which is narcos with better lawyers.');
-      add('action', 'Raúl arrives, sets a warm hand on Marisol’s shoulder. She doesn’t turn.');
+      add('action', 'Raúl arrives, sets a warm hand on Marisol’s shoulder.  She doesn’t turn.');
       add('character', 'RAÚL');
       add('dialogue', 'Come by the office tomorrow, mija. Family should not talk business over a grave.');
       add('action', 'He goes. Lupita watches Marisol watch him. The backhoe drops into gear.');
@@ -97,7 +97,7 @@ export const sampleScreenplay: Screenplay = {
     }),
     scene('sc5', 5, 2, 'INT. EL CAMINO MOTEL - ROOM 7 - NIGHT', 'plot', (add) => {
       add('scene_heading', 'INT. EL CAMINO MOTEL - ROOM 7 - NIGHT');
-      add('action', 'Ledger pages spread across a sagging bed. Marisol works a calculator, sticky notes climbing the headboard like ivy. She circles one column twice.');
+      add('action', 'Ledger pages spread across a sagging bed. Marisol works a calculator,  sticky notes climbing the headboard like ivy. She circles one column twice.');
       add('character', 'MARISOL');
       add('parenthetical', '(quiet)');
       add('dialogue', 'Forty thousand cubic meters. Every dry season. Where are you going?');

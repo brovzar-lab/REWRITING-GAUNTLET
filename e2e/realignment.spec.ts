@@ -97,6 +97,33 @@ test.describe('visual realignment', () => {
     await expect(page.locator('.evidence-card.is-linked')).toBeVisible();
   });
 
+  test('the shipped sample demonstrates the full approve loop', async ({ page }) => {
+    test.slow();
+    await freshApp(page);
+    // Complete the private read across all 16 sample scenes.
+    await page.getByRole('banner').getByRole('button', { name: 'Annotated read', exact: true }).click();
+    const readBar = page.getByRole('region', { name: 'Private annotated read' });
+    for (let i = 0; i < 15; i++) {
+      await readBar.getByRole('button', { name: 'Next scene' }).click();
+    }
+    await readBar.getByRole('button', { name: 'Mark read complete' }).click();
+    // Work under a revision set so the approved change carries a mark.
+    await page.locator('#rev-select').selectOption('Blue');
+    await page.getByTestId('rev-start').click();
+    // Diagnose the Polish pass: the sample must yield a real approvable proposal.
+    await page.getByRole('button', { name: /11.*POLISH/ }).click();
+    await page.getByRole('button', { name: 'Diagnose', exact: true }).click();
+    const approvable = page.locator('.ai-finding').filter({ has: page.getByRole('button', { name: 'Approve' }) });
+    await expect(approvable.first()).toBeVisible();
+    const cited = await approvable.first().getAttribute('data-cited-element');
+    await approvable.first().getByRole('button', { name: 'Approve' }).click();
+    // The change entered the draft: revision mark on the exact line, provenance in evidence.
+    await expect(page.locator(`[data-element-id="${cited}"]`)).toHaveClass(/sp-revised/);
+    await page.locator(`[data-element-id="${cited}"]`).click();
+    await page.getByRole('tab', { name: 'Evidence & Notes' }).click();
+    await expect(page.getByText('Writer-confirmed').first()).toBeVisible();
+  });
+
   test('evidence Go to script selects the exact cited line', async ({ page }) => {
     await freshApp(page);
     await pasteImport(page);
