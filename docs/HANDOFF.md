@@ -1,6 +1,12 @@
-# HANDOFF — Rewrite Studio / REWRITING-GAUNTLET (2026-07-12, trust repair complete)
+# HANDOFF — Rewrite Studio / REWRITING-GAUNTLET (2026-07-13, Epps phase M1 done, awaiting Billy's direction check)
 
-## Where we left off
+## Epps methodology phase (current work)
+
+Billy approved `docs/plans/2026-07-12-epps-methodology-phase.md` (M1–M7) with an explicit STOP after M1 proof for a methodology-direction check before M2. **M1 (Game Plan + Compass) is built, committed (`epps M1:`), and proven** — third inspector tab with Objective (statement of intent, about, improves, must-not-be-lost, two EXT-chipped Studio-extension fields) and Compass (touchstone, ticking clock with exact-line link, theme-through-action, motifs with exact-line occurrences that feed the margin markers), pass priorities drag-orderable via the board's keyboard pattern, additive persistence with a pre-phase migration test. Proof: `docs/proof/epps/` (01, 01b Day twin, 01c). Counts after M1: **251 unit / 51 Playwright / build exit 0**.
+
+**Next action: WAIT for Billy's verdict on M1, then execute M2 (Scene Point) per the plan. Do not start M2 unprompted.**
+
+## Where the previous pass left off
 
 Billy accepted the Visual + UX Realignment (R1-R11, all committed) as the design direction, then an /impeccable critique (score 27/40) drove an approved **Trust & Testability Repair Pass** (`docs/plans/2026-07-12-trust-testability-repair.md`, tasks T1-T7, Billy's directive verbatim). All seven tasks are **built and committed on main**, one `trust TN:` commit per task:
 
