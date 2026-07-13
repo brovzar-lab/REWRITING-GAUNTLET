@@ -95,8 +95,13 @@
   padding-top: 12pt;
 }
 
+/* Page boundary: always spans the full 8.5in paper, even when the break falls
+   inside an indented element (a split dialogue). Width is explicit and the
+   left margin compensates for the host element's indent, so the desk band
+   reads as a real page edge and never as a partial-width slab. */
 .sp-page-gap {
-  margin: 0.9in -1in 0 -1.5in; /* fills the bottom margin, spans full paper width */
+  margin: 0.9in 0 0 -1.5in;
+  width: 8.5in;
   height: 44px;
   background: var(--desk);
   border-top: 1px solid var(--divider);
@@ -104,15 +109,52 @@
   box-shadow: inset 0 6px 8px -6px rgba(12, 18, 22, 0.35), inset 0 -6px 8px -6px rgba(12, 18, 22, 0.35);
 }
 
+.sp-dialogue .sp-page-gap {
+  margin-left: -2.5in; /* 1.5in paper margin + 1in dialogue indent */
+}
+
+.sp-parenthetical .sp-page-gap {
+  margin-left: -3.1in; /* + 1.6in parenthetical indent */
+}
+
+.sp-character .sp-page-gap {
+  margin-left: -3.7in; /* + 2.2in character indent */
+}
+
 .sp-page-header {
   display: flex;
   justify-content: flex-end;
   gap: var(--space-md);
   align-items: baseline;
-  margin: 0.35in -0.5in 0.35in 0;
+  margin: 0.35in 0 0.35in -1.5in;
+  width: 8.5in;
+  padding-right: 0.5in;
+  padding-left: 1in;
   font-family: var(--font-screenplay);
   font-size: var(--font-size-screenplay);
   color: var(--color-ink);
+}
+
+.sp-dialogue .sp-page-header {
+  margin-left: -2.5in;
+}
+
+.sp-parenthetical .sp-page-header {
+  margin-left: -3.1in;
+}
+
+.sp-character .sp-page-header {
+  margin-left: -3.7in;
+}
+
+/* Inside a split dialogue the boundary's (MORE)/(CONT'D) inherit the host's
+   1in indent; pull them back to their true screenplay columns. */
+.sp-dialogue .sp-more {
+  margin-left: 0;
+}
+
+.sp-dialogue .sp-contd {
+  margin-left: 1.2in;
 }
 
 .sp-rev-label {
@@ -120,7 +162,6 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
   margin-right: auto;
-  margin-left: -0.5in;
 }
 
 .sp-element {
