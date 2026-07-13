@@ -211,15 +211,99 @@
   text-transform: uppercase;
 }
 
-/* M2: word chip until the scene states its point (words, never color alone) */
-.card-nopoint {
-  align-self: flex-start;
-  font-size: var(--font-size-label);
-  font-style: italic;
+/* M2R: the card is a frame; the main button carries select/drag identity. */
+.card-main {
+  display: grid;
+  gap: 5px;
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
   color: inherit;
-  border: 1px dashed currentColor;
+  text-align: left;
+  cursor: grab;
+}
+
+.ds-story-card.is-dragging .card-main {
+  cursor: grabbing;
+}
+
+/* M2: word chip until the scene states its point (words, never color alone).
+   M2R: it is a button — click it to write the point right on the card. */
+.card-nopoint,
+.card-point-preview {
+  justify-self: start;
+  max-width: 100%;
+  background: transparent;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-label);
+  color: inherit;
   border-radius: var(--rounded-control);
   padding: 0 4px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.card-nopoint {
+  font-style: italic;
+  border: 1px dashed currentColor;
+}
+
+.card-point-preview {
+  border: 1px solid currentColor;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-verdict {
+  justify-self: start;
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-label);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+}
+
+/* The in-place Scene Point editor. Dense, token-true, above neighbors. */
+.sp-card-pop {
+  position: absolute;
+  left: -2px;
+  top: calc(100% - 6px);
+  z-index: 6;
+  width: 236px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  background: var(--surface-panel);
+  color: var(--text-primary);
+  border: 1px solid var(--divider-strong);
+  border-radius: var(--rounded-control);
+  padding: var(--space-sm);
+  box-shadow: var(--shadow-card-lift);
+}
+
+.sp-card-pop textarea {
+  background: var(--surface-inset);
+  color: var(--text-primary);
+  border: 1px solid var(--divider);
+  border-radius: var(--rounded-control);
+  padding: 5px 8px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-body);
+  resize: vertical;
+}
+
+.sp-card-pop .sp-verdicts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.sp-card-pop .seg-button[aria-pressed='true'] {
+  border-color: var(--accent);
+  color: var(--text-primary);
 }
 
 /* R-trust: board legend — colors and line styles always paired with words */

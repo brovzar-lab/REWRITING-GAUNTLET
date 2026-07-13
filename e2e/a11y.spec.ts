@@ -43,7 +43,9 @@ test('full keyboard walkthrough reaches every region', async ({ page }) => {
   // Tab from the top of the document through the main regions.
   const reached = new Set<string>();
   await page.keyboard.press('Tab');
-  for (let i = 0; i < 60; i++) {
+  // M2R doubled the board's tab stops (each card has a main button + a scene
+  // point chip), so the walk needs more steps; the assertion is unchanged.
+  for (let i = 0; i < 140; i++) {
     const region = await page.evaluate(() => {
       const el = document.activeElement;
       if (!el) return null;

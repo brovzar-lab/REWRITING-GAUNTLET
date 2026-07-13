@@ -314,6 +314,7 @@ export const dictionaries = {
     'sp.valueChange': 'Value change',
     'sp.audienceLearns': 'Audience learns',
     'sp.cutlist': 'Writer-marked cut candidates',
+    'sp.editPoint': 'Edit scene point',
   },
   es: {
     'app.title': 'Rewrite Studio',
@@ -626,6 +627,7 @@ export const dictionaries = {
     'sp.valueChange': 'Cambio de valor',
     'sp.audienceLearns': 'El público aprende',
     'sp.cutlist': 'Candidatas a corte marcadas por el guionista',
+    'sp.editPoint': 'Editar punto de escena',
   },
 } as const satisfies Record<Lang, Record<string, string>>;
 

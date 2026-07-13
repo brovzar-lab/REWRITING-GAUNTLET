@@ -86,13 +86,13 @@ test.describe('workspace', () => {
 
   test('board card is keyboard-draggable (Space, arrows, Space)', async ({ page }) => {
     await freshApp(page);
-    const firstCardBefore = await page.locator('.card-row .ds-story-card').first().getAttribute('data-scene-card');
+    const firstCardBefore = await page.locator('.card-row .ds-story-card').first().getAttribute('data-card-frame');
     expect(firstCardBefore).toBe('sc1');
     await page.locator('[data-scene-card="sc1"]').focus();
     await page.keyboard.press('Space');
     for (let i = 0; i < 8; i++) await page.keyboard.press('ArrowRight');
     await page.keyboard.press('Space');
-    const firstCardAfter = await page.locator('.card-row .ds-story-card').first().getAttribute('data-scene-card');
+    const firstCardAfter = await page.locator('.card-row .ds-story-card').first().getAttribute('data-card-frame');
     expect(firstCardAfter).not.toBe('sc1');
     // Navigator reflects the new scene order (renumbered)
     await expect(page.locator('.scene-row').first()).not.toContainText('HIGHWAY 2');

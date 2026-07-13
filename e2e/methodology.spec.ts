@@ -58,20 +58,20 @@ test('M2: Scene Points state the point, clear the board chip, and survive a relo
 
   // Every card starts honest: no point stated yet.
   const board = page.getByRole('region', { name: 'Story Board' }).first();
-  const card2 = board.getByRole('button', { name: /Scene 2/ });
-  await expect(card2).toContainText('No point yet');
+  const frame2 = page.locator('[data-card-frame="sc2"]');
+  await expect(frame2).toContainText('No point yet');
 
   // Select scene 2 and state its point in the Evidence tab.
-  await card2.click();
+  await board.getByRole('button', { name: /Scene 2/ }).click();
   await page.getByRole('tab', { name: 'Evidence & Notes' }).click();
-  await page.getByLabel('Scene point').fill('The wake reopens the ledger.');
+  await page.locator('#sp-point').fill('The wake reopens the ledger.');
   await page.getByRole('button', { name: 'Unsure' }).click();
-  await expect(card2).not.toContainText('No point yet');
+  await expect(frame2).not.toContainText('No point yet');
 
-  // Mark another scene as a writer cut candidate.
+  // Mark another scene as a writer cut candidate (in the inspector).
   await board.getByRole('button', { name: /Scene 3/ }).click();
-  await page.getByLabel('Scene point').fill('A drive-by of the cemetery.');
-  await page.getByRole('button', { name: 'Cut candidate' }).click();
+  await page.locator('#sp-point').fill('A drive-by of the cemetery.');
+  await page.locator('.scene-point-card').getByRole('button', { name: 'Cut candidate' }).click();
 
   // The Scene pass surfaces the writer-marked cut candidate, visibly writer-sourced.
   await page.getByRole('button', { name: /8.*SCENE/ }).click();
@@ -83,10 +83,47 @@ test('M2: Scene Points state the point, clear the board chip, and survive a relo
   await page.waitForTimeout(1200);
   await page.reload();
   await expect(page.locator('.sp-page .ProseMirror')).toBeVisible();
-  await expect(board.getByRole('button', { name: /Scene 2/ })).not.toContainText('No point yet');
-  await expect(board.getByRole('button', { name: /Scene 4/ })).toContainText('No point yet');
+  await expect(frame2).not.toContainText('No point yet');
+  await expect(page.locator('[data-card-frame="sc4"]')).toContainText('No point yet');
   await board.getByRole('button', { name: /Scene 2/ }).click();
   await page.getByRole('tab', { name: 'Evidence & Notes' }).click();
-  await expect(page.getByLabel('Scene point')).toHaveValue('The wake reopens the ledger.');
-  await expect(page.getByRole('button', { name: 'Unsure' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('#sp-point')).toHaveValue('The wake reopens the ledger.');
+  await expect(page.locator('.scene-point-card').getByRole('button', { name: 'Unsure' })).toHaveAttribute('aria-pressed', 'true');
+});
+
+test('M2R: the writer acts on the card itself — inline point, verdict, reload', async ({ page }) => {
+  await freshApp(page);
+
+  // Click the chip on the card, write the point in place, Enter saves.
+  const frame4 = page.locator('[data-card-frame="sc4"]');
+  await frame4.getByRole('button', { name: 'No point yet' }).click();
+  const pop = page.getByRole('dialog', { name: 'Scene point' });
+  await expect(pop.locator('textarea')).toBeFocused();
+  await pop.locator('textarea').fill('Raúl shows what the water cost him.');
+  // The verdict lives in the same popover.
+  await pop.getByRole('button', { name: 'Unsure' }).click();
+  await pop.locator('textarea').press('Enter');
+  await expect(pop).not.toBeVisible();
+
+  // The chip became a preview; the verdict marker is words, on the card.
+  await expect(frame4).toContainText('Raúl shows what the water cost him.');
+  await expect(frame4).toContainText('Unsure');
+
+  // The inspector shows the same data immediately.
+  await frame4.getByRole('button', { name: /Scene 4/ }).click();
+  await page.getByRole('tab', { name: 'Evidence & Notes' }).click();
+  await expect(page.locator('#sp-point')).toHaveValue('Raúl shows what the water cost him.');
+  await expect(page.locator('.scene-point-card').getByRole('button', { name: 'Unsure' })).toHaveAttribute('aria-pressed', 'true');
+
+  // Escape cancels a second edit without losing the saved point.
+  await frame4.getByRole('button', { name: /Raúl shows/ }).click();
+  await page.getByRole('dialog', { name: 'Scene point' }).locator('textarea').press('Escape');
+  await expect(frame4).toContainText('Raúl shows what the water cost him.');
+
+  // Reload: inline-authored point and verdict persist.
+  await page.waitForTimeout(1200);
+  await page.reload();
+  await expect(page.locator('.sp-page .ProseMirror')).toBeVisible();
+  await expect(frame4).toContainText('Raúl shows what the water cost him.');
+  await expect(frame4).toContainText('Unsure');
 });

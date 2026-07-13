@@ -42,8 +42,8 @@ export function ConnectionLayer({
       const containerRect = container.getBoundingClientRect();
       const next: ResolvedLine[] = [];
       for (const connection of connections) {
-        const fromEl = container.querySelector(`[data-scene-card="${connection.fromSceneId}"]`);
-        const toEl = container.querySelector(`[data-scene-card="${connection.toSceneId}"]`);
+        const fromEl = container.querySelector(`[data-card-frame="${connection.fromSceneId}"]`);
+        const toEl = container.querySelector(`[data-card-frame="${connection.toSceneId}"]`);
         if (!fromEl || !toEl) continue;
         const a = fromEl.getBoundingClientRect();
         const b = toEl.getBoundingClientRect();

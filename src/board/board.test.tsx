@@ -81,15 +81,18 @@ describe('resolveDragEnd', () => {
 });
 
 describe('scene point chip on board cards', () => {
-  it('every card says "No point yet" until its scene point is stated, then the chip clears', () => {
+  const frame = (sceneId: string) =>
+    document.querySelector(`[data-card-frame="${sceneId}"]`) as HTMLElement;
+
+  it('every card says "No point yet" until its scene point is stated, then shows a preview', () => {
     const { rerender } = render(<Board />);
-    const card2 = screen.getByRole('button', { name: /Scene 2/ });
-    expect(card2).toHaveTextContent('No point yet');
+    expect(frame('sc2')).toHaveTextContent('No point yet');
 
     useAppStore.getState().updateScenePoint('sc2', { point: 'The wake reopens the ledger.' });
     rerender(<Board />);
-    expect(screen.getByRole('button', { name: /Scene 2/ })).not.toHaveTextContent('No point yet');
+    expect(frame('sc2')).not.toHaveTextContent('No point yet');
+    expect(frame('sc2')).toHaveTextContent('The wake reopens the ledger.');
     // The others still carry the chip.
-    expect(screen.getByRole('button', { name: /Scene 3/ })).toHaveTextContent('No point yet');
+    expect(frame('sc3')).toHaveTextContent('No point yet');
   });
 });
