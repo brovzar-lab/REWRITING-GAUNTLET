@@ -273,7 +273,15 @@ export function PassWorkspace() {
               {t('ai.error')}: {error}
             </p>
           )}
-          {passFindings.length === 0 && !busy && !error && <p className="inspector-hint">{t('ai.noFindings')}</p>}
+          {passFindings.length === 0 && !busy && !error && (
+            <p className="inspector-hint">
+              {runState === 'reviewing' || runState === 'complete'
+                ? t('ai.checkedEmpty')
+                    .replace('{n}', String(screenplay.scenes.length))
+                    .replace('{focus}', t(`checked.${pass.id}` as StringKey))
+                : t('ai.notRun')}
+            </p>
+          )}
           {passFindings.length > 0 && (
             <ul className="ai-findings">
               {[...open, ...resolved].map((f, i) => (

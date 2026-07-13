@@ -91,6 +91,20 @@ describe('the guided pass workspace', () => {
     expect(screen.getByText(/^rejected$/i)).toBeInTheDocument();
   });
 
+  it('a diagnosed pass with nothing to cite says what was checked', async () => {
+    primeDraft();
+    useAppStore.getState().completeAnnotatedRead();
+    useAppStore.getState().setActivePass('plot'); // the 2-scene draft has no connections, so plot finds nothing
+    const user = userEvent.setup();
+    render(<PassWorkspace />);
+    expect(screen.getByText(/not diagnosed yet/i)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /^diagnose$/i }));
+    await waitFor(() =>
+      expect(screen.getByText(/checked 2 scenes for set-ups that pay off out of order/i)).toBeInTheDocument(),
+    );
+    expect(screen.queryByText(/no findings for this pass/i)).not.toBeInTheDocument();
+  });
+
   it('recommends the next pass and activates it on click', async () => {
     primeDraft();
     useAppStore.getState().completeAnnotatedRead();
