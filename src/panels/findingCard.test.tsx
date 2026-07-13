@@ -59,6 +59,25 @@ describe('structured finding card', () => {
     expect(useAppStore.getState().selection).toEqual({ sceneId: 'sc2', elementId: 'sc2-e5' });
   });
 
+  it('a failed approval explains itself and reassures nothing changed', async () => {
+    // Proposal targets an element the finding does not cite: the store refuses.
+    seedFinding({
+      proposal: {
+        sceneId: 'sc3',
+        elementId: 'sc3-e2',
+        oldText: 'X',
+        newText: 'Y',
+        rationale: 'Bad target.',
+      },
+    });
+    const user = userEvent.setup();
+    render(<PassWorkspace />);
+    await user.click(screen.getByRole('button', { name: 'Approve' }));
+    const alert = screen.getByRole('alert');
+    expect(alert.textContent).toMatch(/scene lock/i);
+    expect(alert.textContent).toMatch(/nothing was changed in the script/i);
+  });
+
   it('hides confidence when the finding has none', () => {
     seedFinding();
     render(<PassWorkspace />);

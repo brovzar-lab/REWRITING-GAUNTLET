@@ -160,6 +160,8 @@ const dictionaries = {
     'ai.approved': 'Approved',
     'ai.rejected': 'Rejected',
     'ai.error': 'Diagnosis failed',
+    'ai.errorHelp': 'Your script is unchanged. Try Diagnose again; if it keeps failing, open AI settings.',
+    'ai.approveErrorHelp': 'Nothing was changed in the script.',
     'inspector.tabEvidence': 'Evidence & Notes',
     'inspector.tabPass': 'Rewrite pass',
     'pass.pass': 'Pass',

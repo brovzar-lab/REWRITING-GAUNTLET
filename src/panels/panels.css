@@ -23,6 +23,23 @@
   white-space: nowrap;
 }
 
+/* Disabled controls must read as disabled — no invisible dead clicks.
+   (Disabled elements are exempt from WCAG contrast minimums.) */
+.seg-button:disabled,
+.tool-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.tool-button:disabled:hover {
+  border-color: transparent;
+  background: transparent;
+}
+
+.seg-button:disabled:hover {
+  background: var(--surface-frame);
+}
+
 /* Quiet document-action buttons: labels, not boxes, until touched. */
 .tool-button {
   background: transparent;

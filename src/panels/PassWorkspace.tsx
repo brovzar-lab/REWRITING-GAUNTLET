@@ -136,7 +136,7 @@ function FindingCard({ finding, index }: { finding: Finding; index: number }) {
       )}
       {error && (
         <p className="inspector-error" role="alert">
-          {error}
+          {error} {t('ai.approveErrorHelp')}
         </p>
       )}
     </li>
@@ -270,7 +270,7 @@ export function PassWorkspace() {
           </div>
           {error && (
             <p className="inspector-error" role="alert">
-              {t('ai.error')}: {error}
+              {t('ai.error')}: {error} {t('ai.errorHelp')}
             </p>
           )}
           {passFindings.length === 0 && !busy && !error && (

@@ -97,6 +97,16 @@ test.describe('visual realignment', () => {
     await expect(page.locator('.evidence-card.is-linked')).toBeVisible();
   });
 
+  test('disabled controls are visibly disabled', async ({ page }) => {
+    await freshApp(page);
+    const prev = page.getByRole('button', { name: 'Previous page' });
+    await expect(prev).toBeDisabled();
+    expect(await prev.evaluate((el) => Number(getComputedStyle(el).opacity))).toBeLessThan(0.7);
+    const revStart = page.getByTestId('rev-start');
+    await expect(revStart).toBeDisabled();
+    expect(await revStart.evaluate((el) => Number(getComputedStyle(el).opacity))).toBeLessThan(0.7);
+  });
+
   test('narrow windows and high zoom keep the page reachable', async ({ page }) => {
     await page.setViewportSize({ width: 900, height: 700 });
     await freshApp(page);
