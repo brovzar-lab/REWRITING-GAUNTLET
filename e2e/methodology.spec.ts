@@ -52,3 +52,41 @@ test('M1: the Game Plan survives a reload and its links point at exact lines', a
   await page.locator('.gp-occurrence .gp-anchor').click();
   await expect(page.locator('.sp-page .has-evidence').first()).toBeVisible();
 });
+
+test('M2: Scene Points state the point, clear the board chip, and survive a reload', async ({ page }) => {
+  await freshApp(page);
+
+  // Every card starts honest: no point stated yet.
+  const board = page.getByRole('region', { name: 'Story Board' }).first();
+  const card2 = board.getByRole('button', { name: /Scene 2/ });
+  await expect(card2).toContainText('No point yet');
+
+  // Select scene 2 and state its point in the Evidence tab.
+  await card2.click();
+  await page.getByRole('tab', { name: 'Evidence & Notes' }).click();
+  await page.getByLabel('Scene point').fill('The wake reopens the ledger.');
+  await page.getByRole('button', { name: 'Unsure' }).click();
+  await expect(card2).not.toContainText('No point yet');
+
+  // Mark another scene as a writer cut candidate.
+  await board.getByRole('button', { name: /Scene 3/ }).click();
+  await page.getByLabel('Scene point').fill('A drive-by of the cemetery.');
+  await page.getByRole('button', { name: 'Cut candidate' }).click();
+
+  // The Scene pass surfaces the writer-marked cut candidate, visibly writer-sourced.
+  await page.getByRole('button', { name: /8.*SCENE/ }).click();
+  const cutlist = page.getByRole('region', { name: 'Writer-marked cut candidates' });
+  await expect(cutlist).toContainText('Writer');
+  await expect(cutlist).toContainText('A drive-by of the cemetery.');
+
+  // Reload: points, verdicts, and chips persist.
+  await page.waitForTimeout(1200);
+  await page.reload();
+  await expect(page.locator('.sp-page .ProseMirror')).toBeVisible();
+  await expect(board.getByRole('button', { name: /Scene 2/ })).not.toContainText('No point yet');
+  await expect(board.getByRole('button', { name: /Scene 4/ })).toContainText('No point yet');
+  await board.getByRole('button', { name: /Scene 2/ }).click();
+  await page.getByRole('tab', { name: 'Evidence & Notes' }).click();
+  await expect(page.getByLabel('Scene point')).toHaveValue('The wake reopens the ledger.');
+  await expect(page.getByRole('button', { name: 'Unsure' })).toHaveAttribute('aria-pressed', 'true');
+});

@@ -211,6 +211,17 @@
   text-transform: uppercase;
 }
 
+/* M2: word chip until the scene states its point (words, never color alone) */
+.card-nopoint {
+  align-self: flex-start;
+  font-size: var(--font-size-label);
+  font-style: italic;
+  color: inherit;
+  border: 1px dashed currentColor;
+  border-radius: var(--rounded-control);
+  padding: 0 4px;
+}
+
 /* R-trust: board legend — colors and line styles always paired with words */
 .board-legend {
   display: flex;

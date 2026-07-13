@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { localAnalyzer } from './localAnalyzer';
 import { EPPS_PASSES } from '../model/passes';
 import { sampleConnections, sampleScreenplay } from '../model/sample/gauntlet-sample';
+import { emptyScenePoint } from '../model/scenepoint';
 import type { Connection, Screenplay } from '../model/screenplay';
 import type { DiagnoseRequest } from './provider';
 
@@ -202,5 +203,54 @@ describe('the shipped sample demonstrates the core loop', () => {
     const proposals = findings.filter((f) => f.proposal);
     expect(proposals.length).toBeGreaterThanOrEqual(1);
     expect(proposals[0].proposal!.oldText).toBe(textOf(proposals[0].proposal!.sceneId, proposals[0].proposal!.elementId));
+  });
+});
+
+describe('scene pass: scenes with no stated scene point', () => {
+  const scenePass = EPPS_PASSES.find((p) => p.id === 'scene')!;
+
+  it('cites exactly the unpointed scenes, at their headings, with no proposal', async () => {
+    const { screenplay, connections } = fixture();
+    const pointed = screenplay.scenes[0];
+    const findings = await localAnalyzer.diagnose({
+      screenplay,
+      connections,
+      scenePoints: {
+        [pointed.id]: { ...emptyScenePoint(pointed.id), point: 'The kitchen is a courtroom.' },
+      },
+      pass: scenePass,
+      passRunId: 'run-sp',
+      now: 1,
+    });
+    const f = findings.find((x) => x.summary.includes('Scene Point'));
+    expect(f).toBeDefined();
+    expect(f!.citations.map((c) => c.elementId)).toEqual(
+      screenplay.scenes.slice(1).map((s) => s.elements[0].id),
+    );
+    expect(f!.proposal).toBeUndefined();
+  });
+
+  it('stays silent when every scene has a stated point', async () => {
+    const { screenplay, connections } = fixture();
+    const scenePoints = Object.fromEntries(
+      screenplay.scenes.map((s) => [s.id, { ...emptyScenePoint(s.id), point: `Point of ${s.slug}.` }]),
+    );
+    const findings = await localAnalyzer.diagnose({
+      screenplay,
+      connections,
+      scenePoints,
+      pass: scenePass,
+      passRunId: 'run-sp2',
+      now: 1,
+    });
+    expect(findings.find((x) => x.summary.includes('Scene Point'))).toBeUndefined();
+  });
+
+  it('with no scene point data at all, it honestly reports every scene unpointed', async () => {
+    const findings = await localAnalyzer.diagnose(req('scene'));
+    const f = findings.find((x) => x.summary.includes('Scene Point'));
+    expect(f).toBeDefined();
+    const { screenplay } = fixture();
+    expect(f!.citations.length).toBe(screenplay.scenes.length);
   });
 });

@@ -150,6 +150,8 @@ function FindingCard({ finding, index }: { finding: Finding; index: number }) {
 export function PassWorkspace() {
   const screenplay = useAppStore((s) => s.screenplay);
   const connections = useAppStore((s) => s.connections);
+  const scenePoints = useAppStore((s) => s.scenePoints);
+  const select = useAppStore((s) => s.select);
   const activePassId = useAppStore((s) => s.activePassId);
   const setActivePass = useAppStore((s) => s.setActivePass);
   const readComplete = useAppStore((s) => s.workflow.annotatedReadComplete);
@@ -195,6 +197,11 @@ export function PassWorkspace() {
   const proposalsResolved = proposals.filter((f) => f.resolution !== 'open');
   const passNotes = evidence.filter((e) => e.passId === pass.id);
   const examines = t(`pass.ex.${pass.id}` as StringKey).split('|');
+  // Writer-marked cut candidates surface in the Scene pass, visibly writer-sourced.
+  const cutCandidates =
+    pass.id === 'scene'
+      ? screenplay.scenes.filter((s) => scenePoints[s.id]?.verdict === 'cut_candidate')
+      : [];
 
   const diagnose = async () => {
     if (busy) return;
@@ -203,7 +210,7 @@ export function PassWorkspace() {
     setPassRunState(pass.id, 'diagnosing');
     try {
       const passRunId = `run-${pass.id}-${crypto.randomUUID()}`;
-      const result = await provider.diagnose({ screenplay, connections, pass, passRunId, now: Date.now() });
+      const result = await provider.diagnose({ screenplay, connections, scenePoints, pass, passRunId, now: Date.now() });
       setFindings(passRunId, result);
       setPassRunState(pass.id, 'reviewing');
     } catch (e) {
@@ -235,6 +242,27 @@ export function PassWorkspace() {
           ))}
         </ul>
       </section>
+
+      {cutCandidates.length > 0 && (
+        <section className="sp-cutlist" aria-label={t('sp.cutlist')}>
+          <span className="control-label">{t('sp.cutlist')}</span>
+          <ul className="finding-notes">
+            {cutCandidates.map((scene) => (
+              <li key={scene.id} className="finding-note">
+                <span className="source-chip source-writer">{t('source.writer')}</span>
+                <button
+                  type="button"
+                  className="gp-anchor"
+                  onClick={() => select({ sceneId: scene.id, elementId: scene.elements[0].id })}
+                >
+                  {t('card.scene')} {scene.number}
+                </button>
+                <span className="finding-note-summary">{scenePoints[scene.id]?.point || scene.slug}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {!readComplete ? (
         <div className="ai-locked">

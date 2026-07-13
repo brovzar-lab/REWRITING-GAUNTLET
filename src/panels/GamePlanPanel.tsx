@@ -14,17 +14,8 @@ import { useAppStore } from '../store/appStore';
 import { useT } from '../i18n/strings';
 import { EPPS_PASSES } from '../model/passes';
 import { movePassPriority, type Motif } from '../model/gameplan';
+import { ExtChip } from './ExtChip';
 import './inspector.css';
-
-/** EXT chip: marks a field as a Studio extension, never book-attributed. */
-function ExtChip() {
-  const t = useT();
-  return (
-    <span className="ext-chip" title={t('ext.tip')}>
-      {t('ext.label')}
-    </span>
-  );
-}
 
 function Field({
   id,

@@ -13,6 +13,7 @@ import {
 } from '../workflow/types';
 import { EPPS_PASSES } from '../model/passes';
 import { emptyGamePlan, type Compass, type ElementAnchor, type GamePlan } from '../model/gameplan';
+import { emptyScenePoint, type ScenePoint } from '../model/scenepoint';
 import { db } from './db';
 
 export interface Selection {
@@ -76,6 +77,11 @@ export interface AppState {
   addMotifOccurrence: (motifId: string, anchor: ElementAnchor) => void;
   removeMotifOccurrence: (motifId: string, elementId: string) => void;
   loadGamePlan: (gamePlan: GamePlan) => void;
+
+  /** Per-scene Scene Points, writer-authored. Keyed by scene id. */
+  scenePoints: Record<string, ScenePoint>;
+  updateScenePoint: (sceneId: string, patch: Partial<Omit<ScenePoint, 'sceneId'>>) => void;
+  loadScenePoints: (scenePoints: Record<string, ScenePoint>) => void;
 
   /** Rewrite workflow: annotated read, readers, findings, approvals. */
   workflow: WorkflowState;
@@ -240,6 +246,18 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   loadGamePlan: (gamePlan) => set({ gamePlan }),
 
+  scenePoints: {},
+
+  updateScenePoint: (sceneId, patch) =>
+    set((s) => ({
+      scenePoints: {
+        ...s.scenePoints,
+        [sceneId]: { ...(s.scenePoints[sceneId] ?? emptyScenePoint(sceneId)), ...patch },
+      },
+    })),
+
+  loadScenePoints: (scenePoints) => set({ scenePoints }),
+
   workflow: emptyWorkflow(),
 
   readModeActive: false,
@@ -401,6 +419,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       revisionSetLabel: null,
       workflow: emptyWorkflow(),
       gamePlan: emptyGamePlan(),
+      scenePoints: {},
       readModeActive: false,
     }),
 
@@ -501,6 +520,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       revisionSetLabel: null,
       workflow: emptyWorkflow(),
       gamePlan: emptyGamePlan(),
+      scenePoints: {},
       readModeActive: false,
       noteComposerOpen: false,
       inspectorTab: 'evidence',

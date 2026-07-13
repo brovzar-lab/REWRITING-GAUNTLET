@@ -24,8 +24,9 @@ export async function initPersistence(options: PersistenceOptions = {}): Promise
   const savedWorkflow = await db.workflow.get(targetDocId);
   if (savedWorkflow) {
     store.getState().loadWorkflow(savedWorkflow.state, savedWorkflow.evidence, savedWorkflow.connections);
-    // Pre-methodology rows have no gamePlan; hydrate the default, lose nothing.
+    // Pre-methodology rows have no gamePlan/scenePoints; hydrate defaults, lose nothing.
     store.getState().loadGamePlan(savedWorkflow.gamePlan ?? emptyGamePlan());
+    store.getState().loadScenePoints(savedWorkflow.scenePoints ?? {});
   }
 
   const savedBaseline = await db.baselines.get(targetDocId);
@@ -60,6 +61,7 @@ export async function initPersistence(options: PersistenceOptions = {}): Promise
         evidence: state.evidence,
         connections: state.connections,
         gamePlan: state.gamePlan,
+        scenePoints: state.scenePoints,
       });
       if (state.revisionBaseline && state.revisionSetLabel) {
         void db.baselines.put({

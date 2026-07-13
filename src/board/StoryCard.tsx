@@ -1,6 +1,7 @@
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import type { Scene } from '../model/screenplay';
+import { hasStatedPoint } from '../model/scenepoint';
 import { useAppStore } from '../store/appStore';
 import { useT } from '../i18n/strings';
 
@@ -15,6 +16,7 @@ const FUNCTION_KEY = {
 export function StoryCard({ scene }: { scene: Scene }) {
   const selection = useAppStore((s) => s.selection);
   const select = useAppStore((s) => s.select);
+  const scenePoint = useAppStore((s) => s.scenePoints[scene.id]);
   const t = useT();
 
   const { attributes, listeners, setNodeRef: setDragRef, transform, isDragging } = useDraggable({ id: scene.id });
@@ -56,6 +58,7 @@ export function StoryCard({ scene }: { scene: Scene }) {
       </span>
       <small className="card-slug">{scene.slug}</small>
       <span className="card-function">{t(FUNCTION_KEY[scene.storyFunction])}</span>
+      {!hasStatedPoint(scenePoint) && <span className="card-nopoint">{t('sp.nopoint')}</span>}
     </button>
   );
 }

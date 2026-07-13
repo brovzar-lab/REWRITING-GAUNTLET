@@ -1,11 +1,14 @@
 import type { Connection, Screenplay } from '../model/screenplay';
 import type { RewritePass } from '../model/passes';
+import type { ScenePoint } from '../model/scenepoint';
 import type { Finding } from '../workflow/types';
 
 /** Everything a provider may look at. Nothing else ever leaves this boundary. */
 export interface DiagnoseRequest {
   screenplay: Screenplay;
   connections: Connection[];
+  /** Writer-stated Scene Points. Optional: absent means none stated yet. */
+  scenePoints?: Record<string, ScenePoint>;
   pass: RewritePass;
   passRunId: string;
   /** Timestamp injected by the caller so providers stay deterministic. */

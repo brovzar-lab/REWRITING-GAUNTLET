@@ -1,4 +1,5 @@
 import type { Scene, Screenplay } from '../model/screenplay';
+import { unpointedScenes } from '../model/scenepoint';
 import type { Citation, Finding } from '../workflow/types';
 import type { AIProvider, DiagnoseRequest } from './provider';
 
@@ -301,6 +302,20 @@ function whitespaceCleanups(ctx: Ctx): Finding[] {
   return out.slice(0, MAX_PER_PASS);
 }
 
+/** A fact about the writer's own data: which scenes still lack a stated
+    Scene Point. Cites every one at its heading; proposes nothing. */
+function missingScenePoints(ctx: Ctx): Finding[] {
+  const missing = unpointedScenes(ctx.screenplay, ctx.scenePoints ?? {});
+  if (missing.length === 0) return [];
+  return [
+    ctx.make({
+      status: 'uncertain',
+      summary: `${missing.length} of ${ctx.screenplay.scenes.length} scenes have no stated Scene Point yet. "The point of this scene is…" — can you finish that sentence for each one?`,
+      citations: missing.map((s) => heading(s)),
+    }),
+  ];
+}
+
 const PASS_LENSES: Record<string, (ctx: Ctx) => Finding[]> = {
   foundation: (ctx) => actBalance(ctx),
   character: (ctx) => singleAppearanceCharacters(ctx),
@@ -309,7 +324,7 @@ const PASS_LENSES: Record<string, (ctx: Ctx) => Finding[]> = {
   plot: (ctx) => backwardsSetupPayoff(ctx),
   corr: (ctx) => lengthOutliers(ctx, 'pressure'),
   relationship: (ctx) => missingRelationships(ctx),
-  scene: (ctx) => lengthOutliers(ctx, 'scene'),
+  scene: (ctx) => [...missingScenePoints(ctx), ...lengthOutliers(ctx, 'scene')],
   dialogue: (ctx) => [...longSpeeches(ctx), ...talkyScenes(ctx)],
   consistency: (ctx) => nearDuplicateNames(ctx),
   polish: (ctx) => whitespaceCleanups(ctx),

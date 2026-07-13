@@ -509,6 +509,80 @@
   border-color: var(--accent);
 }
 
+/* M2: Scene Point card in the Evidence tab. */
+.scene-point-card {
+  margin: 0 var(--space-md) var(--space-sm);
+  border: 1px solid var(--divider);
+  border-radius: var(--rounded-control);
+  padding: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.scene-point-card .gp-field {
+  padding: 0;
+  margin-bottom: 0;
+}
+
+.sp-verdict-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sp-verdicts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.sp-verdicts .seg-button[aria-pressed='true'] {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.sp-dynamics summary {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.sp-ext-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-xs) var(--space-sm);
+  margin-top: var(--space-xs);
+}
+
+.sp-ext-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sp-ext-field input {
+  background: var(--surface-inset);
+  color: var(--text-primary);
+  border: 1px solid var(--divider);
+  border-radius: var(--rounded-control);
+  padding: 4px 6px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-body);
+  min-width: 0;
+}
+
+.sp-cutlist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  border: 1px solid var(--color-confirmed);
+  border-radius: var(--rounded-control);
+  padding: var(--space-sm);
+}
+
 /* M1: Game Plan + Compass panel. Dense writer forms, token vocabulary only. */
 .game-plan {
   display: flex;

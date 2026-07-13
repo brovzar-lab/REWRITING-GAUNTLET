@@ -3,6 +3,7 @@ import { useT } from '../i18n/strings';
 import type { EvidenceRecord, EvidenceStatus, NoteSource } from '../model/evidence';
 import { NoteComposer } from './NoteComposer';
 import { ReadersManager } from './ReadersManager';
+import { ScenePointCard } from './ScenePointCard';
 import './inspector.css';
 
 const SOURCE_KEY: Record<NoteSource, `source.${NoteSource}`> = {
@@ -81,6 +82,7 @@ export function EvidenceInspector() {
           <p className="inspector-context">
             <span className="scene-number">{scene?.number}</span> {scene?.slug}
           </p>
+          <ScenePointCard sceneId={selection.sceneId} />
           <h3 className="inspector-section">{t('inspector.thisline')}</h3>
           {lineEvidence.length === 0 ? (
             <p className="inspector-hint">{t('inspector.none')}</p>

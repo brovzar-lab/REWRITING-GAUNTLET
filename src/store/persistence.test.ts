@@ -91,6 +91,24 @@ describe('persistence', () => {
     expect(gp.compass.motifs[0].occurrences).toEqual([{ sceneId: 'sc2', elementId: 'sc2-e5' }]);
   });
 
+  it('scene points survive a reload', async () => {
+    dispose = await initPersistence({ debounceMs: 5 });
+    const s = useAppStore.getState();
+    s.updateScenePoint('sc2', { point: 'The wake reopens the ledger.', verdict: 'earns' });
+    await until(async () => {
+      const row = await db.workflow.get(sampleScreenplay.id);
+      return row?.scenePoints?.sc2?.point === 'The wake reopens the ledger.';
+    });
+    dispose();
+
+    useAppStore.getState().resetToSample();
+    expect(useAppStore.getState().scenePoints).toEqual({});
+    dispose = await initPersistence({ debounceMs: 5 });
+    const sp = useAppStore.getState().scenePoints.sc2;
+    expect(sp.point).toBe('The wake reopens the ledger.');
+    expect(sp.verdict).toBe('earns');
+  });
+
   it('a pre-methodology save (no gamePlan key) hydrates with defaults and loses nothing', async () => {
     // Simulate a workflow row written before the Epps methodology phase.
     await db.workflow.put({
@@ -113,5 +131,6 @@ describe('persistence', () => {
     expect(state.workflow.visitedScenes).toEqual(['sc1']);
     expect(state.workflow.passRuns.polish).toBe('complete');
     expect(state.gamePlan).toEqual(emptyGamePlan());
+    expect(state.scenePoints).toEqual({});
   });
 });
