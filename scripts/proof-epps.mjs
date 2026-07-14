@@ -76,18 +76,18 @@ await shot('02-scene-point.png');
 await page.getByRole('button', { name: /8.*SCENE/ }).click();
 await shot('02b-scene-pass-cutlist.png');
 
-// M2R: inline editing on the card itself.
+// M2R2: the dotted chip is the editor — typing happens inside the card.
 const frame4 = page.locator('[data-card-frame="sc4"]');
-await frame4.scrollIntoViewIfNeeded();
-await frame4.getByRole('button', { name: 'No point yet' }).click();
-const pop = page.getByRole('dialog', { name: 'Scene point' });
-await pop.locator('textarea').fill('Raúl shows what the water cost him.');
-await pop.getByRole('button', { name: 'Unsure' }).click();
 await frame4.evaluate((el) => el.scrollIntoView({ block: 'center' }));
+await frame4.getByRole('button', { name: 'No point yet' }).click();
+const editor = frame4.locator('.card-point-edit');
+await editor.fill('Raúl shows what the water cost him.');
 await shot('02c-inline-editor-open.png');
-await pop.locator('textarea').press('Enter');
+await editor.press('Enter');
 await frame4.getByRole('button', { name: /Scene 4/ }).click();
 await page.getByRole('tab', { name: 'Evidence & Notes' }).click();
+await page.locator('.scene-point-card').getByRole('button', { name: 'Unsure' }).click();
+await frame4.evaluate((el) => el.scrollIntoView({ block: 'center' }));
 await shot('02d-inline-saved-inspector-matches.png');
 
 // Leave no demo data behind.
