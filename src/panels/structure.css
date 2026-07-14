@@ -63,3 +63,60 @@
 .map-unpair {
   margin-left: auto;
 }
+
+/* M4: Four High Points checklist + momentum strip. */
+.hp-checklist {
+  list-style: none;
+  margin: 0 0 var(--space-sm);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.hp-unplaced {
+  font-size: var(--font-size-label);
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.hp-momentum {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.hp-momentum-act {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.hp-momentum-actlabel {
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-label);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.hp-momentum-points {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.hp-momentum-point {
+  background: var(--surface-inset);
+  color: var(--text-primary);
+  border: 1px solid var(--divider);
+  border-radius: var(--rounded-control);
+  padding: 1px 6px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-label);
+  cursor: pointer;
+}
+
+.hp-momentum-point.dir-high { border-color: var(--color-confirmed); }
+.hp-momentum-point.dir-low { border-color: var(--color-concern); }

@@ -14,7 +14,7 @@ import {
 import { EPPS_PASSES } from '../model/passes';
 import { emptyGamePlan, type Compass, type ElementAnchor, type GamePlan } from '../model/gameplan';
 import { emptyScenePoint, type ScenePoint } from '../model/scenepoint';
-import type { StoryBeat, StoryBeatKind } from '../model/markers';
+import { isStructuralRole, type HighPointMarker, type HighPointRole, type StoryBeat, type StoryBeatKind } from '../model/markers';
 import { db } from './db';
 
 export interface Selection {
@@ -91,6 +91,11 @@ export interface AppState {
   pairBeats: (setupId: string, payoffId: string) => void;
   unpairBeat: (beatId: string) => void;
   loadStoryBeats: (storyBeats: StoryBeat[]) => void;
+
+  /** Four Major High Points + emotional highs/lows. One marker per scene. */
+  highPoints: HighPointMarker[];
+  setHighPoint: (sceneId: string, role: HighPointRole | null) => void;
+  loadHighPoints: (highPoints: HighPointMarker[]) => void;
 
   /** Rewrite workflow: annotated read, readers, findings, approvals. */
   workflow: WorkflowState;
@@ -317,6 +322,21 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   loadStoryBeats: (storyBeats) => set({ storyBeats }),
 
+  highPoints: [],
+
+  setHighPoint: (sceneId, role) =>
+    set((s) => {
+      // A scene holds at most one marker; structural roles are unique across scenes.
+      let markers = s.highPoints.filter((m) => m.sceneId !== sceneId);
+      if (role) {
+        if (isStructuralRole(role)) markers = markers.filter((m) => m.role !== role);
+        markers = [...markers, { role, sceneId }];
+      }
+      return { highPoints: markers };
+    }),
+
+  loadHighPoints: (highPoints) => set({ highPoints }),
+
   workflow: emptyWorkflow(),
 
   readModeActive: false,
@@ -480,6 +500,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       gamePlan: emptyGamePlan(),
       scenePoints: {},
       storyBeats: [],
+      highPoints: [],
       readModeActive: false,
     }),
 
@@ -582,6 +603,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       gamePlan: emptyGamePlan(),
       scenePoints: {},
       storyBeats: [],
+      highPoints: [],
       readModeActive: false,
       noteComposerOpen: false,
       inspectorTab: 'evidence',

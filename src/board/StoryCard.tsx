@@ -3,9 +3,19 @@ import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import type { Scene } from '../model/screenplay';
 import { hasStatedPoint, type ScenePointVerdict } from '../model/scenepoint';
+import type { HighPointRole } from '../model/markers';
 import { useAppStore } from '../store/appStore';
 import { useT } from '../i18n/strings';
 import type { StringKey } from '../i18n/strings';
+
+const HIGH_POINT_ROLES: HighPointRole[] = [
+  'act_one_end',
+  'midpoint',
+  'act_two_end',
+  'climax',
+  'emotional_high',
+  'emotional_low',
+];
 
 const FUNCTION_KEY = {
   plot: 'function.plot',
@@ -81,6 +91,9 @@ export function StoryCard({ scene }: { scene: Scene }) {
   const selection = useAppStore((s) => s.selection);
   const select = useAppStore((s) => s.select);
   const scenePoint = useAppStore((s) => s.scenePoints[scene.id]);
+  const fullBoard = useAppStore((s) => s.fullBoard);
+  const highPoint = useAppStore((s) => s.highPoints.find((m) => m.sceneId === scene.id));
+  const setHighPoint = useAppStore((s) => s.setHighPoint);
   const t = useT();
   const [editing, setEditing] = useState(false);
   const chipRef = useRef<HTMLButtonElement>(null);
@@ -163,6 +176,25 @@ export function StoryCard({ scene }: { scene: Scene }) {
         <span className="card-verdict">
           <span aria-hidden="true">{mark.icon}</span> {t(mark.key)}
         </span>
+      )}
+      {highPoint && (
+        <span className="card-highpoint">{t(`hp.short.${highPoint.role}` as StringKey)}</span>
+      )}
+      {fullBoard && (
+        <select
+          className="card-hp-select"
+          aria-label={t('hp.select')}
+          value={highPoint?.role ?? ''}
+          onPointerDown={(e) => e.stopPropagation()}
+          onChange={(e) => setHighPoint(scene.id, (e.target.value || null) as HighPointRole | null)}
+        >
+          <option value="">{t('hp.none')}</option>
+          {HIGH_POINT_ROLES.map((role) => (
+            <option key={role} value={role}>
+              {t(`hp.full.${role}` as StringKey)}
+            </option>
+          ))}
+        </select>
       )}
     </div>
   );

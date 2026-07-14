@@ -4,6 +4,69 @@ import type { Screenplay } from './screenplay';
     off. Set-ups and pay-offs anchor to exact elements (not whole scenes), so
     the map can tell the truth by position. Reused margin channel later. */
 
+/** Epps's Four Major High Points, plus the emotional highs and lows of the
+    "roller coaster". The four structural roles are unique (one scene each);
+    emotional markers may repeat across scenes. A scene holds at most one. */
+export type HighPointRole =
+  | 'act_one_end'
+  | 'midpoint'
+  | 'act_two_end'
+  | 'climax'
+  | 'emotional_high'
+  | 'emotional_low';
+
+export type StructuralRole = 'act_one_end' | 'midpoint' | 'act_two_end' | 'climax';
+
+export const STRUCTURAL_ROLES: StructuralRole[] = ['act_one_end', 'midpoint', 'act_two_end', 'climax'];
+
+export function isStructuralRole(role: HighPointRole): role is StructuralRole {
+  return (STRUCTURAL_ROLES as string[]).includes(role);
+}
+
+export interface HighPointMarker {
+  role: HighPointRole;
+  sceneId: string;
+}
+
+/** The structural roles not yet placed, in book order. */
+export function missingStructuralRoles(markers: HighPointMarker[]): StructuralRole[] {
+  const placed = new Set(markers.map((m) => m.role));
+  return STRUCTURAL_ROLES.filter((r) => !placed.has(r));
+}
+
+export interface MomentumPoint {
+  sceneId: string;
+  number: number;
+  slug: string;
+  direction: 'high' | 'low';
+}
+
+/** The emotional highs and lows, grouped by act, in scene order — the
+    roller-coaster shape the writer can read at a glance. */
+export function momentumByAct(
+  markers: HighPointMarker[],
+  sp: Screenplay,
+): { act: 1 | 2 | 3; points: MomentumPoint[] }[] {
+  const sceneById = new Map(sp.scenes.map((s) => [s.id, s]));
+  const points: (MomentumPoint & { act: 1 | 2 | 3 })[] = [];
+  for (const m of markers) {
+    if (m.role !== 'emotional_high' && m.role !== 'emotional_low') continue;
+    const scene = sceneById.get(m.sceneId);
+    if (!scene) continue;
+    points.push({
+      sceneId: scene.id,
+      number: scene.number,
+      slug: scene.slug,
+      direction: m.role === 'emotional_high' ? 'high' : 'low',
+      act: scene.act,
+    });
+  }
+  points.sort((a, b) => a.number - b.number);
+  return ([1, 2, 3] as const)
+    .map((act) => ({ act, points: points.filter((p) => p.act === act).map(({ act: _a, ...p }) => p) }))
+    .filter((g) => g.points.length > 0);
+}
+
 export type StoryBeatKind = 'setup' | 'payoff';
 
 export interface StoryBeat {

@@ -28,6 +28,7 @@ export async function initPersistence(options: PersistenceOptions = {}): Promise
     store.getState().loadGamePlan(savedWorkflow.gamePlan ?? emptyGamePlan());
     store.getState().loadScenePoints(savedWorkflow.scenePoints ?? {});
     store.getState().loadStoryBeats(savedWorkflow.storyBeats ?? []);
+    store.getState().loadHighPoints(savedWorkflow.highPoints ?? []);
   }
 
   const savedBaseline = await db.baselines.get(targetDocId);
@@ -64,6 +65,7 @@ export async function initPersistence(options: PersistenceOptions = {}): Promise
         gamePlan: state.gamePlan,
         scenePoints: state.scenePoints,
         storyBeats: state.storyBeats,
+        highPoints: state.highPoints,
       });
       if (state.revisionBaseline && state.revisionSetLabel) {
         void db.baselines.put({

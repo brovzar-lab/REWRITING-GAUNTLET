@@ -26,7 +26,8 @@ describe('the Set-Up Map in full-board mode', () => {
     useAppStore.getState().pairBeats(beatId('sc1-e2'), beatId('sc3-e1'));
     render(<StructureView />);
 
-    const row = screen.getByRole('listitem');
+    const map = screen.getByRole('list', { name: 'Set-Up / Pay-off Map' });
+    const row = within(map).getByRole('listitem');
     expect(row).toHaveTextContent(/OK/);
     await user.click(within(row).getByRole('button', { name: /set-up.*scene 1/i }));
     expect(useAppStore.getState().selection).toEqual({ sceneId: 'sc1', elementId: 'sc1-e2' });
@@ -37,7 +38,8 @@ describe('the Set-Up Map in full-board mode', () => {
     setBeat('payoff', 'sc1', 'sc1-e2');
     useAppStore.getState().pairBeats(beatId('sc3-e1'), beatId('sc1-e2'));
     render(<StructureView />);
-    expect(screen.getByRole('listitem')).toHaveTextContent(/late set-up/i);
+    const map = screen.getByRole('list', { name: 'Set-Up / Pay-off Map' });
+    expect(within(map).getByRole('listitem')).toHaveTextContent(/late set-up/i);
   });
 
   it('shows unpaid set-ups and orphan pay-offs with words, not color alone', () => {

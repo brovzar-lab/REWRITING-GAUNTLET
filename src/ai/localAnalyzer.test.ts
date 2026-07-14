@@ -316,3 +316,36 @@ describe('plot pass: repeated information', () => {
     expect(findings.find((f) => /same information|word for word/i.test(f.summary))).toBeUndefined();
   });
 });
+
+describe('structure pass: high-point gaps', () => {
+  const structurePass = EPPS_PASSES.find((p) => p.id === 'structure')!;
+
+  it('names each missing structural high point and cites a scene, phrased as a question', async () => {
+    const findings = await localAnalyzer.diagnose({
+      screenplay: sampleScreenplay,
+      connections: sampleConnections,
+      highPoints: [],
+      pass: structurePass,
+      passRunId: 'run-hp',
+      now: 1,
+    });
+    const midpoint = findings.find((f) => /mid-point/i.test(f.summary));
+    expect(midpoint).toBeDefined();
+    expect(midpoint!.citations).toHaveLength(1);
+    expect(midpoint!.summary).toMatch(/\?$/);
+    expect(midpoint!.proposal).toBeUndefined();
+  });
+
+  it('stops naming a high point once the writer places it', async () => {
+    const placed = sampleScreenplay.scenes.map((s) => ({ role: 'midpoint' as const, sceneId: s.id })).slice(7, 8);
+    const findings = await localAnalyzer.diagnose({
+      screenplay: sampleScreenplay,
+      connections: sampleConnections,
+      highPoints: placed,
+      pass: structurePass,
+      passRunId: 'run-hp2',
+      now: 1,
+    });
+    expect(findings.find((f) => /mid-point/i.test(f.summary))).toBeUndefined();
+  });
+});

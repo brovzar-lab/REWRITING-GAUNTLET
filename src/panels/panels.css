@@ -782,6 +782,20 @@
   margin-right: var(--space-xs);
 }
 
+/* M4: structural high-point flag in the navigator (word, not color alone). */
+.scene-highpoint {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  border: 1px solid var(--divider-strong);
+  border-radius: var(--rounded-control);
+  padding: 0 4px;
+  margin-right: var(--space-xs);
+  white-space: nowrap;
+}
+
 /* Pass completion summary. */
 .summary-block {
   display: flex;

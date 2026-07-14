@@ -4,7 +4,7 @@ import type { EvidenceRecord } from '../model/evidence';
 import type { WorkflowState } from '../workflow/types';
 import type { GamePlan } from '../model/gameplan';
 import type { ScenePoint } from '../model/scenepoint';
-import type { StoryBeat } from '../model/markers';
+import type { HighPointMarker, StoryBeat } from '../model/markers';
 import type { ThemeChoice, UiLang } from './appStore';
 
 export interface DocumentRow {
@@ -47,6 +47,7 @@ export interface WorkflowRow {
   gamePlan?: GamePlan;
   scenePoints?: Record<string, ScenePoint>;
   storyBeats?: StoryBeat[];
+  highPoints?: HighPointMarker[];
 }
 
 class RewriteStudioDB extends Dexie {

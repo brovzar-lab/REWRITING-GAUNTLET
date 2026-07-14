@@ -3,7 +3,9 @@ import { useAppStore } from '../store/appStore';
 import { paginate } from '../pagination/engine';
 import { computeRevisedElements } from '../editor/revision';
 import { useT } from '../i18n/strings';
+import type { StringKey } from '../i18n/strings';
 import type { Scene } from '../model/screenplay';
+import { isStructuralRole } from '../model/markers';
 
 const ACT_KEYS = { 1: 'nav.act1', 2: 'nav.act2', 3: 'nav.act3' } as const;
 
@@ -12,7 +14,12 @@ export function SceneNavigator() {
   const selection = useAppStore((s) => s.selection);
   const select = useAppStore((s) => s.select);
   const evidence = useAppStore((s) => s.evidence);
+  const highPoints = useAppStore((s) => s.highPoints);
   const t = useT();
+
+  const structuralByScene = new Map(
+    highPoints.filter((m) => isStructuralRole(m.role)).map((m) => [m.sceneId, m.role]),
+  );
 
   const noteCounts = useMemo(() => {
     const counts = new Map<string, number>();
@@ -64,6 +71,11 @@ export function SceneNavigator() {
                         </span>
                       )}
                     </span>
+                    {structuralByScene.has(scene.id) && (
+                      <span className="scene-highpoint">
+                        {t(`hp.short.${structuralByScene.get(scene.id)!}` as StringKey)}
+                      </span>
+                    )}
                     {(noteCounts.get(scene.id) ?? 0) > 0 && (
                       <span className="scene-notes" aria-label={`${t('nav.notes')}: ${noteCounts.get(scene.id)}`}>
                         {noteCounts.get(scene.id)}

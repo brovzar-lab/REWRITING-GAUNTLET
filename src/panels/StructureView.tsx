@@ -1,8 +1,16 @@
 import { useAppStore } from '../store/appStore';
 import { useT } from '../i18n/strings';
 import type { StringKey } from '../i18n/strings';
-import { setupPayoffRows, type SetupPayoffStatus, type StoryBeat } from '../model/markers';
+import {
+  momentumByAct,
+  setupPayoffRows,
+  STRUCTURAL_ROLES,
+  type SetupPayoffStatus,
+  type StoryBeat,
+} from '../model/markers';
 import './structure.css';
+
+const ACT_KEY = { 1: 'nav.act1', 2: 'nav.act2', 3: 'nav.act3' } as const;
 
 const STATUS: Record<SetupPayoffStatus, { icon: string; key: StringKey }> = {
   ok: { icon: '✓', key: 'map.status.ok' },
@@ -18,12 +26,18 @@ export function StructureView() {
   const t = useT();
   const screenplay = useAppStore((s) => s.screenplay);
   const storyBeats = useAppStore((s) => s.storyBeats);
+  const highPoints = useAppStore((s) => s.highPoints);
   const select = useAppStore((s) => s.select);
   const pairBeats = useAppStore((s) => s.pairBeats);
   const unpairBeat = useAppStore((s) => s.unpairBeat);
 
   const rows = setupPayoffRows(storyBeats, screenplay);
   const sceneNumber = (sceneId: string) => screenplay.scenes.find((s) => s.id === sceneId)?.number ?? '?';
+  const jumpToScene = (sceneId: string) => {
+    const scene = screenplay.scenes.find((s) => s.id === sceneId);
+    if (scene) select({ sceneId, elementId: scene.elements[0].id });
+  };
+  const momentum = momentumByAct(highPoints, screenplay);
   const orphanPayoffs = storyBeats.filter((b) => b.kind === 'payoff' && !b.pairedWith);
   const unpairedSetups = storyBeats.filter((b) => b.kind === 'setup' && !b.pairedWith);
 
@@ -39,11 +53,56 @@ export function StructureView() {
 
   return (
     <section className="structure-view" aria-label={t('map.title')}>
+      <h3 className="inspector-section">{t('hp.checklist')}</h3>
+      {highPoints.length === 0 && <p className="inspector-hint">{t('hp.empty')}</p>}
+      <ul className="hp-checklist" aria-label={t('hp.checklist')}>
+        {STRUCTURAL_ROLES.map((role) => {
+          const placed = highPoints.find((m) => m.role === role);
+          return (
+            <li key={role} className={`hp-item${placed ? ' is-placed' : ''}`}>
+              {placed ? (
+                <button type="button" className="gp-anchor" onClick={() => jumpToScene(placed.sceneId)}>
+                  {t(`hp.full.${role}` as StringKey)} · {t('gp.scene')} {sceneNumber(placed.sceneId)}
+                </button>
+              ) : (
+                <span className="hp-unplaced">
+                  {t(`hp.full.${role}` as StringKey)} — {t('hp.notPlaced')}
+                </span>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+
+      {momentum.length > 0 && (
+        <div className="hp-momentum" role="group" aria-label={t('hp.momentum')}>
+          <h3 className="inspector-section">{t('hp.momentum')}</h3>
+          {momentum.map((group) => (
+            <div key={group.act} className="hp-momentum-act">
+              <span className="hp-momentum-actlabel">{t(ACT_KEY[group.act])}</span>
+              <span className="hp-momentum-points">
+                {group.points.map((p) => (
+                  <button
+                    key={p.sceneId}
+                    type="button"
+                    className={`hp-momentum-point dir-${p.direction}`}
+                    onClick={() => jumpToScene(p.sceneId)}
+                  >
+                    <span aria-hidden="true">{p.direction === 'high' ? '▲' : '▼'}</span> {p.number}{' '}
+                    {t(`hp.short.emotional_${p.direction}` as StringKey)}
+                  </button>
+                ))}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
       <h3 className="inspector-section">{t('map.title')}</h3>
       {rows.length === 0 ? (
         <p className="inspector-hint">{t('map.empty')}</p>
       ) : (
-        <ul className="map-list">
+        <ul className="map-list" aria-label={t('map.title')}>
           {rows.map((row) => {
             const key = row.setup?.id ?? row.payoff!.id;
             const s = STATUS[row.status];

@@ -133,6 +133,24 @@ describe('persistence', () => {
     expect(reloadedSetup.pairedWith).toBe(beats.find((b) => b.elementId === 'sc3-e1')!.id);
   });
 
+  it('high points survive a reload', async () => {
+    dispose = await initPersistence({ debounceMs: 5 });
+    useAppStore.getState().setHighPoint('sc4', 'midpoint');
+    useAppStore.getState().setHighPoint('sc2', 'emotional_low');
+    await until(async () => {
+      const row = await db.workflow.get(sampleScreenplay.id);
+      return (row?.highPoints?.length ?? 0) === 2;
+    });
+    dispose();
+
+    useAppStore.getState().resetToSample();
+    expect(useAppStore.getState().highPoints).toEqual([]);
+    dispose = await initPersistence({ debounceMs: 5 });
+    const hp = useAppStore.getState().highPoints;
+    expect(hp).toContainEqual({ role: 'midpoint', sceneId: 'sc4' });
+    expect(hp).toContainEqual({ role: 'emotional_low', sceneId: 'sc2' });
+  });
+
   it('a pre-methodology save (no gamePlan key) hydrates with defaults and loses nothing', async () => {
     // Simulate a workflow row written before the Epps methodology phase.
     await db.workflow.put({
@@ -157,5 +175,6 @@ describe('persistence', () => {
     expect(state.gamePlan).toEqual(emptyGamePlan());
     expect(state.scenePoints).toEqual({});
     expect(state.storyBeats).toEqual([]);
+    expect(state.highPoints).toEqual([]);
   });
 });

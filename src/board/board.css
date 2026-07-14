@@ -278,6 +278,29 @@
   text-transform: uppercase;
 }
 
+/* M4: high-point flag on the card (word), and the placement control. */
+.card-highpoint {
+  justify-self: start;
+  font-size: var(--font-size-label);
+  font-weight: 700;
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  border-radius: var(--rounded-control);
+  padding: 0 4px;
+}
+
+.card-hp-select {
+  width: 100%;
+  background: rgba(32, 35, 33, 0.14);
+  color: inherit;
+  border: 1px solid rgba(32, 35, 33, 0.28);
+  border-radius: var(--rounded-control);
+  padding: 2px 4px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-label);
+}
+
 /* The dotted chip becomes the editor, in place, inside the card.
    Same dashed outline, same footprint; the card simply grows a little. */
 .card-point-edit {

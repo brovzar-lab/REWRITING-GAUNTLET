@@ -1,5 +1,6 @@
 import type { Scene, Screenplay } from '../model/screenplay';
 import { unpointedScenes } from '../model/scenepoint';
+import { missingStructuralRoles, type StructuralRole } from '../model/markers';
 import type { Citation, Finding } from '../workflow/types';
 import type { AIProvider, DiagnoseRequest } from './provider';
 
@@ -352,11 +353,48 @@ function missingScenePoints(ctx: Ctx): Finding[] {
   ];
 }
 
+/** For a missing structural high point, the scene the book would look at, and
+    the book's own question about it. A fact about placement, not a guess. */
+function highPointGaps(ctx: Ctx): Finding[] {
+  const scenes = ctx.screenplay.scenes;
+  if (scenes.length < 4) return [];
+  const missing = missingStructuralRoles(ctx.highPoints ?? []);
+  const actOne = scenes.filter((s) => s.act === 1);
+  const actTwo = scenes.filter((s) => s.act === 2);
+  const actThree = scenes.filter((s) => s.act === 3);
+  const middle = scenes[Math.floor(scenes.length / 2)];
+  const anchor: Record<StructuralRole, { scene: Scene | undefined; q: string }> = {
+    act_one_end: {
+      scene: actOne[actOne.length - 1],
+      q: 'No End of Act One is marked. Is your first-act endpoint a real point of no return?',
+    },
+    midpoint: {
+      scene: middle,
+      q: 'No Mid-Point Plot Turn is marked in the middle of the script. Where does the story turn?',
+    },
+    act_two_end: {
+      scene: actTwo[actTwo.length - 1],
+      q: 'No End of Act Two is marked. Does Act Two end on the protagonist’s lowest moment of doubt?',
+    },
+    climax: {
+      scene: actThree[actThree.length - 1],
+      q: 'No Third Act Climax is marked. Where does the story pay everything off?',
+    },
+  };
+  const out: Finding[] = [];
+  for (const role of missing) {
+    const { scene, q } = anchor[role];
+    if (!scene) continue;
+    out.push(ctx.make({ status: 'uncertain', summary: q, citations: [heading(scene)] }));
+  }
+  return out;
+}
+
 const PASS_LENSES: Record<string, (ctx: Ctx) => Finding[]> = {
   foundation: (ctx) => actBalance(ctx),
   character: (ctx) => singleAppearanceCharacters(ctx),
   'story-theme': (ctx) => unconnectedScenes(ctx),
-  structure: (ctx) => [...actBalance(ctx), ...softActTwoEnd(ctx)],
+  structure: (ctx) => [...highPointGaps(ctx), ...actBalance(ctx), ...softActTwoEnd(ctx)],
   plot: (ctx) => [...backwardsSetupPayoff(ctx), ...repeatedInformation(ctx)],
   corr: (ctx) => lengthOutliers(ctx, 'pressure'),
   relationship: (ctx) => missingRelationships(ctx),

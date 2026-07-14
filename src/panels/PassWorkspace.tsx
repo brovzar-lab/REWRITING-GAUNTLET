@@ -151,6 +151,7 @@ export function PassWorkspace() {
   const screenplay = useAppStore((s) => s.screenplay);
   const connections = useAppStore((s) => s.connections);
   const scenePoints = useAppStore((s) => s.scenePoints);
+  const highPoints = useAppStore((s) => s.highPoints);
   const select = useAppStore((s) => s.select);
   const activePassId = useAppStore((s) => s.activePassId);
   const setActivePass = useAppStore((s) => s.setActivePass);
@@ -210,7 +211,7 @@ export function PassWorkspace() {
     setPassRunState(pass.id, 'diagnosing');
     try {
       const passRunId = `run-${pass.id}-${crypto.randomUUID()}`;
-      const result = await provider.diagnose({ screenplay, connections, scenePoints, pass, passRunId, now: Date.now() });
+      const result = await provider.diagnose({ screenplay, connections, scenePoints, highPoints, pass, passRunId, now: Date.now() });
       setFindings(passRunId, result);
       setPassRunState(pass.id, 'reviewing');
     } catch (e) {

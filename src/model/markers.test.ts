@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import type { Screenplay } from './screenplay';
-import { elementOrder, setupPayoffRows, type StoryBeat } from './markers';
+import {
+  elementOrder,
+  isStructuralRole,
+  missingStructuralRoles,
+  momentumByAct,
+  setupPayoffRows,
+  type HighPointMarker,
+  type StoryBeat,
+} from './markers';
 
 /** Four scenes, one element each for clarity of ordering. */
 function sp(): Screenplay {
@@ -76,5 +84,34 @@ describe('setupPayoffRows', () => {
     const snapshot = JSON.stringify(beats);
     setupPayoffRows(beats, sp());
     expect(JSON.stringify(beats)).toBe(snapshot);
+  });
+});
+
+describe('high points', () => {
+  it('knows which roles are structural', () => {
+    expect(isStructuralRole('midpoint')).toBe(true);
+    expect(isStructuralRole('emotional_high')).toBe(false);
+  });
+
+  it('reports missing structural roles in book order', () => {
+    const markers: HighPointMarker[] = [
+      { role: 'midpoint', sceneId: 's2' },
+      { role: 'climax', sceneId: 's4' },
+    ];
+    expect(missingStructuralRoles(markers)).toEqual(['act_one_end', 'act_two_end']);
+  });
+
+  it('builds the momentum roller-coaster per act, in scene order, emotional only', () => {
+    const markers: HighPointMarker[] = [
+      { role: 'emotional_low', sceneId: 's3' },
+      { role: 'emotional_high', sceneId: 's1' },
+      { role: 'midpoint', sceneId: 's2' }, // structural — excluded from momentum
+    ];
+    const byAct = momentumByAct(markers, sp());
+    // s1 in act 1, s3 in act 2
+    expect(byAct).toEqual([
+      { act: 1, points: [{ sceneId: 's1', number: 1, slug: 'SCENE 1', direction: 'high' }] },
+      { act: 2, points: [{ sceneId: 's3', number: 3, slug: 'SCENE 3', direction: 'low' }] },
+    ]);
   });
 });

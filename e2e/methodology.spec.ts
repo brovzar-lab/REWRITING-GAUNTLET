@@ -130,6 +130,32 @@ test('M3: mark a set-up and a pay-off on lines, pair them in the map, survive re
   await expect(page.getByRole('region', { name: 'Set-Up / Pay-off Map' }).locator('.map-row.status-ok')).toBeVisible();
 });
 
+test('M4: place high points on cards, see them in the checklist, navigator, and reload', async ({ page }) => {
+  await page.setViewportSize({ width: 1500, height: 900 });
+  await freshApp(page);
+
+  // High points are placed on the card, in full board.
+  await page.getByRole('region', { name: 'Story Board' }).first().getByRole('button', { name: 'Full board' }).click();
+  await page.locator('[data-card-frame="sc4"]').getByLabel('High point').selectOption('midpoint');
+  await expect(page.locator('[data-card-frame="sc4"]')).toContainText('Mid-Point');
+
+  // An emotional low feeds the momentum strip.
+  await page.locator('[data-card-frame="sc2"]').getByLabel('High point').selectOption('emotional_low');
+  const structure = page.getByRole('region', { name: 'Set-Up / Pay-off Map' });
+  await expect(structure.getByRole('group', { name: 'Momentum' })).toContainText('Low');
+
+  // The Four High Points checklist shows the placed one and jumps to it.
+  const checklist = structure.getByRole('list', { name: 'Four High Points' });
+  await expect(checklist).toContainText('Mid-Point Plot Turn');
+  await checklist.getByRole('button', { name: /Mid-Point Plot Turn/ }).click();
+
+  // Reload: the placements persist and the navigator flags the structural point.
+  await page.waitForTimeout(1200);
+  await page.reload();
+  await expect(page.locator('.sp-page .ProseMirror')).toBeVisible();
+  await expect(page.locator('.scene-navigator')).toContainText('Mid-Point');
+});
+
 test('M2R: the dotted chip is the editor — type the point directly on the card', async ({ page }) => {
   await freshApp(page);
 
