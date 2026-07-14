@@ -1,6 +1,11 @@
 import { XMLParser } from 'fast-xml-parser';
 import { assembleScreenplay, contentHash, type ParsedElement } from './assemble';
-import type { ElementType, Screenplay } from '../model/screenplay';
+import type { DocFormat, ElementType, Screenplay } from '../model/screenplay';
+
+/** Studio-extension metadata rides in an XML comment: any XML parser (Final
+    Draft included) ignores comments, so it never appears on a page. */
+const META_RE = /<!--\s*rewrite-studio\s+docFormat="([a-z_]+)"\s*-->/i;
+const VALID_FORMATS = new Set<DocFormat>(['feature', 'one_hour', 'half_hour']);
 
 /** Final Draft (.fdx) import/export. Maps the seven core paragraph types;
     anything else becomes action. Structurally tested; not yet validated
@@ -64,11 +69,16 @@ export function parseFdx(xml: string): Screenplay {
     text: textOf(p?.Text),
   }));
 
-  return assembleScreenplay(parsed, {
+  const screenplay = assembleScreenplay(parsed, {
     id: `imported-fdx-${contentHash(xml)}`,
     title: 'IMPORTED SCRIPT (FDX)',
     draftLabel: 'Imported from Final Draft',
   });
+  const metaMatch = xml.match(META_RE);
+  if (metaMatch && VALID_FORMATS.has(metaMatch[1] as DocFormat)) {
+    screenplay.docFormat = metaMatch[1] as DocFormat;
+  }
+  return screenplay;
 }
 
 const escapeXml = (s: string) =>
@@ -87,6 +97,11 @@ export function serializeFdx(screenplay: Screenplay): string {
       );
     }
   }
-  lines.push('  </Content>', '</FinalDraft>', '');
+  lines.push('  </Content>');
+  // Non-feature formats append the ignorable comment (feature is the default).
+  if (screenplay.docFormat && screenplay.docFormat !== 'feature') {
+    lines.push(`  <!-- rewrite-studio docFormat="${screenplay.docFormat}" -->`);
+  }
+  lines.push('</FinalDraft>', '');
   return lines.join('\n');
 }

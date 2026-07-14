@@ -28,7 +28,7 @@ test('paste-import replaces the draft and paginates it', async ({ page }) => {
   await expect(dialog.getByRole('button', { name: 'Paste screenplay' })).toBeVisible();
   await expect(dialog.getByRole('button', { name: 'Open Fountain file' })).toBeVisible();
   await expect(dialog.getByRole('button', { name: 'Open Final Draft file' })).toBeVisible();
-  await expect(dialog.getByText(/PDF import is not available yet/)).toBeVisible();
+  await expect(dialog.getByRole('button', { name: 'Open PDF (best effort)' })).toBeVisible();
 
   await dialog.getByRole('button', { name: 'Paste screenplay' }).click();
   await dialog.getByLabel(/Paste your script/).fill(FOUNTAIN);
@@ -60,4 +60,28 @@ test('cancelling the import leaves the current draft untouched', async ({ page }
   await dialog.getByRole('button', { name: 'Cancel' }).click();
   await expect(dialog).toBeHidden();
   await expect(page.locator('.top-bar')).toContainText('LAS GARZAS');
+});
+
+test('PDF import is best effort: extracts text, warns, and imports', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => indexedDB.deleteDatabase('rewrite-studio'));
+  await page.reload();
+
+  const content =
+    'BT /F1 12 Tf 72 720 Td (INT. NEWSROOM - NIGHT) Tj 0 -20 Td (Phones ring in the dark.) Tj ET';
+  const pdf = `%PDF-1.4\n4 0 obj<</Length ${content.length}>>\nstream\n${content}\nendstream\nendobj\n%%EOF\n`;
+
+  await page.getByRole('button', { name: 'Import', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: 'Open a screenplay' });
+  await expect(dialog.getByRole('button', { name: 'Open PDF (best effort)' })).toBeVisible();
+  await page.setInputFiles('[data-testid="import-file-pdf"]', {
+    name: 'script.pdf',
+    mimeType: 'application/pdf',
+    buffer: Buffer.from(pdf, 'latin1'),
+  });
+
+  await expect(dialog.getByText(/Best effort/i)).toBeVisible();
+  await expect(dialog.getByText(/not Final Draft fidelity/i)).toBeVisible();
+  await dialog.getByRole('button', { name: /Import and replace draft/ }).click();
+  await expect(page.locator('.sp-page').first()).toContainText('INT. NEWSROOM - NIGHT');
 });

@@ -87,6 +87,12 @@ export const dictionaries = {
     'import.pages': 'Pages (approx.)',
     'import.actGuess': 'Acts are assigned by thirds as a first guess. You can change them later.',
     'import.pdfNote': 'PDF import is not available yet. Copy the text out of your PDF and paste it here.',
+    'import.optionPdf': 'Open PDF (best effort)',
+    'import.pdfCaveat': 'Text-based PDFs only. Formatting may be imperfect.',
+    'import.pdfWarning':
+      'Best effort: text was extracted from the PDF, but element types and spacing may be wrong. Review the preview, and fix elements after import. This is not Final Draft fidelity.',
+    'import.pdfEmpty':
+      'No readable text found in this PDF. It may be scanned or image-only. Try a text-based PDF, or paste the text instead.',
     'import.snapshotNote': 'Your current draft is saved as a snapshot before it is replaced.',
     'import.fdxCaveat': 'Final Draft file detected. Not yet validated inside the Final Draft application.',
     'import.confirm': 'Import and replace draft',
@@ -465,6 +471,12 @@ export const dictionaries = {
     'import.pages': 'Páginas (aprox.)',
     'import.actGuess': 'Los actos se asignan por tercios como primera aproximación. Puedes cambiarlos después.',
     'import.pdfNote': 'La importación de PDF aún no está disponible. Copia el texto de tu PDF y pégalo aquí.',
+    'import.optionPdf': 'Abrir PDF (mejor esfuerzo)',
+    'import.pdfCaveat': 'Solo PDFs con texto. El formato puede ser imperfecto.',
+    'import.pdfWarning':
+      'Mejor esfuerzo: se extrajo el texto del PDF, pero los tipos de elemento y el espaciado pueden estar mal. Revisa la vista previa y corrige los elementos tras importar. Esto no es fidelidad de Final Draft.',
+    'import.pdfEmpty':
+      'No se encontró texto legible en este PDF. Puede ser escaneado o solo de imagen. Prueba un PDF con texto o pega el texto.',
     'import.snapshotNote': 'Tu borrador actual se guarda como copia antes de reemplazarlo.',
     'import.fdxCaveat': 'Archivo de Final Draft detectado. Aún no validado dentro de la aplicación Final Draft.',
     'import.confirm': 'Importar y reemplazar borrador',

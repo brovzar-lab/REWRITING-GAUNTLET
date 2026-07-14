@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft DocumentType="Script" Template="No" Version="5">
+  <Content>
+    <Paragraph Type="Scene Heading"><Text>INT. WRITERS ROOM - DAY</Text></Paragraph>
+    <Paragraph Type="Action"><Text>The team argues about the cold open.</Text></Paragraph>
+    <Paragraph Type="Character"><Text>MAYA</Text></Paragraph>
+    <Paragraph Type="Parenthetical"><Text>(leaning in)</Text></Paragraph>
+    <Paragraph Type="Dialogue"><Text>Open on the fire, not the meeting.</Text></Paragraph>
+    <Paragraph Type="Scene Heading"><Text>EXT. STUDIO LOT - DAY</Text></Paragraph>
+    <Paragraph Type="Action"><Text>Golf carts weave between sound stages.</Text></Paragraph>
+    <Paragraph Type="Transition"><Text>SMASH CUT TO:</Text></Paragraph>
+    <Paragraph Type="Scene Heading"><Text>INT. STAGE 4 - DAY</Text></Paragraph>
+    <Paragraph Type="Action"><Text>The set is half struck.</Text></Paragraph>
+  </Content>
+  <!-- rewrite-studio docFormat="one_hour" -->
+</FinalDraft>

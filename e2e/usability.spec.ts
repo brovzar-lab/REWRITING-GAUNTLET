@@ -93,7 +93,7 @@ test('the import menu exposes every import choice', async ({ page }) => {
   await expect(dialog.getByRole('button', { name: 'Paste screenplay' })).toBeVisible();
   await expect(dialog.getByRole('button', { name: 'Open Fountain file' })).toBeVisible();
   await expect(dialog.getByRole('button', { name: 'Open Final Draft file' })).toBeVisible();
-  await expect(dialog.getByText(/PDF import is not available yet/)).toBeVisible();
+  await expect(dialog.getByRole('button', { name: 'Open PDF (best effort)' })).toBeVisible();
 });
 
 test('the snapshot history is reachable and lists restorable versions', async ({ page }) => {

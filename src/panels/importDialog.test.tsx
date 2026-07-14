@@ -54,12 +54,12 @@ beforeEach(async () => {
 });
 
 describe('ImportDialog', () => {
-  it('opens as an app-style menu: paste, Fountain file, Final Draft file, PDF note', () => {
+  it('opens as an app-style menu: paste, Fountain file, Final Draft file, PDF (best effort)', () => {
     render(<ImportDialog />);
     expect(screen.getByRole('button', { name: /paste screenplay/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /open fountain file/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /open final draft file/i })).toBeInTheDocument();
-    expect(screen.getByText(/pdf import is not available yet/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /open pdf \(best effort\)/i })).toBeInTheDocument();
     // No developer-form controls on the first screen.
     expect(screen.queryByLabelText(/paste your script/i)).not.toBeInTheDocument();
   });

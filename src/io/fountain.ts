@@ -1,5 +1,11 @@
 import { assembleScreenplay, contentHash, type ParsedElement } from './assemble';
-import type { ElementType, Screenplay } from '../model/screenplay';
+import type { DocFormat, ElementType, Screenplay } from '../model/screenplay';
+
+/** Studio-extension metadata rides in a Fountain boneyard comment: ignored by
+    every Fountain renderer, never shown on a page, and stripped before parsing
+    so it can never become an action line. */
+const META_RE = /\/\*\s*rewrite-studio\s+docFormat=([a-z_]+)\s*\*\//i;
+const VALID_FORMATS = new Set<DocFormat>(['feature', 'one_hour', 'half_hour']);
 
 /** Fountain import/export against the canonical model.
     Import never throws: anything unrecognized becomes an action line.
@@ -33,7 +39,13 @@ function isCharacter(line: string, nextLine: string | undefined): boolean {
 }
 
 export function parseFountain(text: string): Screenplay {
-  const rawLines = text.replace(/\r\n/g, '\n').split('\n');
+  // Pull the sidecar format out and remove the whole boneyard comment first,
+  // so it never reaches the line parser.
+  const metaMatch = text.match(META_RE);
+  const docFormat =
+    metaMatch && VALID_FORMATS.has(metaMatch[1] as DocFormat) ? (metaMatch[1] as DocFormat) : undefined;
+  const cleaned = text.replace(/\/\*\s*rewrite-studio[\s\S]*?\*\//gi, '');
+  const rawLines = cleaned.replace(/\r\n/g, '\n').split('\n');
 
   // Title page: leading "Key: Value" lines up to the first blank line.
   let title = 'UNTITLED';
@@ -83,11 +95,13 @@ export function parseFountain(text: string): Screenplay {
     }
   }
 
-  return assembleScreenplay(parsed, {
+  const screenplay = assembleScreenplay(parsed, {
     id: `imported-${contentHash(text)}`,
     title,
     draftLabel,
   });
+  if (docFormat) screenplay.docFormat = docFormat;
+  return screenplay;
 }
 
 export function serializeFountain(screenplay: Screenplay): string {
@@ -103,5 +117,10 @@ export function serializeFountain(screenplay: Screenplay): string {
       prevType = element.type;
     }
   }
-  return out.join('\n') + '\n';
+  let text = out.join('\n') + '\n';
+  // Non-feature formats append the ignorable sidecar comment (feature is the default).
+  if (screenplay.docFormat && screenplay.docFormat !== 'feature') {
+    text += `\n/* rewrite-studio docFormat=${screenplay.docFormat} */\n`;
+  }
+  return text;
 }

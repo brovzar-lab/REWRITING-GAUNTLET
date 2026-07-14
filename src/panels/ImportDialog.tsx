@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAppStore } from '../store/appStore';
 import { parseFountain } from '../io/fountain';
 import { parseFdx } from '../io/fdx';
+import { extractPdfText } from '../io/pdf';
 import { paginate } from '../pagination/engine';
 import type { DocFormat } from '../model/screenplay';
 import { useT } from '../i18n/strings';
@@ -25,6 +26,15 @@ function readFileText(file: File): Promise<string> {
   });
 }
 
+function readFileBytes(file: File): Promise<Uint8Array> {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(new Uint8Array(r.result as ArrayBuffer));
+    r.onerror = () => reject(r.error);
+    r.readAsArrayBuffer(file);
+  });
+}
+
 type Step = 'menu' | 'paste' | 'file';
 
 /** Opening a script should feel like opening a script: a short menu
@@ -43,10 +53,12 @@ export function ImportDialog() {
   const [text, setText] = useState('');
   const [fileName, setFileName] = useState<string | null>(null);
   const [format, setFormat] = useState<DocFormat>('feature');
+  const [isPdf, setIsPdf] = useState(false);
   const [busy, setBusy] = useState(false);
   const pasteRef = useRef<HTMLTextAreaElement>(null);
   const fountainInputRef = useRef<HTMLInputElement>(null);
   const fdxInputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (open) {
@@ -54,6 +66,7 @@ export function ImportDialog() {
       setText('');
       setFileName(null);
       setFormat('feature');
+      setIsPdf(false);
       setBusy(false);
     }
   }, [open]);
@@ -80,6 +93,7 @@ export function ImportDialog() {
     setStep('menu');
     setText('');
     setFileName(null);
+    setIsPdf(false);
   };
 
   const doImport = async () => {
@@ -97,7 +111,16 @@ export function ImportDialog() {
   const onFile = async (file: File | undefined) => {
     if (!file) return;
     setFileName(file.name);
+    setIsPdf(false);
     setText(await readFileText(file));
+    setStep('file');
+  };
+
+  const onPdf = async (file: File | undefined) => {
+    if (!file) return;
+    setFileName(file.name);
+    setIsPdf(true);
+    setText(await extractPdfText(await readFileBytes(file)));
     setStep('file');
   };
 
@@ -110,6 +133,7 @@ export function ImportDialog() {
       </span>
       <p className="import-note">{t('import.actGuess')}</p>
       {preview.fdx && <p className="import-note">{t('import.fdxCaveat')}</p>}
+      {isPdf && <p className="import-warning">{t('import.pdfWarning')}</p>}
     </div>
   );
 
@@ -182,8 +206,13 @@ export function ImportDialog() {
                   <span className="import-note">.fdx · {t('import.fdxCaveat')}</span>
                 </button>
               </li>
+              <li>
+                <button type="button" className="export-option" onClick={() => pdfInputRef.current?.click()}>
+                  <span className="export-option-label">{t('import.optionPdf')}</span>
+                  <span className="import-note">.pdf · {t('import.pdfCaveat')}</span>
+                </button>
+              </li>
             </ul>
-            <p className="import-note">{t('import.pdfNote')}</p>
             <input
               ref={fountainInputRef}
               data-testid="import-file-fountain"
@@ -201,6 +230,15 @@ export function ImportDialog() {
               hidden
               aria-label={t('import.optionFdx')}
               onChange={(e) => void onFile(e.target.files?.[0])}
+            />
+            <input
+              ref={pdfInputRef}
+              data-testid="import-file-pdf"
+              type="file"
+              accept=".pdf,application/pdf"
+              hidden
+              aria-label={t('import.optionPdf')}
+              onChange={(e) => void onPdf(e.target.files?.[0])}
             />
             <div className="import-actions">
               <button type="button" className="seg-button" onClick={close}>
@@ -237,6 +275,7 @@ export function ImportDialog() {
             <p className="import-file-name">
               {t('import.fileChosen')}: {fileName}
             </p>
+            {isPdf && !preview && <p className="import-warning">{t('import.pdfEmpty')}</p>}
             {previewBlock}
             {formatPicker}
             <p className="import-note">{t('import.snapshotNote')}</p>
