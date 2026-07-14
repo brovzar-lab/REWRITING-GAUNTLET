@@ -97,7 +97,13 @@ export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
   const viewRef = useRef<EditorView | null>(null);
   const syncingFromEditor = useRef(false);
   const zoom = useAppStore((s) => s.zoom);
+  const readOnly = useAppStore((s) => s.readOnly);
   const t = useT();
+
+  // Re-evaluate ProseMirror's editable() when read-only toggles.
+  useEffect(() => {
+    viewRef.current?.setProps({ editable: () => !readOnly });
+  }, [readOnly]);
 
   const [smartType, setSmartType] = useState<SmartTypeState | null>(null);
   const smartTypeRef = useRef<SmartTypeState | null>(null);
@@ -216,6 +222,7 @@ export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
 
     const view = new EditorView(host, {
       state,
+      editable: () => !store.getState().readOnly,
       dispatchTransaction(tr) {
         const newState = view.state.apply(tr);
         view.updateState(newState);

@@ -1,21 +1,12 @@
 import { useEffect } from 'react';
-import { PanelLayout } from './panels/PanelLayout';
 import { GoToPage } from './panels/GoToPage';
 import { ImportDialog } from './panels/ImportDialog';
-import { AnnotatedReadBar } from './panels/AnnotatedReadBar';
-import { PolishReadBar } from './panels/PolishReadBar';
 import { AiSettings } from './panels/AiSettings';
 import { ExportMenu } from './panels/ExportMenu';
 import { PrintView } from './panels/PrintView';
 import { PassSummaryDialog } from './panels/PassSummaryDialog';
 import { HistoryDialog } from './panels/HistoryDialog';
-import { SceneNavigator } from './panels/SceneNavigator';
-import { InspectorTabs } from './panels/InspectorTabs';
-import { PassTray } from './panels/PassTray';
-import { ScreenplayEditor } from './editor/ScreenplayEditor';
-import { EditorToolbar } from './editor/EditorToolbar';
-import { Board } from './board/Board';
-import { TopBar } from './panels/TopBar';
+import { WorkstationShell } from './shell/WorkstationShell';
 import { initPersistence } from './store/persistence';
 import { useAppStore } from './store/appStore';
 
@@ -46,21 +37,7 @@ export default function App() {
 
   return (
     <>
-      <PanelLayout
-        topBar={<TopBar />}
-        navigator={<SceneNavigator />}
-        editor={
-          <>
-            <AnnotatedReadBar />
-            <PolishReadBar />
-            <EditorToolbar />
-            <ScreenplayEditor />
-          </>
-        }
-        board={<Board />}
-        inspector={<InspectorTabs />}
-        tray={<PassTray />}
-      />
+      <WorkstationShell />
       <GoToPage />
       <ImportDialog />
       <AiSettings />

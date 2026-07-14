@@ -30,6 +30,10 @@ export async function initPersistence(options: PersistenceOptions = {}): Promise
     store.getState().loadStoryBeats(savedWorkflow.storyBeats ?? []);
     store.getState().loadHighPoints(savedWorkflow.highPoints ?? []);
     store.getState().loadPolishReadComplete(savedWorkflow.polishReadComplete ?? false);
+    store.getState().loadProjectDocs({
+      privatePad: savedWorkflow.privatePad,
+      projectNotes: savedWorkflow.projectNotes,
+    });
   }
 
   const savedBaseline = await db.baselines.get(targetDocId);
@@ -68,6 +72,8 @@ export async function initPersistence(options: PersistenceOptions = {}): Promise
         storyBeats: state.storyBeats,
         highPoints: state.highPoints,
         polishReadComplete: state.polishReadComplete,
+        privatePad: state.privatePad,
+        projectNotes: state.projectNotes,
       });
       if (state.revisionBaseline && state.revisionSetLabel) {
         void db.baselines.put({

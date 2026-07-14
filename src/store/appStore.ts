@@ -59,6 +59,35 @@ export interface AppState {
   setAiSettingsOpen: (open: boolean) => void;
   inspectorTab: 'evidence' | 'pass' | 'gameplan';
   setInspectorTab: (tab: 'evidence' | 'pass' | 'gameplan') => void;
+
+  /** WriterDuet-informed workstation IA. The left panel (Project/Scenes or
+      none), the right context panel, and the overall layout mode are chosen
+      independently so the workspace shows one thing per region, not all. */
+  leftWorkspace: 'project' | 'scenes' | null;
+  setLeftWorkspace: (ws: 'project' | 'scenes' | null) => void;
+  rightWorkspace: 'journey' | 'passes' | 'evidence' | 'gameplan';
+  setRightWorkspace: (ws: 'journey' | 'passes' | 'evidence' | 'gameplan') => void;
+  layoutMode: 'workbench' | 'board' | 'focus' | 'script_notes';
+  setLayoutMode: (mode: 'workbench' | 'board' | 'focus' | 'script_notes') => void;
+  /** Read-only viewing (Format menu). The editor respects it. */
+  readOnly: boolean;
+  toggleReadOnly: () => void;
+  /** In-script find bar. */
+  findOpen: boolean;
+  setFindOpen: (open: boolean) => void;
+  /** Change the current document's format (Production menu / Studio extension). */
+  setDocFormat: (format: 'feature' | 'one_hour' | 'half_hour') => void;
+  /** Whether a script document is open in the center. False shows the empty
+      "Open or import a script" state (a fresh, empty project). */
+  documentOpen: boolean;
+  newProject: () => Promise<void>;
+  openSampleProject: () => void;
+  /** Project-side documents (local-first, never exported, never seen by AI). */
+  privatePad: string;
+  setPrivatePad: (text: string) => void;
+  projectNotes: string;
+  setProjectNotes: (text: string) => void;
+  loadProjectDocs: (docs: { privatePad?: string; projectNotes?: string }) => void;
   exportOpen: boolean;
   setExportOpen: (open: boolean) => void;
   noteComposerOpen: boolean;
@@ -195,6 +224,38 @@ export const useAppStore = create<AppState>((set, get) => ({
   setAiSettingsOpen: (aiSettingsOpen) => set({ aiSettingsOpen }),
   inspectorTab: 'evidence',
   setInspectorTab: (inspectorTab) => set({ inspectorTab }),
+
+  leftWorkspace: 'project',
+  setLeftWorkspace: (leftWorkspace) => set((s) => ({ leftWorkspace: s.leftWorkspace === leftWorkspace ? null : leftWorkspace })),
+  rightWorkspace: 'journey',
+  setRightWorkspace: (rightWorkspace) => set({ rightWorkspace }),
+  layoutMode: 'workbench',
+  setLayoutMode: (layoutMode) =>
+    set({
+      layoutMode,
+      focusMode: layoutMode === 'focus',
+      fullBoard: layoutMode === 'board',
+    }),
+  readOnly: false,
+  toggleReadOnly: () => set((s) => ({ readOnly: !s.readOnly })),
+  findOpen: false,
+  setFindOpen: (findOpen) => set({ findOpen }),
+  setDocFormat: (format) => set((s) => ({ screenplay: { ...s.screenplay, docFormat: format } })),
+  documentOpen: true,
+  newProject: async () => {
+    await get().takeSnapshot(`Before new project: ${get().screenplay.title}`);
+    set({ documentOpen: false, leftWorkspace: 'project', rightWorkspace: 'journey', layoutMode: 'workbench' });
+  },
+  openSampleProject: () => {
+    get().resetToSample();
+    set({ documentOpen: true });
+  },
+  privatePad: '',
+  setPrivatePad: (privatePad) => set({ privatePad }),
+  projectNotes: '',
+  setProjectNotes: (projectNotes) => set({ projectNotes }),
+  loadProjectDocs: ({ privatePad, projectNotes }) =>
+    set({ privatePad: privatePad ?? '', projectNotes: projectNotes ?? '' }),
   exportOpen: false,
   setExportOpen: (exportOpen) => set({ exportOpen }),
   noteComposerOpen: false,
@@ -536,6 +597,14 @@ export const useAppStore = create<AppState>((set, get) => ({
       polishReadPage: 1,
       polishReadComplete: false,
       readModeActive: false,
+      leftWorkspace: 'project',
+      rightWorkspace: 'journey',
+      layoutMode: 'workbench',
+      focusMode: false,
+      fullBoard: false,
+      documentOpen: true,
+      privatePad: '',
+      projectNotes: '',
     }),
 
   loadWorkflow: (workflow, evidence, connections) => set({ workflow, evidence, connections }),
@@ -611,9 +680,13 @@ export const useAppStore = create<AppState>((set, get) => ({
     }),
 
   setTheme: (theme) => set({ theme }),
-  // Choosing a pass opens its guided workspace; deselecting leaves the tab alone.
+  // Choosing a pass opens its guided workspace in the right context panel.
   setActivePass: (activePassId) =>
-    set((s) => ({ activePassId, inspectorTab: activePassId ? 'pass' : s.inspectorTab })),
+    set((s) => ({
+      activePassId,
+      inspectorTab: activePassId ? 'pass' : s.inspectorTab,
+      rightWorkspace: activePassId ? 'passes' : s.rightWorkspace,
+    })),
   setPanelSize: (panel, px) => set((s) => ({ panelSizes: { ...s.panelSizes, [panel]: px } })),
   togglePanel: (panel) =>
     set((s) => ({ collapsedPanels: { ...s.collapsedPanels, [panel]: !s.collapsedPanels[panel] } })),
@@ -644,6 +717,12 @@ export const useAppStore = create<AppState>((set, get) => ({
       readModeActive: false,
       noteComposerOpen: false,
       inspectorTab: 'evidence',
+      leftWorkspace: 'project',
+      rightWorkspace: 'journey',
+      layoutMode: 'workbench',
+      documentOpen: true,
+      privatePad: '',
+      projectNotes: '',
       passSummary: null,
     }),
 }));

@@ -1,0 +1,469 @@
+/* WriterDuet-informed workstation shell. Uses the existing token vocabulary. */
+
+.workstation {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  min-height: 0;
+  background: var(--surface-app, var(--surface-panel));
+}
+
+/* Top app-menu bar */
+.app-menubar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 10px;
+  background: var(--surface-toolbar);
+  border-bottom: 1px solid var(--divider-strong);
+}
+
+.app-menubar-brand {
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  margin-right: 10px;
+}
+
+.menu-root {
+  position: relative;
+}
+
+.menu-top {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  padding: 5px 10px;
+  border-radius: var(--rounded-control);
+  cursor: pointer;
+}
+
+.menu-top:hover,
+.menu-top.is-open {
+  background: var(--surface-inset);
+}
+
+.menu-drop {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  z-index: 40;
+  min-width: 210px;
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  background: var(--surface-panel);
+  border: 1px solid var(--divider-strong);
+  border-radius: var(--rounded-control);
+  box-shadow: var(--shadow-card-lift);
+}
+
+.menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  text-align: left;
+  padding: 6px 8px;
+  border-radius: var(--rounded-control);
+  cursor: pointer;
+}
+
+.menu-item:hover {
+  background: var(--surface-inset);
+}
+
+.menu-item:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.menu-check {
+  width: 12px;
+  color: var(--accent);
+}
+
+.menu-header {
+  font-size: var(--font-size-label);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  padding: 6px 8px 2px;
+}
+
+.menu-sep {
+  height: 1px;
+  background: var(--divider);
+  margin: 4px 2px;
+}
+
+/* Toolbar wraps on narrow widths */
+.workstation .editor-toolbar {
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+}
+
+/* Pass strip */
+.pass-strip {
+  flex: 0 0 auto;
+  display: flex;
+  gap: var(--space-xs);
+  padding: 6px 10px;
+  overflow-x: auto;
+  background: var(--surface-inset);
+  border-bottom: 1px solid var(--divider);
+}
+
+/* Body regions */
+.workstation-body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+/* Left workspace rail */
+.workspace-rail {
+  flex: 0 0 auto;
+  width: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-sm) 4px;
+  background: var(--surface-toolbar);
+  border-right: 1px solid var(--divider);
+  overflow-y: auto;
+}
+
+.rail-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--rounded-control);
+  color: var(--text-secondary);
+  padding: 7px 2px;
+  cursor: pointer;
+  font-family: var(--font-ui);
+}
+
+.rail-item:hover {
+  color: var(--text-primary);
+  background: var(--surface-inset);
+}
+
+.rail-item.is-active {
+  color: var(--text-primary);
+  background: var(--surface-inset);
+  border-color: var(--accent);
+}
+
+.rail-glyph {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.rail-label {
+  font-size: 9.5px;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
+/* Left panel */
+.left-panel {
+  flex: 0 0 auto;
+  width: 244px;
+  overflow-y: auto;
+  border-right: 1px solid var(--divider);
+  background: var(--surface-panel);
+}
+
+/* Center */
+.center-region {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--desk);
+}
+
+.center-region > .sp-page-scroller {
+  flex: 1;
+  height: auto;
+  min-height: 0;
+}
+
+.center-region > .board {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Right context panel */
+.right-panel {
+  flex: 0 0 auto;
+  width: 324px;
+  overflow-y: auto;
+  border-left: 1px solid var(--divider);
+  background: var(--surface-panel);
+}
+
+.right-context {
+  min-height: 0;
+}
+
+/* Journey guide */
+.journey-guide {
+  padding-bottom: var(--space-lg);
+}
+
+.jg-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.jg-stage {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: flex-start;
+  border: 1px solid transparent;
+  border-radius: var(--rounded-control);
+  padding: 6px 8px;
+}
+
+.jg-stage.is-current {
+  border-color: var(--accent);
+  background: var(--surface-inset);
+}
+
+.jg-marker {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--divider-strong);
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.jg-stage.is-done .jg-marker {
+  color: var(--color-confirmed);
+  border-color: var(--color-confirmed);
+}
+
+.jg-stage.is-current .jg-marker {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.jg-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.jg-name {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-title);
+}
+
+.jg-why {
+  margin: 0;
+  font-size: var(--font-size-label);
+  color: var(--text-secondary);
+}
+
+.jg-action {
+  align-self: flex-start;
+  margin-top: 2px;
+  border-color: var(--accent);
+}
+
+/* Project panel */
+.project-panel {
+  padding-bottom: var(--space-lg);
+}
+
+.proj-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: var(--space-md);
+}
+
+.proj-name {
+  margin: 0;
+  padding: 0 var(--space-md);
+  font-size: var(--font-size-body);
+  font-weight: 650;
+}
+
+.proj-draft {
+  margin: 0;
+  padding: 0 var(--space-md);
+  font-size: var(--font-size-label);
+  color: var(--text-secondary);
+}
+
+.proj-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md) 0;
+}
+
+.proj-docs,
+.proj-recent {
+  list-style: none;
+  margin: 0;
+  padding: 0 var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.proj-doc {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.proj-doc.is-active {
+  border-left: 2px solid var(--accent);
+  padding-left: 6px;
+}
+
+.proj-doc-kind {
+  font-size: var(--font-size-label);
+  color: var(--text-secondary);
+}
+
+.proj-doc-name {
+  font-size: var(--font-size-body);
+}
+
+.proj-doc-toggle,
+.proj-recent-item {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: var(--font-size-body);
+  text-align: left;
+  padding: 3px 0;
+  cursor: pointer;
+}
+
+.proj-doc-toggle:hover,
+.proj-recent-item:hover {
+  color: var(--accent);
+}
+
+.proj-doc-text {
+  width: 100%;
+  min-height: 90px;
+  background: var(--surface-inset);
+  color: var(--text-primary);
+  border: 1px solid var(--divider);
+  border-radius: var(--rounded-control);
+  padding: 6px 8px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-body);
+  resize: vertical;
+}
+
+/* Empty state */
+.empty-script {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: var(--space-xl);
+}
+
+.empty-inner {
+  max-width: 420px;
+  text-align: center;
+  background: var(--surface-panel);
+  border: 1px solid var(--divider);
+  border-radius: var(--rounded-card);
+  padding: var(--space-xl);
+}
+
+.empty-title {
+  margin: 0 0 var(--space-sm);
+  font-size: 20px;
+}
+
+.empty-body {
+  margin: 0 0 var(--space-lg);
+  color: var(--text-secondary);
+}
+
+.empty-actions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: center;
+}
+
+.empty-primary {
+  border-color: var(--accent);
+}
+
+/* Find bar */
+.find-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex-basis: 100%;
+  padding-top: var(--space-xs);
+}
+
+.find-input {
+  min-width: 180px;
+  background: var(--surface-inset);
+  color: var(--text-primary);
+  border: 1px solid var(--divider-strong);
+  border-radius: var(--rounded-control);
+  padding: 4px 8px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-body);
+}
+
+.find-count {
+  font-size: var(--font-size-label);
+  color: var(--text-secondary);
+  min-width: 70px;
+}
+
+/* Scene navigator gains a search field in its workspace */
+.scene-search {
+  margin: var(--space-sm) var(--space-md);
+  width: calc(100% - 2 * var(--space-md));
+  background: var(--surface-inset);
+  color: var(--text-primary);
+  border: 1px solid var(--divider);
+  border-radius: var(--rounded-control);
+  padding: 5px 8px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-body);
+}
+
+/* Focus layout: hide chrome, keep the page. */
+.workstation.mode-focus .workstation-body {
+  justify-content: center;
+}

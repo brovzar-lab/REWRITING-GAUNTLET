@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useAppStore } from '../store/appStore';
 import { paginate } from '../pagination/engine';
 import { computeRevisedElements } from '../editor/revision';
@@ -34,15 +34,29 @@ export function SceneNavigator() {
     [screenplay, revisionBaseline],
   );
 
+  const [query, setQuery] = useState('');
+
   const acts = useMemo(() => {
+    const q = query.trim().toLowerCase();
     const byAct = new Map<1 | 2 | 3, Scene[]>([[1, []], [2, []], [3, []]]);
-    for (const scene of screenplay.scenes) byAct.get(scene.act)?.push(scene);
+    for (const scene of screenplay.scenes) {
+      if (q && !scene.slug.toLowerCase().includes(q)) continue;
+      byAct.get(scene.act)?.push(scene);
+    }
     return [...byAct.entries()].filter(([, scenes]) => scenes.length > 0);
-  }, [screenplay]);
+  }, [screenplay, query]);
 
   return (
     <nav className="scene-navigator" aria-label={t('nav.title')}>
       <h2 className="panel-title">{t('nav.title')}</h2>
+      <input
+        type="search"
+        className="scene-search"
+        aria-label={t('nav.title')}
+        placeholder={`${t('nav.title')}…`}
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+      />
       {acts.map(([act, scenes]) => (
         <section key={act} role="group" aria-labelledby={`act-header-${act}`}>
           <h3 id={`act-header-${act}`} className="act-header">
