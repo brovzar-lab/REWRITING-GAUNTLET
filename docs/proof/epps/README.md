@@ -46,4 +46,19 @@ cd /Users/quantumcode/CODE/REWRITING-GAUNTLET && node scripts/proof-epps.mjs
    surfaces, zero drift. Verdict editing lives in the inspector; the card
    mirrors it.
 
-Later slices (M3–M7) append shots 03–08 here.
+## M3 — Set-Up / Pay-off map (2026-07-13)
+
+8. `03-setup-marked-on-line.png` — an action line selected; its status bar
+   carries "Set-up" (pressed) and "Pay-off" toggle buttons, the same line
+   where "Add note" lives. Marking happens on the object, not in a panel.
+9. `03b-setup-payoff-map.png` — full-board Set-Up / Pay-off Map with all three
+   statuses at once: OK (Scene 1 set-up → Scene 3 pay-off, with Unpair),
+   Unpaid set-up (Scene 5, with a "Pair with a pay-off…" select), Orphan
+   pay-off (Scene 8, with "Pair with a set-up…"). Every status is a word plus
+   glyph; every reference jumps to the exact line.
+
+Repeated-information (near-identical lines cited at both occurrences) runs in
+the Plot pass and is covered by unit tests; the sample has no duplicate line
+to screenshot.
+
+Later slices (M4–M7) append shots 04–08 here.

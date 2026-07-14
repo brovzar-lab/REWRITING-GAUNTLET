@@ -90,6 +90,30 @@ await page.locator('.scene-point-card').getByRole('button', { name: 'Unsure' }).
 await frame4.evaluate((el) => el.scrollIntoView({ block: 'center' }));
 await shot('02d-inline-saved-inspector-matches.png');
 
+// M3: Set-Up / Pay-off — marked directly on the line, mapped in full board.
+await page.evaluate(() => indexedDB.deleteDatabase('rewrite-studio'));
+await page.reload();
+await page.waitForSelector('.sp-page .ProseMirror');
+
+const markBar = page.locator('.status-beats');
+// Mark an action line as a set-up directly from its status bar.
+await page.locator('.sp-page .sp-action').first().click();
+await markBar.getByRole('button', { name: 'Set-up' }).click();
+await shot('03-setup-marked-on-line.png');
+
+// A pay-off, plus an unpaid set-up and an orphan pay-off to show every status.
+await page.locator('[data-scene-card="sc3"]').click();
+await markBar.getByRole('button', { name: 'Pay-off' }).click();
+await page.locator('[data-scene-card="sc5"]').click();
+await markBar.getByRole('button', { name: 'Set-up' }).click();
+await page.locator('[data-scene-card="sc7"]').click();
+await markBar.getByRole('button', { name: 'Pay-off' }).click();
+
+await page.getByRole('region', { name: 'Story Board' }).first().getByRole('button', { name: 'Full board' }).click();
+const map = page.getByRole('region', { name: 'Set-Up / Pay-off Map' });
+await map.locator('.map-row', { hasText: 'Set-up · Scene 1' }).getByLabel(/Pair with a pay-off/).selectOption({ label: 'Scene 3' });
+await shot('03b-setup-payoff-map.png');
+
 // Leave no demo data behind.
 await page.evaluate(() => indexedDB.deleteDatabase('rewrite-studio'));
 await browser.close();
