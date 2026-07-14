@@ -266,44 +266,25 @@
   text-transform: uppercase;
 }
 
-/* The in-place Scene Point editor. Dense, token-true, above neighbors. */
-.sp-card-pop {
-  position: absolute;
-  left: -2px;
-  top: calc(100% - 6px);
-  z-index: 6;
-  width: 236px;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-  background: var(--surface-panel);
-  color: var(--text-primary);
-  border: 1px solid var(--divider-strong);
+/* The dotted chip becomes the editor, in place, inside the card.
+   Same dashed outline, same footprint; the card simply grows a little. */
+.card-point-edit {
+  width: 100%;
+  background: transparent;
+  color: inherit;
+  border: 1px dashed currentColor;
   border-radius: var(--rounded-control);
-  padding: var(--space-sm);
-  box-shadow: var(--shadow-card-lift);
-}
-
-.sp-card-pop textarea {
-  background: var(--surface-inset);
-  color: var(--text-primary);
-  border: 1px solid var(--divider);
-  border-radius: var(--rounded-control);
-  padding: 5px 8px;
+  padding: 2px 4px;
   font-family: var(--font-ui);
-  font-size: var(--font-size-body);
-  resize: vertical;
+  font-size: var(--font-size-label);
+  line-height: 1.35;
+  resize: none;
 }
 
-.sp-card-pop .sp-verdicts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-xs);
-}
-
-.sp-card-pop .seg-button[aria-pressed='true'] {
-  border-color: var(--accent);
-  color: var(--text-primary);
+.card-point-edit::placeholder {
+  color: inherit;
+  opacity: 0.8;
+  font-style: italic;
 }
 
 /* R-trust: board legend — colors and line styles always paired with words */

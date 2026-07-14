@@ -12,17 +12,22 @@ beforeEach(() => {
 const frame = (sceneId: string) =>
   document.querySelector(`[data-card-frame="${sceneId}"]`) as HTMLElement;
 
-describe('inline scene point editing on board cards', () => {
-  it('clicking "No point yet" opens the inline editor, focused, with the book placeholder', async () => {
+describe('direct in-card scene point editing (no popover)', () => {
+  it('clicking the dotted chip turns it into an editable field inside the card itself', async () => {
     const user = userEvent.setup();
     render(<Board />);
     await user.click(within(frame('sc2')).getByRole('button', { name: 'No point yet' }));
-    const editor = screen.getByPlaceholderText('The point of this scene is…');
+
+    // The editor lives inside the card frame — in place of the chip.
+    const editor = within(frame('sc2')).getByPlaceholderText('The point of this scene is…');
     expect(editor).toBeVisible();
     expect(editor).toHaveFocus();
+    // No popover, no floating box, no dialog. Ever.
+    expect(document.querySelector('.sp-card-pop')).toBeNull();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('Enter saves, closes the editor, turns the chip into a preview, and syncs the inspector', async () => {
+  it('Enter saves in place, shows the preview on the card, and syncs the inspector', async () => {
     const user = userEvent.setup();
     useAppStore.getState().select({ sceneId: 'sc2', elementId: 'sc2-e5' });
     render(
@@ -35,7 +40,7 @@ describe('inline scene point editing on board cards', () => {
     await user.keyboard('The wake reopens the ledger.{Enter}');
 
     expect(useAppStore.getState().scenePoints.sc2.point).toBe('The wake reopens the ledger.');
-    expect(screen.queryByRole('dialog', { name: 'Scene point' })).not.toBeInTheDocument();
+    expect(within(frame('sc2')).queryByPlaceholderText('The point of this scene is…')).not.toBeInTheDocument();
     const preview = within(frame('sc2')).getByRole('button', { name: /the wake reopens/i });
     expect(preview).toHaveFocus();
     // The inspector's Scene Point card shows the same value immediately.
@@ -47,12 +52,11 @@ describe('inline scene point editing on board cards', () => {
   it('Escape cancels without saving and returns focus to the chip', async () => {
     const user = userEvent.setup();
     render(<Board />);
-    const chip = within(frame('sc2')).getByRole('button', { name: 'No point yet' });
-    await user.click(chip);
+    await user.click(within(frame('sc2')).getByRole('button', { name: 'No point yet' }));
     await user.keyboard('junk that must not be saved{Escape}');
 
     expect(useAppStore.getState().scenePoints.sc2?.point ?? '').toBe('');
-    expect(screen.queryByPlaceholderText('The point of this scene is…')).not.toBeInTheDocument();
+    expect(within(frame('sc2')).queryByPlaceholderText('The point of this scene is…')).not.toBeInTheDocument();
     expect(within(frame('sc2')).getByRole('button', { name: 'No point yet' })).toHaveFocus();
   });
 
@@ -64,10 +68,10 @@ describe('inline scene point editing on board cards', () => {
     await user.click(screen.getByText('Story Board'));
 
     expect(useAppStore.getState().scenePoints.sc2.point).toBe('Saved by blur.');
-    expect(screen.queryByPlaceholderText('The point of this scene is…')).not.toBeInTheDocument();
+    expect(within(frame('sc2')).queryByPlaceholderText('The point of this scene is…')).not.toBeInTheDocument();
   });
 
-  it('the verdict set from the card popover updates the store, the card marker, and the inspector', async () => {
+  it('typing in the inspector mirrors onto the card, and its verdict shows as a card marker', async () => {
     const user = userEvent.setup();
     const sc3 = useAppStore.getState().screenplay.scenes.find((s) => s.id === 'sc3')!;
     useAppStore.getState().select({ sceneId: 'sc3', elementId: sc3.elements[0].id });
@@ -77,18 +81,16 @@ describe('inline scene point editing on board cards', () => {
         <EvidenceInspector />
       </>,
     );
-    await user.click(within(frame('sc3')).getByRole('button', { name: 'No point yet' }));
-    const pop = screen.getByRole('dialog', { name: 'Scene point' });
-    await user.click(within(pop).getByRole('button', { name: /cut candidate/i }));
+    const inspector = screen.getByLabelText('Evidence & Notes', { selector: 'aside' });
+    await user.type(
+      within(inspector).getByLabelText('Scene point', { selector: 'textarea' }),
+      'A drive-by of the cemetery.',
+    );
+    expect(frame('sc3')).toHaveTextContent('A drive-by of the cemetery.');
 
+    await user.click(within(inspector).getByRole('button', { name: /cut candidate/i }));
     expect(useAppStore.getState().scenePoints.sc3.verdict).toBe('cut_candidate');
     // Small but wordy marker on the card itself — never color alone.
     expect(frame('sc3')).toHaveTextContent('Cut candidate');
-    // The inspector's verdict button reflects it immediately.
-    const inspector = screen.getByLabelText('Evidence & Notes', { selector: 'aside' });
-    expect(within(inspector).getByRole('button', { name: /cut candidate/i })).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    );
   });
 });

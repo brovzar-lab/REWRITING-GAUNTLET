@@ -91,36 +91,37 @@ test('M2: Scene Points state the point, clear the board chip, and survive a relo
   await expect(page.locator('.scene-point-card').getByRole('button', { name: 'Unsure' })).toHaveAttribute('aria-pressed', 'true');
 });
 
-test('M2R: the writer acts on the card itself — inline point, verdict, reload', async ({ page }) => {
+test('M2R: the dotted chip is the editor — type the point directly on the card', async ({ page }) => {
   await freshApp(page);
 
-  // Click the chip on the card, write the point in place, Enter saves.
+  // Click the chip: the same dotted area becomes an editable field in the card.
   const frame4 = page.locator('[data-card-frame="sc4"]');
   await frame4.getByRole('button', { name: 'No point yet' }).click();
-  const pop = page.getByRole('dialog', { name: 'Scene point' });
-  await expect(pop.locator('textarea')).toBeFocused();
-  await pop.locator('textarea').fill('Raúl shows what the water cost him.');
-  // The verdict lives in the same popover.
-  await pop.getByRole('button', { name: 'Unsure' }).click();
-  await pop.locator('textarea').press('Enter');
-  await expect(pop).not.toBeVisible();
+  const editor = frame4.locator('.card-point-edit');
+  await expect(editor).toBeFocused();
+  await expect(editor).toHaveAttribute('placeholder', 'The point of this scene is…');
+  // No popover, no floating box, no dialog — the editing happens in the card.
+  await expect(page.locator('.sp-card-pop')).toHaveCount(0);
+  await expect(page.getByRole('dialog')).toHaveCount(0);
 
-  // The chip became a preview; the verdict marker is words, on the card.
+  await editor.fill('Raúl shows what the water cost him.');
+  await editor.press('Enter');
+  await expect(frame4.locator('.card-point-edit')).toHaveCount(0);
   await expect(frame4).toContainText('Raúl shows what the water cost him.');
-  await expect(frame4).toContainText('Unsure');
 
-  // The inspector shows the same data immediately.
+  // Verdict stays in the inspector; the card mirrors it as a word marker.
   await frame4.getByRole('button', { name: /Scene 4/ }).click();
   await page.getByRole('tab', { name: 'Evidence & Notes' }).click();
   await expect(page.locator('#sp-point')).toHaveValue('Raúl shows what the water cost him.');
-  await expect(page.locator('.scene-point-card').getByRole('button', { name: 'Unsure' })).toHaveAttribute('aria-pressed', 'true');
+  await page.locator('.scene-point-card').getByRole('button', { name: 'Unsure' }).click();
+  await expect(frame4).toContainText('Unsure');
 
-  // Escape cancels a second edit without losing the saved point.
+  // Escape cancels a second in-card edit without losing the saved point.
   await frame4.getByRole('button', { name: /Raúl shows/ }).click();
-  await page.getByRole('dialog', { name: 'Scene point' }).locator('textarea').press('Escape');
+  await frame4.locator('.card-point-edit').press('Escape');
   await expect(frame4).toContainText('Raúl shows what the water cost him.');
 
-  // Reload: inline-authored point and verdict persist.
+  // Reload: card-authored point and verdict persist.
   await page.waitForTimeout(1200);
   await page.reload();
   await expect(page.locator('.sp-page .ProseMirror')).toBeVisible();
