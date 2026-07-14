@@ -114,6 +114,51 @@ const map = page.getByRole('region', { name: 'Set-Up / Pay-off Map' });
 await map.locator('.map-row', { hasText: 'Set-up · Scene 1' }).getByLabel(/Pair with a pay-off/).selectOption({ label: 'Scene 3' });
 await shot('03b-setup-payoff-map.png');
 
+// M4: Four High Points placed on cards + momentum strip (full board).
+await page.evaluate(() => indexedDB.deleteDatabase('rewrite-studio'));
+await page.reload();
+await page.waitForSelector('.sp-page .ProseMirror');
+await page.getByRole('region', { name: 'Story Board' }).first().getByRole('button', { name: 'Full board' }).click();
+await page.locator('[data-card-frame="sc4"]').getByLabel('High point').selectOption('midpoint');
+await page.locator('[data-card-frame="sc8"]').getByLabel('High point').selectOption('act_two_end');
+await page.locator('[data-card-frame="sc2"]').getByLabel('High point').selectOption('emotional_high');
+await page.locator('[data-card-frame="sc6"]').getByLabel('High point').selectOption('emotional_low');
+await shot('04-high-points-momentum.png');
+await page.getByRole('button', { name: 'Exit full board' }).click();
+
+// M5: methodology tools surfaced inside a pass workspace (Structure).
+await page.getByRole('button', { name: /4.*STRUCTURE/ }).click();
+await shot('05-pass-workspace-integration.png');
+
+// M6: Polish Read in progress, then export readiness.
+await page.getByRole('button', { name: /11.*POLISH/ }).click();
+await page.getByRole('button', { name: 'Start Polish Read' }).click();
+await shot('06-polish-read.png');
+const polishBar = page.getByRole('region', { name: 'Polish Read', exact: true });
+for (let i = 0; i < 20; i++) {
+  const finish = polishBar.getByRole('button', { name: 'Finish Polish Read' });
+  if (await finish.isEnabled()) break;
+  await polishBar.getByRole('button', { name: 'Next page' }).click();
+}
+await polishBar.getByRole('button', { name: 'Finish Polish Read' }).click();
+await page.getByRole('button', { name: 'Export', exact: true }).click();
+await shot('07-export-readiness.png');
+await page.getByRole('dialog', { name: 'Export screenplay' }).getByRole('button', { name: 'Close' }).click();
+
+// M7: TV pilot adapter (Studio extension) — import as a one-hour pilot.
+await page.getByRole('button', { name: 'Import', exact: true }).click();
+const dialog = page.getByRole('dialog', { name: 'Open a screenplay' });
+await dialog.getByRole('button', { name: /Paste screenplay/ }).click();
+await dialog.getByLabel(/Paste your script/).fill(
+  'Title: THE PILOT\n\nINT. WRITERS ROOM - DAY\n\nThe team argues about the cold open.\n\nEXT. STUDIO LOT - DAY\n\nGolf carts weave between sound stages.\n\nINT. STAGE 4 - DAY\n\nThe set is half struck.\n\nINT. NETWORK OFFICE - DAY\n\nThe verdict lands.\n',
+);
+await dialog.getByLabel(/Format/).selectOption('one_hour');
+await shot('08-tv-adapter-import.png');
+await dialog.getByRole('button', { name: /Import and replace draft/ }).click();
+await page.locator('.scene-row').first().click();
+await page.waitForTimeout(300);
+await shot('08b-tv-adapter-badge.png');
+
 // Leave no demo data behind.
 await page.evaluate(() => indexedDB.deleteDatabase('rewrite-studio'));
 await browser.close();

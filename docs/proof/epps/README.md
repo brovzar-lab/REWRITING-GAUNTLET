@@ -61,4 +61,29 @@ Repeated-information (near-identical lines cited at both occurrences) runs in
 the Plot pass and is covered by unit tests; the sample has no duplicate line
 to screenshot.
 
-Later slices (M4–M7) append shots 04–08 here.
+## M4 — Four High Points + momentum (2026-07-13)
+
+`04-high-points-momentum.png` — full board: each card carries a High point
+select (act on the object); placed points show word flags (MID-POINT, ACT II
+END, HIGH, LOW). The Four High Points checklist shows placed vs not-placed;
+the Momentum strip reads the emotional roller-coaster per act.
+
+## M5 — pass-workspace integration (2026-07-13)
+
+`05-pass-workspace-integration.png` — the Structure pass workspace with a
+WRITER-sourced High Points section (placed jump, missing named), visibly
+separate from AI findings; the navigator flags structural points.
+
+## M6 — Polish Read + export readiness (2026-07-13)
+
+`06-polish-read.png` — the cover-to-cover Polish Read walking the pages with the
+book's polish objectives in view. `07-export-readiness.png` — the Export menu's
+advisory readiness checklist (pages read, priority concerns, unpaid set-ups);
+export stays available.
+
+## M7 — TV pilot adapter, Studio Extension (2026-07-13)
+
+`08-tv-adapter-import.png` — the import Format picker (EXT) set to a one-hour
+pilot. `08b-tv-adapter-badge.png` — after import the top bar shows the
+"One-hour pilot" badge with its EXT chip, and structure diagnosis uses pilot
+act-out vocabulary. Feature is the default and shows no badge.
