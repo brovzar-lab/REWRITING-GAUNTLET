@@ -114,6 +114,38 @@
   text-transform: uppercase;
 }
 
+/* M7: TV pilot adapter — format badge (Studio extension) in the top bar. */
+.format-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-label);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  color: var(--text-primary);
+  border: 1px solid var(--divider-strong);
+  border-radius: var(--rounded-control);
+  padding: 1px 6px;
+}
+
+.import-format {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: var(--space-sm) 0;
+}
+
+.import-format select {
+  background: var(--surface-inset);
+  color: var(--text-primary);
+  border: 1px solid var(--divider);
+  border-radius: var(--rounded-control);
+  padding: 5px 8px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-body);
+}
+
 .top-bar-spacer {
   flex: 1;
 }

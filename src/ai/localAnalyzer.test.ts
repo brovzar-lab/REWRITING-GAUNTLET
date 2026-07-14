@@ -390,3 +390,33 @@ describe('polish pass: doubled words', () => {
     expect(doubled!.proposal!.newText).toBe('He ran to the door.');
   });
 });
+
+describe('TV adapter (Studio extension): format-aware structure checks', () => {
+  const structurePass = EPPS_PASSES.find((p) => p.id === 'structure')!;
+
+  it('phrases high-point gaps in feature vocabulary by default', async () => {
+    const findings = await localAnalyzer.diagnose({
+      screenplay: sampleScreenplay,
+      connections: sampleConnections,
+      highPoints: [],
+      pass: structurePass,
+      passRunId: 'r-feat',
+      now: 1,
+    });
+    expect(findings.some((f) => /point of no return/i.test(f.summary))).toBe(true);
+    expect(findings.some((f) => /act-out/i.test(f.summary))).toBe(false);
+  });
+
+  it('switches to pilot act-out vocabulary for a one-hour pilot', async () => {
+    const findings = await localAnalyzer.diagnose({
+      screenplay: { ...sampleScreenplay, docFormat: 'one_hour' },
+      connections: sampleConnections,
+      highPoints: [],
+      pass: structurePass,
+      passRunId: 'r-tv',
+      now: 1,
+    });
+    expect(findings.some((f) => /act-out/i.test(f.summary))).toBe(true);
+    expect(findings.some((f) => /point of no return/i.test(f.summary))).toBe(false);
+  });
+});

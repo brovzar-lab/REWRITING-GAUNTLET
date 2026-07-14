@@ -192,6 +192,73 @@ test('M6: run the Polish Read cover to cover, then export shows readiness', asyn
   await expect(page.getByRole('button', { name: 'Resume Polish Read' })).toBeVisible();
 });
 
+const PILOT = `Title: THE PILOT
+Draft date: First draft
+
+INT. WRITERS ROOM - DAY
+
+The team argues about the cold open.
+
+MAYA
+Open on the fire, not the meeting.
+
+EXT. STUDIO LOT - DAY
+
+Golf carts weave between sound stages.
+
+INT. STAGE 4 - DAY
+
+The set is half struck.
+
+INT. EDIT BAY - NIGHT
+
+Frames flick past on the monitor.
+
+EXT. PARKING LOT - NIGHT
+
+Maya leaves last, again.
+
+INT. NETWORK OFFICE - DAY
+
+The verdict on the pilot lands.
+`;
+
+test('M7: import as a one-hour pilot — badge + pilot vocabulary (Studio extension)', async ({ page }) => {
+  await page.setViewportSize({ width: 1500, height: 900 });
+  await freshApp(page);
+
+  // Import with the Studio-extension format picker set to a one-hour pilot.
+  await page.getByRole('button', { name: 'Import', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: 'Open a screenplay' });
+  await dialog.getByRole('button', { name: /Paste screenplay/ }).click();
+  await dialog.getByLabel(/Paste your script/).fill(PILOT);
+  await dialog.getByLabel(/Format/).selectOption('one_hour');
+  await dialog.getByRole('button', { name: /Import and replace draft/ }).click();
+
+  // The format badge shows in the top bar, labeled a Studio extension.
+  const badge = page.locator('.format-badge');
+  await expect(badge).toContainText('One-hour pilot');
+  await expect(badge.locator('.ext-chip')).toBeVisible();
+
+  // Structure diagnosis uses pilot act-out vocabulary, not feature vocabulary.
+  await page.getByRole('banner').getByRole('button', { name: 'Annotated read', exact: true }).click();
+  const readBar = page.getByRole('region', { name: 'Private annotated read' });
+  for (let i = 0; i < 6; i++) {
+    const next = readBar.getByRole('button', { name: 'Next scene' });
+    if (!(await next.isEnabled())) break;
+    await next.click();
+  }
+  await readBar.getByRole('button', { name: 'Mark read complete' }).click();
+  await page.getByRole('button', { name: /4.*STRUCTURE/ }).click();
+  await page.getByRole('button', { name: 'Diagnose', exact: true }).click();
+  await expect(page.getByRole('tabpanel')).toContainText(/act-out/i);
+
+  // Reload: the format persists.
+  await page.waitForTimeout(1200);
+  await page.reload();
+  await expect(page.locator('.format-badge')).toContainText('One-hour pilot');
+});
+
 test('M2R: the dotted chip is the editor — type the point directly on the card', async ({ page }) => {
   await freshApp(page);
 

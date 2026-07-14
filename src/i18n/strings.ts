@@ -375,6 +375,11 @@ export const dictionaries = {
     'export.concerns': '{n} open priority concern(s)',
     'export.unpaid': '{n} unpaid set-up(s)',
     'export.readyNote': 'Advisory only. You can always export.',
+    'fmt.label': 'Format',
+    'fmt.feature': 'Feature',
+    'fmt.one_hour': 'One-hour pilot',
+    'fmt.half_hour': 'Half-hour pilot',
+    'fmt.badgeTip': "Studio extension — TV pilot adapter, not from Epps's book",
   },
   es: {
     'app.title': 'Rewrite Studio',
@@ -748,6 +753,11 @@ export const dictionaries = {
     'export.concerns': '{n} preocupación(es) prioritaria(s) abierta(s)',
     'export.unpaid': '{n} planteamiento(s) sin pago',
     'export.readyNote': 'Solo informativo. Siempre puedes exportar.',
+    'fmt.label': 'Formato',
+    'fmt.feature': 'Largometraje',
+    'fmt.one_hour': 'Piloto de una hora',
+    'fmt.half_hour': 'Piloto de media hora',
+    'fmt.badgeTip': 'Extensión del Studio — adaptador de piloto de TV, no proviene del libro de Epps',
   },
 } as const satisfies Record<Lang, Record<string, string>>;
 

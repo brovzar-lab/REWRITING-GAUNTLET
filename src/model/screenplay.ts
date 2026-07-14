@@ -26,11 +26,21 @@ export interface Scene {
   elements: Element[];
 }
 
+/** Studio extension (not from Epps's book): the document format. Changes
+    structure *expectations* only — never the canonical scene model. */
+export type DocFormat = 'feature' | 'one_hour' | 'half_hour';
+
 export interface Screenplay {
   id: string;
   title: string;
   draftLabel: string;
   scenes: Scene[];
+  /** Optional; absent means a feature. */
+  docFormat?: DocFormat;
+}
+
+export function resolveDocFormat(sp: Screenplay): DocFormat {
+  return sp.docFormat ?? 'feature';
 }
 
 /** A visible story relationship between two scenes on the board. */

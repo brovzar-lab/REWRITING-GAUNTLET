@@ -1,5 +1,7 @@
 import { useAppStore, type ThemeChoice, type UiLang } from '../store/appStore';
+import { resolveDocFormat } from '../model/screenplay';
 import { RevisionControl } from './RevisionControl';
+import { ExtChip } from './ExtChip';
 import { useT } from '../i18n/strings';
 
 const THEMES: { id: ThemeChoice; key: 'theme.day' | 'theme.night' | 'theme.system' }[] = [
@@ -26,6 +28,7 @@ export function TopBar() {
   const saveState = useAppStore((s) => s.saveState);
   const title = useAppStore((s) => s.screenplay.title);
   const draftLabel = useAppStore((s) => s.screenplay.draftLabel);
+  const docFormat = useAppStore((s) => resolveDocFormat(s.screenplay));
   const t = useT();
 
   return (
@@ -34,6 +37,11 @@ export function TopBar() {
       <span className="draft-label">
         {title} · {draftLabel}
       </span>
+      {docFormat !== 'feature' && (
+        <span className="format-badge" title={t('fmt.badgeTip')}>
+          {t(`fmt.${docFormat}`)} <ExtChip />
+        </span>
+      )}
       <span className="top-bar-spacer" />
       <span className={`save-indicator save-${saveState}`} aria-live="polite">
         {saveState === 'saved' ? t('topbar.saved') : t('topbar.saving')}

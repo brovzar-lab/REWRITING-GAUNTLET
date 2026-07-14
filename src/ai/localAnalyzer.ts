@@ -1,4 +1,4 @@
-import type { Scene, Screenplay } from '../model/screenplay';
+import { resolveDocFormat, type DocFormat, type Scene, type Screenplay } from '../model/screenplay';
 import { unpointedScenes } from '../model/scenepoint';
 import { missingStructuralRoles, type StructuralRole } from '../model/markers';
 import type { Citation, Finding } from '../workflow/types';
@@ -89,15 +89,24 @@ interface MakeInput {
   proposal?: Finding['proposal'];
 }
 
+/** Act-balance tolerances by format (Studio extension). TV pilots run leaner
+    acts than a feature's long second act, so the band is wider. */
+const BALANCE: Record<DocFormat, [number, number]> = {
+  feature: [0.15, 0.55],
+  one_hour: [0.1, 0.6],
+  half_hour: [0.1, 0.6],
+};
+
 function actBalance(ctx: Ctx): Finding[] {
   const scenes = ctx.screenplay.scenes;
   if (scenes.length < 6) return [];
+  const [lo, hi] = BALANCE[resolveDocFormat(ctx.screenplay)];
   const out: Finding[] = [];
   for (const act of [1, 2, 3] as const) {
     const inAct = scenes.filter((s) => s.act === act);
     if (inAct.length === 0) continue;
     const share = inAct.length / scenes.length;
-    if (share < 0.15 || share > 0.55) {
+    if (share < lo || share > hi) {
       out.push(
         ctx.make({
           status: 'uncertain',
@@ -394,10 +403,13 @@ function highPointGaps(ctx: Ctx): Finding[] {
   const actTwo = scenes.filter((s) => s.act === 2);
   const actThree = scenes.filter((s) => s.act === 3);
   const middle = scenes[Math.floor(scenes.length / 2)];
+  const isTv = resolveDocFormat(ctx.screenplay) !== 'feature';
   const anchor: Record<StructuralRole, { scene: Scene | undefined; q: string }> = {
     act_one_end: {
       scene: actOne[actOne.length - 1],
-      q: 'No End of Act One is marked. Is your first-act endpoint a real point of no return?',
+      q: isTv
+        ? 'No first act-out is marked. Does your first act break leave the audience unable to stop watching?'
+        : 'No End of Act One is marked. Is your first-act endpoint a real point of no return?',
     },
     midpoint: {
       scene: middle,
@@ -405,11 +417,15 @@ function highPointGaps(ctx: Ctx): Finding[] {
     },
     act_two_end: {
       scene: actTwo[actTwo.length - 1],
-      q: 'No End of Act Two is marked. Does Act Two end on the protagonist’s lowest moment of doubt?',
+      q: isTv
+        ? 'No late act-out is marked. Does a later act break twist the episode’s promise?'
+        : 'No End of Act Two is marked. Does Act Two end on the protagonist’s lowest moment of doubt?',
     },
     climax: {
       scene: actThree[actThree.length - 1],
-      q: 'No Third Act Climax is marked. Where does the story pay everything off?',
+      q: isTv
+        ? 'No episode climax is marked. Where does the pilot pay off its promise and set up the series?'
+        : 'No Third Act Climax is marked. Where does the story pay everything off?',
     },
   };
   const out: Finding[] = [];

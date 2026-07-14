@@ -3,7 +3,11 @@ import { useAppStore } from '../store/appStore';
 import { parseFountain } from '../io/fountain';
 import { parseFdx } from '../io/fdx';
 import { paginate } from '../pagination/engine';
+import type { DocFormat } from '../model/screenplay';
 import { useT } from '../i18n/strings';
+import { ExtChip } from './ExtChip';
+
+const FORMATS: DocFormat[] = ['feature', 'one_hour', 'half_hour'];
 
 /** Fountain is line-based text; FDX is XML. A pasted FDX always carries its root tag. */
 function looksLikeFdx(text: string, fileName: string | null): boolean {
@@ -38,6 +42,7 @@ export function ImportDialog() {
   const [step, setStep] = useState<Step>('menu');
   const [text, setText] = useState('');
   const [fileName, setFileName] = useState<string | null>(null);
+  const [format, setFormat] = useState<DocFormat>('feature');
   const [busy, setBusy] = useState(false);
   const pasteRef = useRef<HTMLTextAreaElement>(null);
   const fountainInputRef = useRef<HTMLInputElement>(null);
@@ -48,6 +53,7 @@ export function ImportDialog() {
       setStep('menu');
       setText('');
       setFileName(null);
+      setFormat('feature');
       setBusy(false);
     }
   }, [open]);
@@ -81,7 +87,7 @@ export function ImportDialog() {
     setBusy(true);
     try {
       await takeSnapshot(`Before import: ${oldTitle}`);
-      replaceDocument(preview.screenplay);
+      replaceDocument({ ...preview.screenplay, docFormat: format });
       close();
     } finally {
       setBusy(false);
@@ -104,6 +110,21 @@ export function ImportDialog() {
       </span>
       <p className="import-note">{t('import.actGuess')}</p>
       {preview.fdx && <p className="import-note">{t('import.fdxCaveat')}</p>}
+    </div>
+  );
+
+  const formatPicker = (
+    <div className="import-format">
+      <label className="control-label" htmlFor="import-format">
+        {t('fmt.label')} <ExtChip />
+      </label>
+      <select id="import-format" value={format} onChange={(e) => setFormat(e.target.value as DocFormat)}>
+        {FORMATS.map((f) => (
+          <option key={f} value={f}>
+            {t(`fmt.${f}`)}
+          </option>
+        ))}
+      </select>
     </div>
   );
 
@@ -205,6 +226,7 @@ export function ImportDialog() {
               }}
             />
             {previewBlock}
+            {formatPicker}
             <p className="import-note">{t('import.snapshotNote')}</p>
             {actions}
           </>
@@ -216,6 +238,7 @@ export function ImportDialog() {
               {t('import.fileChosen')}: {fileName}
             </p>
             {previewBlock}
+            {formatPicker}
             <p className="import-note">{t('import.snapshotNote')}</p>
             {actions}
           </>
