@@ -349,3 +349,44 @@ describe('structure pass: high-point gaps', () => {
     expect(findings.find((f) => /mid-point/i.test(f.summary))).toBeUndefined();
   });
 });
+
+describe('polish pass: doubled words', () => {
+  function withDouble(): { screenplay: Screenplay; connections: Connection[] } {
+    return {
+      screenplay: {
+        id: 'dx',
+        title: 'DOUBLE',
+        draftLabel: 'D',
+        scenes: [
+          {
+            id: 'dx-s1',
+            number: 1,
+            act: 1,
+            slug: 'INT. HALL - DAY',
+            storyFunction: 'plot',
+            elements: [
+              { id: 'dx-s1-e1', type: 'scene_heading', text: 'INT. HALL - DAY' },
+              { id: 'dx-s1-e2', type: 'action', text: 'He ran to to the door.' },
+            ],
+          },
+        ],
+      },
+      connections: [],
+    };
+  }
+
+  it('flags a doubled word and proposes removing the repeat', async () => {
+    const { screenplay, connections } = withDouble();
+    const findings = await localAnalyzer.diagnose({
+      screenplay,
+      connections,
+      pass: EPPS_PASSES.find((p) => p.id === 'polish')!,
+      passRunId: 'run-dx',
+      now: 1,
+    });
+    const doubled = findings.find((f) => /doubled word/i.test(f.summary));
+    expect(doubled).toBeDefined();
+    expect(doubled!.citations[0].elementId).toBe('dx-s1-e2');
+    expect(doubled!.proposal!.newText).toBe('He ran to the door.');
+  });
+});

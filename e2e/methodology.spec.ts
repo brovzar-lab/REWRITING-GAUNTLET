@@ -156,6 +156,42 @@ test('M4: place high points on cards, see them in the checklist, navigator, and 
   await expect(page.locator('.scene-navigator')).toContainText('Mid-Point');
 });
 
+test('M6: run the Polish Read cover to cover, then export shows readiness', async ({ page }) => {
+  await page.setViewportSize({ width: 1500, height: 900 });
+  await freshApp(page);
+
+  // Start the Polish Read from the Polish pass.
+  await page.getByRole('button', { name: /11.*POLISH/ }).click();
+  await page.getByRole('button', { name: 'Start Polish Read' }).click();
+  const bar = page.getByRole('region', { name: 'Polish Read', exact: true });
+  await expect(bar).toContainText('Page 1 of');
+  await expect(bar).toContainText('Dialogue reads clean');
+
+  // Walk to the last page; Finish is gated until then.
+  await expect(bar.getByRole('button', { name: 'Finish Polish Read' })).toBeDisabled();
+  for (let i = 0; i < 20; i++) {
+    const finish = bar.getByRole('button', { name: 'Finish Polish Read' });
+    if (await finish.isEnabled()) break;
+    await bar.getByRole('button', { name: 'Next page' }).click();
+  }
+  await bar.getByRole('button', { name: 'Finish Polish Read' }).click();
+  await expect(page.getByRole('region', { name: 'Polish Read', exact: true })).toHaveCount(0);
+
+  // Export menu shows the readiness facts; export stays available.
+  await page.getByRole('button', { name: 'Export', exact: true }).click();
+  const readiness = page.getByRole('region', { name: 'Export readiness' });
+  await expect(readiness).toContainText('All pages read');
+
+  // Reload: the finished Polish Read persists.
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(1200);
+  await page.reload();
+  await expect(page.locator('.sp-page .ProseMirror')).toBeVisible();
+  // The Polish pass is still active from before the reload; open the pass tab.
+  await page.getByRole('tab', { name: 'Rewrite pass' }).click();
+  await expect(page.getByRole('button', { name: 'Resume Polish Read' })).toBeVisible();
+});
+
 test('M2R: the dotted chip is the editor — type the point directly on the card', async ({ page }) => {
   await freshApp(page);
 

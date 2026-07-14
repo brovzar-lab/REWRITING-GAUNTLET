@@ -144,6 +144,24 @@ function FindingCard({ finding, index }: { finding: Finding; index: number }) {
   );
 }
 
+/** The Polish pass gains a cover-to-cover Polish Read. Acting on the object:
+    the walk happens over the actual pages in the editor, not in this panel. */
+function PolishReadControl() {
+  const active = useAppStore((s) => s.polishReadActive);
+  const complete = useAppStore((s) => s.polishReadComplete);
+  const startPolishRead = useAppStore((s) => s.startPolishRead);
+  const t = useT();
+  return (
+    <section className="pass-tool polish-control" aria-label={t('polish.controlRegion')}>
+      <span className="control-label">{t('polish.title')}</span>
+      {complete && <span className="polish-done-flag">✓ {t('polish.done')}</span>}
+      <button type="button" className="seg-button" disabled={active} onClick={startPolishRead}>
+        {complete ? t('polish.resume') : t('polish.start')}
+      </button>
+    </section>
+  );
+}
+
 /** The guided pass workspace. Selecting a pass in the tray opens this:
     the pass objective, what it examines, Diagnose, the approve/reject queue,
     progress, Complete pass, and the recommended next pass. Diagnosis stays
@@ -244,6 +262,8 @@ export function PassWorkspace() {
           ))}
         </ul>
       </section>
+
+      {pass.id === 'polish' && <PolishReadControl />}
 
       <PassToolSection passId={pass.id} />
 

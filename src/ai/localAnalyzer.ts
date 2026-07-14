@@ -313,6 +313,37 @@ function repeatedInformation(ctx: Ctx): Finding[] {
   return out.slice(0, MAX_PER_PASS);
 }
 
+const DOUBLED_WORD = /\b([A-Za-zÀ-ÿ']+)(\s+)\1\b/i;
+
+/** A word typed twice in a row ("the the"). A textual fact with a safe fix,
+    like the whitespace cleanup. Skips deliberate doubles it cannot judge. */
+function doubledWords(ctx: Ctx): Finding[] {
+  const allowed = new Set(['had', 'that', 'no']); // legitimately repeatable — don't touch
+  const out: Finding[] = [];
+  for (const scene of ctx.screenplay.scenes) {
+    for (const el of scene.elements) {
+      if (el.type !== 'action' && el.type !== 'dialogue') continue;
+      const m = el.text.match(DOUBLED_WORD);
+      if (!m || allowed.has(m[1].toLowerCase())) continue;
+      out.push(
+        ctx.make({
+          status: 'clear',
+          summary: `Doubled word in "${scene.slug}" ("${m[1]}${m[2]}${m[1]}").`,
+          citations: [{ sceneId: scene.id, elementId: el.id }],
+          proposal: {
+            sceneId: scene.id,
+            elementId: el.id,
+            oldText: el.text,
+            newText: el.text.replace(DOUBLED_WORD, '$1'),
+            rationale: 'Remove the accidentally repeated word.',
+          },
+        }),
+      );
+    }
+  }
+  return out.slice(0, MAX_PER_PASS);
+}
+
 function whitespaceCleanups(ctx: Ctx): Finding[] {
   const out: Finding[] = [];
   for (const scene of ctx.screenplay.scenes) {
@@ -401,7 +432,7 @@ const PASS_LENSES: Record<string, (ctx: Ctx) => Finding[]> = {
   scene: (ctx) => [...missingScenePoints(ctx), ...lengthOutliers(ctx, 'scene')],
   dialogue: (ctx) => [...longSpeeches(ctx), ...talkyScenes(ctx)],
   consistency: (ctx) => nearDuplicateNames(ctx),
-  polish: (ctx) => whitespaceCleanups(ctx),
+  polish: (ctx) => [...whitespaceCleanups(ctx), ...doubledWords(ctx)],
 };
 
 export const localAnalyzer: AIProvider = {

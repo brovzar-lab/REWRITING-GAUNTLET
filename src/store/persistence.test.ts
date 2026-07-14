@@ -151,6 +151,19 @@ describe('persistence', () => {
     expect(hp).toContainEqual({ role: 'emotional_low', sceneId: 'sc2' });
   });
 
+  it('a finished Polish Read survives a reload', async () => {
+    dispose = await initPersistence({ debounceMs: 5 });
+    useAppStore.getState().startPolishRead();
+    useAppStore.getState().completePolishRead();
+    await until(async () => (await db.workflow.get(sampleScreenplay.id))?.polishReadComplete === true);
+    dispose();
+
+    useAppStore.getState().resetToSample();
+    expect(useAppStore.getState().polishReadComplete).toBe(false);
+    dispose = await initPersistence({ debounceMs: 5 });
+    expect(useAppStore.getState().polishReadComplete).toBe(true);
+  });
+
   it('a pre-methodology save (no gamePlan key) hydrates with defaults and loses nothing', async () => {
     // Simulate a workflow row written before the Epps methodology phase.
     await db.workflow.put({
@@ -176,5 +189,6 @@ describe('persistence', () => {
     expect(state.scenePoints).toEqual({});
     expect(state.storyBeats).toEqual([]);
     expect(state.highPoints).toEqual([]);
+    expect(state.polishReadComplete).toBe(false);
   });
 });

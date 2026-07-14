@@ -3,6 +3,7 @@ import { PanelLayout } from './panels/PanelLayout';
 import { GoToPage } from './panels/GoToPage';
 import { ImportDialog } from './panels/ImportDialog';
 import { AnnotatedReadBar } from './panels/AnnotatedReadBar';
+import { PolishReadBar } from './panels/PolishReadBar';
 import { AiSettings } from './panels/AiSettings';
 import { ExportMenu } from './panels/ExportMenu';
 import { PrintView } from './panels/PrintView';
@@ -51,6 +52,7 @@ export default function App() {
         editor={
           <>
             <AnnotatedReadBar />
+            <PolishReadBar />
             <EditorToolbar />
             <ScreenplayEditor />
           </>

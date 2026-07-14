@@ -97,6 +97,17 @@ export interface AppState {
   setHighPoint: (sceneId: string, role: HighPointRole | null) => void;
   loadHighPoints: (highPoints: HighPointMarker[]) => void;
 
+  /** Polish Read: the final cover-to-cover page walk. active/page are ephemeral;
+      complete persists as workflow progress. */
+  polishReadActive: boolean;
+  polishReadPage: number;
+  polishReadComplete: boolean;
+  startPolishRead: () => void;
+  setPolishReadPage: (page: number) => void;
+  exitPolishRead: () => void;
+  completePolishRead: () => void;
+  loadPolishReadComplete: (complete: boolean) => void;
+
   /** Rewrite workflow: annotated read, readers, findings, approvals. */
   workflow: WorkflowState;
   /** Guided private annotated read (scene by scene). */
@@ -337,6 +348,26 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   loadHighPoints: (highPoints) => set({ highPoints }),
 
+  polishReadActive: false,
+  polishReadPage: 1,
+  polishReadComplete: false,
+  startPolishRead: () => set({ polishReadActive: true, polishReadPage: 1 }),
+  setPolishReadPage: (polishReadPage) => set({ polishReadPage: Math.max(1, polishReadPage) }),
+  exitPolishRead: () => set({ polishReadActive: false }),
+  completePolishRead: () =>
+    set((s) => ({
+      polishReadActive: false,
+      polishReadComplete: true,
+      workflow: {
+        ...s.workflow,
+        passRuns: {
+          ...s.workflow.passRuns,
+          polish: s.workflow.passRuns.polish === 'complete' ? 'complete' : 'reviewing',
+        },
+      },
+    })),
+  loadPolishReadComplete: (polishReadComplete) => set({ polishReadComplete }),
+
   workflow: emptyWorkflow(),
 
   readModeActive: false,
@@ -501,6 +532,9 @@ export const useAppStore = create<AppState>((set, get) => ({
       scenePoints: {},
       storyBeats: [],
       highPoints: [],
+      polishReadActive: false,
+      polishReadPage: 1,
+      polishReadComplete: false,
       readModeActive: false,
     }),
 
@@ -604,6 +638,9 @@ export const useAppStore = create<AppState>((set, get) => ({
       scenePoints: {},
       storyBeats: [],
       highPoints: [],
+      polishReadActive: false,
+      polishReadPage: 1,
+      polishReadComplete: false,
       readModeActive: false,
       noteComposerOpen: false,
       inspectorTab: 'evidence',

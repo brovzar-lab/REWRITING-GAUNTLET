@@ -48,6 +48,7 @@ export interface WorkflowRow {
   scenePoints?: Record<string, ScenePoint>;
   storyBeats?: StoryBeat[];
   highPoints?: HighPointMarker[];
+  polishReadComplete?: boolean;
 }
 
 class RewriteStudioDB extends Dexie {
