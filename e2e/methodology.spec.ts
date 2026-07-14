@@ -91,6 +91,45 @@ test('M2: Scene Points state the point, clear the board chip, and survive a relo
   await expect(page.locator('.scene-point-card').getByRole('button', { name: 'Unsure' })).toHaveAttribute('aria-pressed', 'true');
 });
 
+test('M3: mark a set-up and a pay-off on lines, pair them in the map, survive reload', async ({ page }) => {
+  await page.setViewportSize({ width: 1500, height: 900 });
+  await freshApp(page);
+
+  const board = page.getByRole('region', { name: 'Story Board' }).first();
+  const markBar = page.locator('.status-beats');
+
+  // Mark scene 1 as a set-up and scene 3 as a pay-off — directly on the line.
+  await page.locator('[data-scene-card="sc1"]').click();
+  await markBar.getByRole('button', { name: 'Set-up' }).click();
+  await expect(markBar.getByRole('button', { name: 'Set-up' })).toHaveAttribute('aria-pressed', 'true');
+  await page.locator('[data-scene-card="sc3"]').click();
+  await markBar.getByRole('button', { name: 'Pay-off' }).click();
+
+  // The map (full-board) shows them unpaired until the writer pairs them.
+  await board.getByRole('button', { name: 'Full board' }).click();
+  const map = page.getByRole('region', { name: 'Set-Up / Pay-off Map' });
+  await expect(map).toContainText('Unpaid set-up');
+  await expect(map).toContainText('Orphan pay-off');
+
+  // Pair them from the map: the row becomes OK.
+  await map.getByLabel(/Pair with a pay-off/).selectOption({ index: 1 });
+  await expect(map.locator('.map-row.status-ok')).toContainText('OK');
+  await expect(map.locator('.map-row.status-ok')).toContainText('Scene 1');
+  await expect(map.locator('.map-row.status-ok')).toContainText('Scene 3');
+
+  // Clicking a row reference jumps to the exact line.
+  await map.locator('.map-row.status-ok').getByRole('button', { name: /Set-up · Scene 1/ }).click();
+  await board.getByRole('button', { name: 'Exit full board' }).click();
+  await expect(markBar.getByRole('button', { name: 'Set-up' })).toHaveAttribute('aria-pressed', 'true');
+
+  // Reload: the pairing and its OK status persist.
+  await page.waitForTimeout(1200);
+  await page.reload();
+  await expect(page.locator('.sp-page .ProseMirror')).toBeVisible();
+  await page.getByRole('region', { name: 'Story Board' }).first().getByRole('button', { name: 'Full board' }).click();
+  await expect(page.getByRole('region', { name: 'Set-Up / Pay-off Map' }).locator('.map-row.status-ok')).toBeVisible();
+});
+
 test('M2R: the dotted chip is the editor — type the point directly on the card', async ({ page }) => {
   await freshApp(page);
 

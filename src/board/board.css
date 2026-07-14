@@ -34,6 +34,18 @@
   display: none;
 }
 
+/* Body holds the canvas and, in full-board mode, the structural side panel. */
+.board-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.board-body > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
 .board-canvas {
   position: relative;
   flex: 1;

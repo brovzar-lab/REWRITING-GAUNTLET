@@ -14,6 +14,7 @@ import {
 import { EPPS_PASSES } from '../model/passes';
 import { emptyGamePlan, type Compass, type ElementAnchor, type GamePlan } from '../model/gameplan';
 import { emptyScenePoint, type ScenePoint } from '../model/scenepoint';
+import type { StoryBeat, StoryBeatKind } from '../model/markers';
 import { db } from './db';
 
 export interface Selection {
@@ -82,6 +83,14 @@ export interface AppState {
   scenePoints: Record<string, ScenePoint>;
   updateScenePoint: (sceneId: string, patch: Partial<Omit<ScenePoint, 'sceneId'>>) => void;
   loadScenePoints: (scenePoints: Record<string, ScenePoint>) => void;
+
+  /** Set-up / pay-off beats anchored to exact elements. */
+  storyBeats: StoryBeat[];
+  /** Mark a line as a set-up or pay-off. Same kind toggles off; other kind switches. */
+  setStoryBeat: (kind: StoryBeatKind, sceneId: string, elementId: string) => void;
+  pairBeats: (setupId: string, payoffId: string) => void;
+  unpairBeat: (beatId: string) => void;
+  loadStoryBeats: (storyBeats: StoryBeat[]) => void;
 
   /** Rewrite workflow: annotated read, readers, findings, approvals. */
   workflow: WorkflowState;
@@ -258,6 +267,56 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   loadScenePoints: (scenePoints) => set({ scenePoints }),
 
+  storyBeats: [],
+
+  setStoryBeat: (kind, sceneId, elementId) =>
+    set((s) => {
+      const existing = s.storyBeats.find((b) => b.elementId === elementId);
+      if (existing && existing.kind === kind) {
+        // Same kind again: remove it and release its partner.
+        return {
+          storyBeats: s.storyBeats
+            .filter((b) => b.id !== existing.id)
+            .map((b) => (b.pairedWith === existing.id ? { ...b, pairedWith: null } : b)),
+        };
+      }
+      if (existing) {
+        // Switch kind: release its partner, keep the anchor.
+        return {
+          storyBeats: s.storyBeats
+            .map((b) => (b.pairedWith === existing.id ? { ...b, pairedWith: null } : b))
+            .map((b) => (b.id === existing.id ? { ...b, kind, pairedWith: null } : b)),
+        };
+      }
+      const beat: StoryBeat = { id: `beat-${crypto.randomUUID()}`, kind, sceneId, elementId, pairedWith: null };
+      return { storyBeats: [...s.storyBeats, beat] };
+    }),
+
+  pairBeats: (setupId, payoffId) =>
+    set((s) => {
+      const setup = s.storyBeats.find((b) => b.id === setupId && b.kind === 'setup');
+      const payoff = s.storyBeats.find((b) => b.id === payoffId && b.kind === 'payoff');
+      if (!setup || !payoff) return s;
+      const freed = new Set([setup.pairedWith, payoff.pairedWith].filter((x): x is string => !!x));
+      return {
+        storyBeats: s.storyBeats.map((b) => {
+          if (b.id === setupId) return { ...b, pairedWith: payoffId };
+          if (b.id === payoffId) return { ...b, pairedWith: setupId };
+          if (freed.has(b.id)) return { ...b, pairedWith: null };
+          return b;
+        }),
+      };
+    }),
+
+  unpairBeat: (beatId) =>
+    set((s) => ({
+      storyBeats: s.storyBeats.map((b) =>
+        b.id === beatId || b.pairedWith === beatId ? { ...b, pairedWith: null } : b,
+      ),
+    })),
+
+  loadStoryBeats: (storyBeats) => set({ storyBeats }),
+
   workflow: emptyWorkflow(),
 
   readModeActive: false,
@@ -420,6 +479,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       workflow: emptyWorkflow(),
       gamePlan: emptyGamePlan(),
       scenePoints: {},
+      storyBeats: [],
       readModeActive: false,
     }),
 
@@ -521,6 +581,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       workflow: emptyWorkflow(),
       gamePlan: emptyGamePlan(),
       scenePoints: {},
+      storyBeats: [],
       readModeActive: false,
       noteComposerOpen: false,
       inspectorTab: 'evidence',

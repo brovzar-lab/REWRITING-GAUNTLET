@@ -109,6 +109,30 @@ describe('persistence', () => {
     expect(sp.verdict).toBe('earns');
   });
 
+  it('story beats survive a reload', async () => {
+    dispose = await initPersistence({ debounceMs: 5 });
+    const s = useAppStore.getState();
+    s.setStoryBeat('setup', 'sc1', 'sc1-e2');
+    s.setStoryBeat('payoff', 'sc3', 'sc3-e1');
+    const setup = useAppStore.getState().storyBeats.find((b) => b.elementId === 'sc1-e2')!;
+    const payoff = useAppStore.getState().storyBeats.find((b) => b.elementId === 'sc3-e1')!;
+    s.pairBeats(setup.id, payoff.id);
+    await until(async () => {
+      const row = await db.workflow.get(sampleScreenplay.id);
+      return (row?.storyBeats?.length ?? 0) === 2;
+    });
+    dispose();
+
+    useAppStore.getState().resetToSample();
+    expect(useAppStore.getState().storyBeats).toEqual([]);
+    dispose = await initPersistence({ debounceMs: 5 });
+    const beats = useAppStore.getState().storyBeats;
+    expect(beats).toHaveLength(2);
+    const reloadedSetup = beats.find((b) => b.elementId === 'sc1-e2')!;
+    expect(reloadedSetup.kind).toBe('setup');
+    expect(reloadedSetup.pairedWith).toBe(beats.find((b) => b.elementId === 'sc3-e1')!.id);
+  });
+
   it('a pre-methodology save (no gamePlan key) hydrates with defaults and loses nothing', async () => {
     // Simulate a workflow row written before the Epps methodology phase.
     await db.workflow.put({
@@ -132,5 +156,6 @@ describe('persistence', () => {
     expect(state.workflow.passRuns.polish).toBe('complete');
     expect(state.gamePlan).toEqual(emptyGamePlan());
     expect(state.scenePoints).toEqual({});
+    expect(state.storyBeats).toEqual([]);
   });
 });

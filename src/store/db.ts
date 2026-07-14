@@ -4,6 +4,7 @@ import type { EvidenceRecord } from '../model/evidence';
 import type { WorkflowState } from '../workflow/types';
 import type { GamePlan } from '../model/gameplan';
 import type { ScenePoint } from '../model/scenepoint';
+import type { StoryBeat } from '../model/markers';
 import type { ThemeChoice, UiLang } from './appStore';
 
 export interface DocumentRow {
@@ -45,6 +46,7 @@ export interface WorkflowRow {
   /** Added in the Epps methodology phase. Optional: pre-phase rows lack them. */
   gamePlan?: GamePlan;
   scenePoints?: Record<string, ScenePoint>;
+  storyBeats?: StoryBeat[];
 }
 
 class RewriteStudioDB extends Dexie {

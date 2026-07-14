@@ -10,7 +10,11 @@ export function StatusBar() {
   const select = useAppStore((s) => s.select);
   const setInspectorTab = useAppStore((s) => s.setInspectorTab);
   const setNoteComposerOpen = useAppStore((s) => s.setNoteComposerOpen);
+  const storyBeats = useAppStore((s) => s.storyBeats);
+  const setStoryBeat = useAppStore((s) => s.setStoryBeat);
   const t = useT();
+
+  const selectedBeat = selection ? storyBeats.find((b) => b.elementId === selection.elementId) : undefined;
 
   const pagination = useMemo(() => paginate(screenplay), [screenplay]);
   const page = selection ? (pagination.pageOfElement.get(selection.elementId) ?? 1) : 1;
@@ -58,6 +62,26 @@ export function StatusBar() {
         ›
       </button>
       <span className="top-bar-spacer" />
+      <span className="status-beats" role="group" aria-label={t('beat.mark')}>
+        <button
+          type="button"
+          className="seg-button"
+          aria-pressed={selectedBeat?.kind === 'setup'}
+          disabled={!selection}
+          onClick={() => selection && setStoryBeat('setup', selection.sceneId, selection.elementId)}
+        >
+          {t('beat.setup')}
+        </button>
+        <button
+          type="button"
+          className="seg-button"
+          aria-pressed={selectedBeat?.kind === 'payoff'}
+          disabled={!selection}
+          onClick={() => selection && setStoryBeat('payoff', selection.sceneId, selection.elementId)}
+        >
+          {t('beat.payoff')}
+        </button>
+      </span>
       <button
         type="button"
         className="seg-button"

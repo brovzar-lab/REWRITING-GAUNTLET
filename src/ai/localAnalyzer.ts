@@ -276,6 +276,42 @@ function nearDuplicateNames(ctx: Ctx): Finding[] {
   return out.slice(0, 3);
 }
 
+const REPEAT_MIN_CHARS = 24;
+const normalizeLine = (text: string): string =>
+  text
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N} ]/gu, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+/** Repeated information: the same action/dialogue line said twice, nearly word
+    for word. A textual fact — cites both occurrences, proposes nothing. */
+function repeatedInformation(ctx: Ctx): Finding[] {
+  const seen = new Map<string, Citation>();
+  const out: Finding[] = [];
+  for (const scene of ctx.screenplay.scenes) {
+    for (const el of scene.elements) {
+      if (el.type !== 'action' && el.type !== 'dialogue') continue;
+      const key = normalizeLine(el.text);
+      if (key.length < REPEAT_MIN_CHARS) continue;
+      const prev = seen.get(key);
+      const here: Citation = { sceneId: scene.id, elementId: el.id };
+      if (prev) {
+        out.push(
+          ctx.make({
+            status: 'uncertain',
+            summary: `The same information appears twice, nearly word for word ("${el.text.trim().slice(0, 48)}…"). Does the audience need to hear it again?`,
+            citations: [prev, here],
+          }),
+        );
+      } else {
+        seen.set(key, here);
+      }
+    }
+  }
+  return out.slice(0, MAX_PER_PASS);
+}
+
 function whitespaceCleanups(ctx: Ctx): Finding[] {
   const out: Finding[] = [];
   for (const scene of ctx.screenplay.scenes) {
@@ -321,7 +357,7 @@ const PASS_LENSES: Record<string, (ctx: Ctx) => Finding[]> = {
   character: (ctx) => singleAppearanceCharacters(ctx),
   'story-theme': (ctx) => unconnectedScenes(ctx),
   structure: (ctx) => [...actBalance(ctx), ...softActTwoEnd(ctx)],
-  plot: (ctx) => backwardsSetupPayoff(ctx),
+  plot: (ctx) => [...backwardsSetupPayoff(ctx), ...repeatedInformation(ctx)],
   corr: (ctx) => lengthOutliers(ctx, 'pressure'),
   relationship: (ctx) => missingRelationships(ctx),
   scene: (ctx) => [...missingScenePoints(ctx), ...lengthOutliers(ctx, 'scene')],

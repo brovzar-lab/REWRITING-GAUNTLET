@@ -254,3 +254,65 @@ describe('scene pass: scenes with no stated scene point', () => {
     expect(f!.citations.length).toBe(screenplay.scenes.length);
   });
 });
+
+describe('plot pass: repeated information', () => {
+  function withRepeat(): { screenplay: Screenplay; connections: Connection[] } {
+    const screenplay: Screenplay = {
+      id: 'rx',
+      title: 'REPEAT',
+      draftLabel: 'D',
+      scenes: [
+        {
+          id: 'rx-s1',
+          number: 1,
+          act: 1,
+          slug: 'INT. OFFICE - DAY',
+          storyFunction: 'plot',
+          elements: [
+            { id: 'rx-s1-e1', type: 'scene_heading', text: 'INT. OFFICE - DAY' },
+            { id: 'rx-s1-e2', type: 'action', text: 'The dam upstream has been condemned for years.' },
+          ],
+        },
+        {
+          id: 'rx-s2',
+          number: 2,
+          act: 2,
+          slug: 'EXT. RIVER - DAY',
+          storyFunction: 'plot',
+          elements: [
+            { id: 'rx-s2-e1', type: 'scene_heading', text: 'EXT. RIVER - DAY' },
+            { id: 'rx-s2-e2', type: 'action', text: 'The dam upstream has been condemned for years.' },
+          ],
+        },
+      ],
+    };
+    return { screenplay, connections: [] };
+  }
+
+  it('cites both occurrences of a near-identical line', async () => {
+    const { screenplay, connections } = withRepeat();
+    const findings = await localAnalyzer.diagnose({
+      screenplay,
+      connections,
+      pass: EPPS_PASSES.find((p) => p.id === 'plot')!,
+      passRunId: 'run-rx',
+      now: 1,
+    });
+    const repeat = findings.find((f) => /same information|word for word|repeat/i.test(f.summary));
+    expect(repeat).toBeDefined();
+    expect(repeat!.citations).toHaveLength(2);
+    expect(repeat!.citations.map((c) => c.elementId).sort()).toEqual(['rx-s1-e2', 'rx-s2-e2']);
+  });
+
+  it('does not flag short or one-off lines', async () => {
+    const { screenplay, connections } = fixture();
+    const findings = await localAnalyzer.diagnose({
+      screenplay,
+      connections,
+      pass: EPPS_PASSES.find((p) => p.id === 'plot')!,
+      passRunId: 'run-plain',
+      now: 1,
+    });
+    expect(findings.find((f) => /same information|word for word/i.test(f.summary))).toBeUndefined();
+  });
+});

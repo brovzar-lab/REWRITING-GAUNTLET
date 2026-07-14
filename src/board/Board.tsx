@@ -10,6 +10,7 @@ import {
 } from '@dnd-kit/core';
 import { StoryCard } from './StoryCard';
 import { ConnectionLayer } from './connections';
+import { StructureView } from '../panels/StructureView';
 import { useAppStore } from '../store/appStore';
 import { useT } from '../i18n/strings';
 import type { Scene } from '../model/screenplay';
@@ -85,23 +86,26 @@ export function Board() {
           {fullBoard ? t('board.collapse') : t('board.expand')}
         </button>
       </div>
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-        <div className="board-canvas" ref={containerRef}>
-          <ConnectionLayer connections={connections} containerRef={containerRef} lang={lang} />
-          {acts.map(([act, group]) => (
-            <section key={act} className="board-act" aria-labelledby={`board-act-${act}`}>
-              <h3 id={`board-act-${act}`} className="board-act-header">
-                {t(ACT_KEYS[act])}
-              </h3>
-              <div className="card-row">
-                {group.map((scene) => (
-                  <StoryCard key={scene.id} scene={scene} />
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-      </DndContext>
+      <div className="board-body">
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+          <div className="board-canvas" ref={containerRef}>
+            <ConnectionLayer connections={connections} containerRef={containerRef} lang={lang} />
+            {acts.map(([act, group]) => (
+              <section key={act} className="board-act" aria-labelledby={`board-act-${act}`}>
+                <h3 id={`board-act-${act}`} className="board-act-header">
+                  {t(ACT_KEYS[act])}
+                </h3>
+                <div className="card-row">
+                  {group.map((scene) => (
+                    <StoryCard key={scene.id} scene={scene} />
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        </DndContext>
+        {fullBoard && <StructureView />}
+      </div>
       <dl className="board-legend" aria-label={t('board.legend')}>
         {FUNCTION_ORDER.map((fn) => (
           <div key={fn} className="legend-item">
