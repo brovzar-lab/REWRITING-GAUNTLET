@@ -1,0 +1,79 @@
+import { expect, test } from '@playwright/test';
+import { freshApp, rail, openScenes, openBoardMode, openPasses } from './helpers';
+
+/** Acceptance for the WriterDuet-informed Journey / IA realignment. */
+
+test('first open leads with Open / Import / New Project, not a wall of tools', async ({ page }) => {
+  await freshApp(page);
+  // The Project workspace is the starting place.
+  await expect(page.locator('.project-panel')).toBeVisible();
+  await expect(page.locator('.project-panel').getByRole('button', { name: 'Open Project' })).toBeVisible();
+  await expect(page.locator('.project-panel').getByRole('button', { name: 'Import…' })).toBeVisible();
+  await expect(page.locator('.project-panel').getByRole('button', { name: 'New Project' })).toBeVisible();
+  // "What to do next" is right there.
+  await expect(page.locator('.journey-guide')).toContainText('Private annotated read');
+  // The scene list is NOT the default left column, and the pass tray is gone.
+  await expect(page.locator('.scene-navigator')).toHaveCount(0);
+  await expect(page.locator('.pass-tray')).toHaveCount(0);
+});
+
+test('the script stays visually central and scenes open on demand', async ({ page }) => {
+  await freshApp(page);
+  // Editor occupies the center region.
+  const center = page.locator('.center-region .sp-page');
+  await expect(center).toBeVisible();
+  // Scenes are a workspace you open, with search.
+  await openScenes(page);
+  await expect(page.locator('.scene-navigator .scene-search')).toBeVisible();
+  await page.locator('.scene-navigator .scene-search').fill('CANAL');
+  await expect(page.locator('.scene-navigator .scene-row')).toHaveCount(1);
+});
+
+test('rewrite passes are one action away and the active pass says what to do', async ({ page }) => {
+  await freshApp(page);
+  await openPasses(page);
+  // The 11 passes are promoted to a strip at the top.
+  await expect(page.locator('.pass-strip .ds-pass-chip')).toHaveCount(11);
+  await page.locator('.pass-strip').getByRole('button', { name: /STRUCTURE/ }).click();
+  const workspace = page.locator('[data-pass-workspace="structure"]');
+  await expect(workspace).toBeVisible();
+  await expect(workspace).toContainText('Objective');
+  await expect(workspace).toContainText('What this pass examines');
+});
+
+test('the board is a mode, reachable and dismissible, never wedged by default', async ({ page }) => {
+  await freshApp(page);
+  await expect(page.locator('.center-region > .board')).toHaveCount(0);
+  await openBoardMode(page);
+  await expect(page.locator('.center-region > .board')).toBeVisible();
+  await expect(page.locator('.sp-page')).toHaveCount(0);
+  await rail(page, 'Board').click(); // toggle back
+  await expect(page.locator('.sp-page')).toBeVisible();
+});
+
+test('layout modes reconfigure the workspace', async ({ page }) => {
+  await freshApp(page);
+  await page.getByLabel('Layout').selectOption('focus');
+  await expect(page.locator('.workspace-rail')).toHaveCount(0);
+  await expect(page.locator('.sp-page')).toBeVisible();
+  await page.getByLabel('Layout').selectOption('workbench');
+  await expect(page.locator('.workspace-rail')).toBeVisible();
+});
+
+test('the journey guide advances as the writer works', async ({ page }) => {
+  await freshApp(page);
+  // Current stage is the private read.
+  await expect(page.locator('.jg-stage.is-current')).toContainText('Private annotated read');
+  await page.locator('.journey-guide').getByRole('button', { name: 'Start read' }).click();
+  await expect(page.getByRole('region', { name: 'Private annotated read' })).toBeVisible();
+});
+
+test('Day and Night both work in the new shell', async ({ page }) => {
+  await freshApp(page);
+  await page.getByLabel('Appearance').selectOption('day');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'day');
+  await expect(page.locator('.app-menubar')).toBeVisible();
+  await expect(page.locator('.project-panel')).toBeVisible();
+  await page.getByLabel('Appearance').selectOption('night');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'night');
+});

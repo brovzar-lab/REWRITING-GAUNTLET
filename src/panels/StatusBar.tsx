@@ -88,6 +88,7 @@ export function StatusBar() {
         disabled={!selection}
         onClick={() => {
           setInspectorTab('evidence');
+          useAppStore.getState().setRightWorkspace('evidence');
           setNoteComposerOpen(true);
         }}
       >

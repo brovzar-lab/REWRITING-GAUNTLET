@@ -1,68 +1,54 @@
-import { expect, test, type Page } from '@playwright/test';
-
-async function freshApp(page: Page) {
-  await page.goto('/');
-  await page.evaluate(() => indexedDB.deleteDatabase('rewrite-studio'));
-  await page.reload();
-  await expect(page.locator('.sp-page .ProseMirror')).toBeVisible();
-}
+import { expect, test } from '@playwright/test';
+import { freshApp, rail, openScenes, openBoardMode, openEvidence, openPass } from './helpers';
 
 test.describe('workspace', () => {
-  test('loads the full rewrite room on one screen', async ({ page }) => {
+  test('opens on the Project workspace with the script centered, scenes not the default column', async ({ page }) => {
     await freshApp(page);
-    await expect(page.getByRole('heading', { name: 'Rewrite Studio' })).toBeVisible();
-    // Screenplay page with real content
+    await expect(page.locator('.app-menubar')).toBeVisible();
     await expect(page.locator('.sp-scene_heading').first()).toHaveText('EXT. HIGHWAY 2 - SONORAN DESERT - DAY');
-    // Navigator: three acts, 16 scenes
-    await expect(page.locator('.act-header')).toHaveCount(3);
-    await expect(page.locator('.scene-row')).toHaveCount(16);
-    // Pass tray: the 11 Epps passes in order
-    const chips = page.locator('.ds-pass-chip');
-    await expect(chips).toHaveCount(11);
-    await expect(chips.first()).toContainText('FOUNDATION');
-    await expect(chips.last()).toContainText('POLISH');
-    // Board: one card per scene + 7 connections
-    await expect(page.locator('.ds-story-card')).toHaveCount(16);
-    await expect(page.locator('[data-connection-id]')).toHaveCount(7);
+    // Project is the default left workspace; Open / Import are right there.
+    await expect(page.locator('.project-panel')).toBeVisible();
+    await expect(rail(page, 'Project')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('.project-panel').getByRole('button', { name: 'Open Project' })).toBeVisible();
+    // "What to do next" guide on the right.
+    await expect(page.locator('.journey-guide')).toBeVisible();
+    // The scene list is NOT the permanent left column, and the pass tray is gone.
+    await expect(page.locator('.scene-navigator')).toHaveCount(0);
+    await expect(page.locator('.pass-tray')).toHaveCount(0);
   });
 
-  test('Day and Night themes switch the workspace but never the paper (Page Rule)', async ({ page }) => {
+  test('Day and Night themes switch the chrome but never the paper (Page Rule)', async ({ page }) => {
     await freshApp(page);
     const paper = page.locator('.sp-page');
     const nightPaper = await paper.evaluate((el) => getComputedStyle(el).backgroundColor);
     await page.getByLabel('Appearance').selectOption('day');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'day');
     const dayPaper = await paper.evaluate((el) => getComputedStyle(el).backgroundColor);
-    expect(dayPaper).toBe(nightPaper); // warm paper in both themes
-    // Identical hierarchy: same panels present in both themes
+    expect(dayPaper).toBe(nightPaper);
+    await expect(page.locator('.project-panel')).toBeVisible();
+    await expect(page.locator('.right-panel')).toBeVisible();
+  });
+
+  test('the Scenes workspace navigates, and the board reflects the selection', async ({ page }) => {
+    await freshApp(page);
+    await openScenes(page);
     await expect(page.locator('.scene-navigator')).toBeVisible();
-    await expect(page.locator('.evidence-inspector')).toBeVisible();
-    await expect(page.locator('.pass-tray')).toBeVisible();
+    await page.locator('.scene-navigator .scene-row', { hasText: 'MUNICIPAL ARCHIVE - DAY' }).first().click();
+    await expect(page.locator('.scene-row.is-selected')).toContainText('MUNICIPAL ARCHIVE');
+    await openBoardMode(page);
+    await expect(page.locator('[data-scene-card="sc7"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('[data-scene-card="sc7"] .card-selected-marker')).toBeVisible();
   });
 
-  test('navigator click travels to the scene and selects it everywhere', async ({ page }) => {
+  test('selecting a line and opening Evidence shows source and claim labels', async ({ page }) => {
     await freshApp(page);
-    await page.locator('.scene-navigator').getByRole('button', { name: /^8 INT\. MUNICIPAL ARCHIVE - DAY/ }).click();
-    // Board card highlights with non-color marker
-    const card = page.locator('[data-scene-card="sc7"]');
-    await expect(card).toHaveAttribute('aria-pressed', 'true');
-    await expect(card.locator('.card-selected-marker')).toBeVisible();
-    // Inspector shows the scene context
-    await expect(page.locator('.inspector-context')).toContainText('INT. MUNICIPAL ARCHIVE - DAY');
-  });
-
-  test('selecting a screenplay line reveals its evidence with source and claim labels', async ({ page }) => {
-    await freshApp(page);
-    // Click Raúl's buyout dialogue line (sc4-e4)
     await page.locator('[data-element-id="sc4-e4"]').click();
+    await openEvidence(page);
     const inspector = page.locator('.evidence-inspector');
     await expect(inspector).toContainText('Raúl’s buyout offer lands before');
     await expect(inspector.locator('.source-chip').first()).toHaveText('Reader');
     await expect(inspector).toContainText('Ana P.');
-    await expect(inspector).toContainText('Reader reaction');
     await expect(inspector).toContainText('Priority concern');
-    // The board card for scene 4 carries the selection
-    await expect(page.locator('[data-scene-card="sc4"]')).toHaveAttribute('aria-pressed', 'true');
   });
 
   test('Final Draft keyboard flow: Tab retypes, Enter advances element', async ({ page }) => {
@@ -71,61 +57,56 @@ test.describe('workspace', () => {
     await action.click();
     await page.keyboard.press('Tab');
     await expect(page.locator('[data-element-id="sc1-e2"]')).toHaveAttribute('data-element-type', 'character');
-    await page.keyboard.press('Tab'); // character -> transition
-    await page.keyboard.press('Tab'); // transition -> scene_heading
-    await page.keyboard.press('Tab'); // scene_heading -> action (back where we began)
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
     await expect(page.locator('[data-element-id="sc1-e2"]')).toHaveAttribute('data-element-type', 'action');
-    // Enter after a character creates a dialogue element
     await page.locator('[data-element-id="sc2-e3"]').click();
     await page.keyboard.press('End');
     await page.keyboard.press('Enter');
     const scene2Types = page.locator('[data-scene-id="sc2"][data-element-type]');
-    await expect(scene2Types.nth(2)).toHaveAttribute('data-element-type', 'character'); // sc2-e3
-    await expect(scene2Types.nth(3)).toHaveAttribute('data-element-type', 'dialogue'); // newly created
+    await expect(scene2Types.nth(2)).toHaveAttribute('data-element-type', 'character');
+    await expect(scene2Types.nth(3)).toHaveAttribute('data-element-type', 'dialogue');
   });
 
-  test('board card is keyboard-draggable (Space, arrows, Space)', async ({ page }) => {
+  test('board card is keyboard-draggable in board mode (Space, arrows, Space)', async ({ page }) => {
     await freshApp(page);
-    const firstCardBefore = await page.locator('.card-row .ds-story-card').first().getAttribute('data-card-frame');
-    expect(firstCardBefore).toBe('sc1');
+    await openBoardMode(page);
+    const firstBefore = await page.locator('.card-row .ds-story-card').first().getAttribute('data-card-frame');
+    expect(firstBefore).toBe('sc1');
     await page.locator('[data-scene-card="sc1"]').focus();
     await page.keyboard.press('Space');
     for (let i = 0; i < 8; i++) await page.keyboard.press('ArrowRight');
     await page.keyboard.press('Space');
-    const firstCardAfter = await page.locator('.card-row .ds-story-card').first().getAttribute('data-card-frame');
-    expect(firstCardAfter).not.toBe('sc1');
-    // Navigator reflects the new scene order (renumbered)
-    await expect(page.locator('.scene-row').first()).not.toContainText('HIGHWAY 2');
+    const firstAfter = await page.locator('.card-row .ds-story-card').first().getAttribute('data-card-frame');
+    expect(firstAfter).not.toBe('sc1');
   });
 
-  test('focus mode strips to page and tray; full-board mode expands the board', async ({ page }) => {
+  test('layout modes: Focus strips the chrome, Board expands the board', async ({ page }) => {
     await freshApp(page);
-    await page.getByRole('button', { name: 'Focus mode' }).click();
-    await expect(page.locator('.scene-navigator')).toBeHidden();
-    await expect(page.locator('.board')).toBeHidden();
+    await page.getByLabel('Layout').selectOption('focus');
+    await expect(page.locator('.workspace-rail')).toHaveCount(0);
+    await expect(page.locator('.right-panel')).toHaveCount(0);
     await expect(page.locator('.sp-page')).toBeVisible();
-    await expect(page.locator('.pass-tray')).toBeVisible();
-    await page.getByRole('button', { name: 'Exit focus mode' }).click();
-    await page.getByRole('button', { name: 'Full board' }).click();
-    await expect(page.locator('.middle.board-only .board')).toBeVisible();
-    await expect(page.locator('.sp-page')).toBeHidden();
-    await page.getByRole('button', { name: 'Exit full board' }).click();
+    await page.getByLabel('Layout').selectOption('board');
+    await expect(page.locator('.center-region > .board')).toBeVisible();
+    await expect(page.locator('.sp-page')).toHaveCount(0);
+    await page.getByLabel('Layout').selectOption('workbench');
     await expect(page.locator('.sp-page')).toBeVisible();
   });
 
   test('Spanish interface localizes chrome without touching screenplay text', async ({ page }) => {
     await freshApp(page);
     await page.getByRole('button', { name: 'ES', exact: true }).click();
+    await page.getByRole('button', { name: 'Escenas', exact: true }).click();
     await expect(page.locator('.act-header').first()).toHaveText('PRIMER ACTO');
-    await expect(page.locator('.pass-tray')).toContainText('Pasadas de reescritura');
-    // Screenplay content untouched
     await expect(page.locator('.sp-scene_heading').first()).toHaveText('EXT. HIGHWAY 2 - SONORAN DESERT - DAY');
   });
 
   test('active rewrite pass persists as a visible working state', async ({ page }) => {
     await freshApp(page);
-    const chip = page.getByRole('button', { name: /CHARACTER/ });
-    await chip.click();
-    await expect(chip).toHaveAttribute('aria-pressed', 'true');
+    await openPass(page, /CHARACTER/);
+    await expect(page.locator('.pass-strip').getByRole('button', { name: /CHARACTER/ })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('.pass-workspace')).toContainText('Character');
   });
 });

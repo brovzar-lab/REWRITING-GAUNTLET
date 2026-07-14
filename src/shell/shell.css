@@ -111,6 +111,13 @@
   flex-wrap: wrap;
 }
 
+/* Disabled controls stay visibly disabled inside the workstation. */
+.workstation .tool-button:disabled,
+.workstation .seg-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 /* Pass strip */
 .pass-strip {
   flex: 0 0 auto;

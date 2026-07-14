@@ -33,7 +33,9 @@ export function WorkstationShell() {
   const showRail = layoutMode !== 'focus';
   const showLeftPanel = layoutMode === 'workbench' && leftWorkspace !== null && documentOpen;
   const centerBoard = layoutMode === 'board' && documentOpen;
-  const showRight = (layoutMode === 'workbench' || layoutMode === 'script_notes') && documentOpen;
+  // Board mode swaps the center for the board but keeps the context panel, so
+  // structure work still has evidence / the pass workspace beside it.
+  const showRight = layoutMode !== 'focus' && documentOpen;
   const effectiveRight = layoutMode === 'script_notes' ? 'evidence' : rightWorkspace;
   const showPassStrip = documentOpen && !centerBoard && rightWorkspace === 'passes';
 

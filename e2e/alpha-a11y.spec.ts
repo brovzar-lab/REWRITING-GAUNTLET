@@ -1,9 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-
-/** Axe scans of every surface the alpha added, in both themes:
-    import dialog, annotated read bar, AI Assist panel (locked), AI settings
-    (consent screen), and the export menu. */
+import { freshApp, openImport, openPass } from './helpers';
 
 async function expectClean(page: Page, surface: string) {
   const results = await new AxeBuilder({ page })
@@ -16,16 +13,16 @@ async function expectClean(page: Page, surface: string) {
 
 for (const theme of ['Night', 'Day'] as const) {
   test(`alpha surfaces axe-clean in ${theme} theme`, async ({ page }) => {
-    test.slow(); // five full axe scans in sequence
+    test.slow();
 
-    await page.goto('/');
-    await page.evaluate(() => indexedDB.deleteDatabase('rewrite-studio'));
-    await page.reload();
+    await freshApp(page);
     await page.getByLabel('Appearance').selectOption(theme.toLowerCase());
-    await expect(page.locator('.sp-page .ProseMirror')).toBeVisible();
+
+    // The default workstation shell.
+    await expectClean(page, 'workstation-default');
 
     // Import menu, then the paste step with a preview showing.
-    await page.getByRole('button', { name: 'Import', exact: true }).click();
+    await openImport(page);
     await expectClean(page, 'import-menu');
     await page.getByRole('button', { name: 'Paste screenplay' }).click();
     await page.getByLabel(/Paste your script/).fill('INT. ROOM - DAY\n\nA table.\n');
@@ -33,12 +30,11 @@ for (const theme of ['Night', 'Day'] as const) {
     await expectClean(page, 'import-paste-step');
     await page.getByRole('button', { name: 'Cancel', exact: true }).click();
 
-    // Pass workspace in its locked state (a pass chip opens it).
-    await page.getByRole('button', { name: /^1 FOUNDATION/ }).click();
+    // Pass workspace in its locked state.
+    await openPass(page, /FOUNDATION/);
     await expect(page.getByText(/What this pass examines/)).toBeVisible();
     await expect(page.getByText(/Locked until/)).toBeVisible();
     await expectClean(page, 'pass-workspace-locked');
-    await page.getByRole('button', { name: /^1 FOUNDATION/ }).click(); // deselect
 
     // AI settings / consent screen.
     await page.getByRole('button', { name: 'AI settings', exact: true }).click();
@@ -46,8 +42,8 @@ for (const theme of ['Night', 'Day'] as const) {
     await expectClean(page, 'ai-settings');
     await page.getByRole('button', { name: 'Close AI settings' }).click();
 
-    // Annotated read bar.
-    await page.getByRole('banner').getByRole('button', { name: 'Annotated read', exact: true }).click();
+    // Annotated read bar (started from the locked pass workspace).
+    await page.getByRole('button', { name: 'Annotated read', exact: true }).click();
     await expect(page.getByRole('region', { name: 'Private annotated read' })).toBeVisible();
     await expectClean(page, 'read-bar');
     await page.getByRole('button', { name: 'Exit read', exact: true }).click();

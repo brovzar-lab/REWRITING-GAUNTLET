@@ -10,7 +10,7 @@ export function RightContextPanel({ override }: { override?: 'journey' | 'passes
   const stored = useAppStore((s) => s.rightWorkspace);
   const rightWorkspace = override ?? stored;
   return (
-    <div className="right-context" role="region" aria-label="Context">
+    <div className="right-context" role="region" aria-label="Context" data-editor-exit tabIndex={-1}>
       {rightWorkspace === 'passes' ? (
         <PassWorkspace />
       ) : rightWorkspace === 'evidence' ? (

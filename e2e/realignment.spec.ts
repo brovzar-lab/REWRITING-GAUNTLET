@@ -1,13 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-
-/** Visual + UX realignment acceptance (2026-07-12 plan). */
-
-async function freshApp(page: Page) {
-  await page.goto('/');
-  await page.evaluate(() => indexedDB.deleteDatabase('rewrite-studio'));
-  await page.reload();
-  await expect(page.locator('.sp-page .ProseMirror')).toBeVisible();
-}
+import { freshApp, openImport, openBoardMode, openEvidence, openPass, completeRead } from './helpers';
 
 const SCRIPT = `Title: THE LEDGER
 Draft date: First draft
@@ -25,65 +17,54 @@ A taxi waits  outside.
 `;
 
 async function pasteImport(page: Page) {
-  await page.getByRole('button', { name: 'Import', exact: true }).click();
+  await openImport(page);
   const dialog = page.getByRole('dialog', { name: 'Open a screenplay' });
   await dialog.getByRole('button', { name: 'Paste screenplay' }).click();
   await dialog.getByLabel(/Paste your script/).fill(SCRIPT);
   await dialog.getByRole('button', { name: 'Import and replace draft' }).click();
-  await expect(page.locator('.top-bar')).toContainText('THE LEDGER');
+  await expect(page.locator('.project-panel')).toContainText('THE LEDGER');
 }
 
 async function diagnosePolish(page: Page) {
-  await page.getByRole('banner').getByRole('button', { name: 'Annotated read', exact: true }).click();
-  const readBar = page.getByRole('region', { name: 'Private annotated read' });
-  await readBar.getByRole('button', { name: 'Next scene' }).click();
-  await readBar.getByRole('button', { name: 'Mark read complete' }).click();
-  await page.getByRole('button', { name: /11.*POLISH/ }).click();
+  await completeRead(page);
+  await openPass(page, /POLISH/);
   await page.getByRole('button', { name: 'Diagnose', exact: true }).click();
   await expect(page.locator('.ai-finding')).toHaveCount(2);
 }
 
 test.describe('visual realignment', () => {
-  test('board sits beside the script on desktop and drops to a bottom drawer when narrow', async ({ page }) => {
+  test('the board is a mode, not permanent furniture beside the script', async ({ page }) => {
     await page.setViewportSize({ width: 1600, height: 900 });
     await freshApp(page);
-    const editorBox = await page.locator('.editor-panel').boundingBox();
-    const boardBox = await page.locator('.board-panel').boundingBox();
-    expect(boardBox).not.toBeNull();
-    expect(boardBox!.x).toBeGreaterThan(editorBox!.x + editorBox!.width - 8);
-    await expect(page.locator('.board-shelf')).toHaveCount(0);
-
-    await page.setViewportSize({ width: 1100, height: 900 });
-    await expect(page.locator('.board-shelf .board')).toBeVisible();
-    await expect(page.locator('.board-panel')).toHaveCount(0);
+    await expect(page.locator('.center-region > .board')).toHaveCount(0);
+    await expect(page.locator('.sp-page')).toBeVisible();
+    await openBoardMode(page);
+    await expect(page.locator('.center-region > .board')).toBeVisible();
+    await expect(page.locator('.sp-page')).toHaveCount(0);
   });
 
-  test('board shows act headers and a selected scene highlights its card', async ({ page }) => {
+  test('board mode shows act headers and a selected scene highlights its card', async ({ page }) => {
     await page.setViewportSize({ width: 1600, height: 900 });
     await freshApp(page);
+    await openBoardMode(page);
     await expect(page.locator('.board-act-header')).toHaveCount(3);
-    await page.locator('.scene-row').nth(1).click();
+    await page.locator('[data-scene-card="sc2"]').click();
     await expect(page.locator('.ds-story-card.is-selected')).toHaveCount(1);
-    await expect(page.locator('.ds-story-card.is-selected')).toContainText('2');
-    // Scene selection reaches all three surfaces: script, board, inspector.
+    await openEvidence(page);
     await expect(page.locator('.inspector-context')).toContainText(/kitchen/i);
   });
 
   test('clicking a pass opens the pass control surface', async ({ page }) => {
     await freshApp(page);
-    await page.locator('.ds-pass-chip').nth(1).click();
-    const openPass = page.getByRole('button', { name: /open pass/i });
-    await expect(openPass).toBeVisible();
-    await expect(page.locator('.tray-detail')).toContainText('Focus');
-    await openPass.click();
-    await expect(page.getByRole('tab', { name: /rewrite pass/i })).toHaveAttribute('aria-selected', 'true');
+    await openPass(page, /CHARACTER/);
+    await expect(page.locator('[data-pass-workspace="character"]')).toBeVisible();
+    await expect(page.locator('.pass-workspace')).toContainText('Objective');
   });
 
-  test('a line with a note shows a marker and links to board and evidence', async ({ page }) => {
+  test('a line with a note shows a marker and links to evidence', async ({ page }) => {
     await page.setViewportSize({ width: 1600, height: 900 });
     await freshApp(page);
     await pasteImport(page);
-    // Add a note through the UI on the first action line.
     await page.locator('.sp-action', { hasText: 'Marta cooks.' }).click();
     await page.locator('.status-bar').getByRole('button', { name: 'Add note' }).click();
     await page.getByLabel('Note text').fill('The radio should already be broken.');
@@ -92,8 +73,7 @@ test.describe('visual realignment', () => {
     const marker = page.locator('.sp-note-marker').first();
     await expect(marker).toBeVisible();
     await marker.click();
-    await expect(page.getByRole('tab', { name: /evidence/i })).toHaveAttribute('aria-selected', 'true');
-    await expect(page.locator('.ds-story-card.is-selected')).toHaveCount(1);
+    await expect(page.locator('.evidence-inspector')).toBeVisible();
     await expect(page.locator('.evidence-card.is-linked')).toBeVisible();
   });
 
@@ -116,12 +96,9 @@ test.describe('visual realignment', () => {
     });
     let paper = (await page.locator('.sp-page').boundingBox())!;
     let box = (await scroller.boundingBox())!;
-    // The paper's left edge (scene numbers, selection bar) is visible...
     expect(paper.x).toBeGreaterThanOrEqual(box.x - 1);
-    // ...and the rest of the paper is reachable by horizontal scroll.
     expect(await scroller.evaluate((el) => el.scrollWidth - el.clientWidth)).toBeGreaterThan(0);
 
-    // In-app zoom raised to 140%: same guarantees.
     for (let i = 0; i < 4; i++) await page.getByRole('button', { name: 'Zoom in' }).click();
     await scroller.evaluate((el) => {
       el.scrollLeft = 0;
@@ -131,7 +108,6 @@ test.describe('visual realignment', () => {
     expect(paper.x).toBeGreaterThanOrEqual(box.x - 1);
     await page.getByRole('button', { name: 'Reset zoom' }).click();
 
-    // 200%-zoom-equivalent width: still reachable, pass footer not clipped.
     await page.setViewportSize({ width: 640, height: 700 });
     await scroller.evaluate((el) => {
       el.scrollLeft = 0;
@@ -144,27 +120,18 @@ test.describe('visual realignment', () => {
   test('the shipped sample demonstrates the full approve loop', async ({ page }) => {
     test.slow();
     await freshApp(page);
-    // Complete the private read across all 16 sample scenes.
-    await page.getByRole('banner').getByRole('button', { name: 'Annotated read', exact: true }).click();
-    const readBar = page.getByRole('region', { name: 'Private annotated read' });
-    for (let i = 0; i < 15; i++) {
-      await readBar.getByRole('button', { name: 'Next scene' }).click();
-    }
-    await readBar.getByRole('button', { name: 'Mark read complete' }).click();
-    // Work under a revision set so the approved change carries a mark.
+    await completeRead(page);
     await page.locator('#rev-select').selectOption('Blue');
     await page.getByTestId('rev-start').click();
-    // Diagnose the Polish pass: the sample must yield a real approvable proposal.
-    await page.getByRole('button', { name: /11.*POLISH/ }).click();
+    await openPass(page, /POLISH/);
     await page.getByRole('button', { name: 'Diagnose', exact: true }).click();
     const approvable = page.locator('.ai-finding').filter({ has: page.getByRole('button', { name: 'Approve' }) });
     await expect(approvable.first()).toBeVisible();
     const cited = await approvable.first().getAttribute('data-cited-element');
     await approvable.first().getByRole('button', { name: 'Approve' }).click();
-    // The change entered the draft: revision mark on the exact line, provenance in evidence.
     await expect(page.locator(`[data-element-id="${cited}"]`)).toHaveClass(/sp-revised/);
     await page.locator(`[data-element-id="${cited}"]`).click();
-    await page.getByRole('tab', { name: 'Evidence & Notes' }).click();
+    await openEvidence(page);
     await expect(page.getByText('Writer-confirmed').first()).toBeVisible();
   });
 

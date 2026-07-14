@@ -4,6 +4,7 @@ import { getEditorView } from '../editor/editorHandle';
 import { useAppStore, type ThemeChoice, type UiLang } from '../store/appStore';
 import { useT, type StringKey } from '../i18n/strings';
 import type { DocFormat } from '../model/screenplay';
+import { ExtChip } from '../panels/ExtChip';
 
 type Item =
   | { kind: 'item'; label: string; onClick: () => void; checked?: boolean; disabled?: boolean }
@@ -124,8 +125,13 @@ export function AppMenuBar() {
   ];
 
   return (
-    <div className="app-menubar" role="menubar" aria-label="Menu" ref={barRef}>
+    <div className="app-menubar" role="toolbar" aria-label="Menu" ref={barRef}>
       <span className="app-menubar-brand">{t('app.title')}</span>
+      {curFmt !== 'feature' && (
+        <span className="format-badge" title={t('fmt.badgeTip')}>
+          {t(`fmt.${curFmt}` as StringKey)} <ExtChip />
+        </span>
+      )}
       {menus.map((m) => (
         <div key={m.id} className="menu-root">
           <button

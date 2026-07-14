@@ -39,6 +39,7 @@ export function annotationPlugin(getCounts: () => Map<string, number>): Plugin {
               const s = useAppStore.getState();
               s.select({ sceneId, elementId });
               s.setInspectorTab('evidence');
+              s.setRightWorkspace('evidence');
             });
             return button;
           },

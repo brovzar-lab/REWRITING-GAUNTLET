@@ -31,7 +31,7 @@ test('reduced motion is honored', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   const duration = await page
-    .locator('.ds-pass-chip')
+    .locator('.rail-item')
     .first()
     .evaluate((el) => getComputedStyle(el).transitionDuration);
   expect(parseFloat(duration) * 1000).toBeLessThanOrEqual(1);
@@ -43,24 +43,22 @@ test('full keyboard walkthrough reaches every region', async ({ page }) => {
   // Tab from the top of the document through the main regions.
   const reached = new Set<string>();
   await page.keyboard.press('Tab');
-  // M2R doubled the board's tab stops (each card has a main button + a scene
-  // point chip), so the walk needs more steps; the assertion is unchanged.
-  for (let i = 0; i < 140; i++) {
+  // Tab through the default workstation regions: menu bar, workspace rail,
+  // the screenplay editor, and the contextual right panel.
+  for (let i = 0; i < 160; i++) {
     const region = await page.evaluate(() => {
       const el = document.activeElement;
       if (!el) return null;
-      if (el.closest('.top-bar')) return 'topbar';
-      if (el.closest('.scene-navigator')) return 'navigator';
+      if (el.closest('.app-menubar')) return 'menubar';
+      if (el.closest('.workspace-rail')) return 'rail';
+      if (el.closest('.left-panel')) return 'left';
       if (el.closest('.ProseMirror') || el.classList.contains('ProseMirror')) return 'editor';
-      if (el.closest('.board')) return 'board';
-      if (el.closest('.evidence-inspector')) return 'inspector';
-      if (el.closest('.pass-tray')) return 'tray';
+      if (el.closest('.right-panel')) return 'right';
       return null;
     });
     if (region) reached.add(region);
-    if (reached.size >= 5 && reached.has('tray')) break;
-    // Tab is reserved for element switching inside the page; Escape exits it.
+    if (reached.has('menubar') && reached.has('rail') && reached.has('editor') && reached.has('right')) break;
     await page.keyboard.press(region === 'editor' ? 'Escape' : 'Tab');
   }
-  expect([...reached]).toEqual(expect.arrayContaining(['topbar', 'navigator', 'editor', 'board', 'tray']));
+  expect([...reached]).toEqual(expect.arrayContaining(['menubar', 'rail', 'editor', 'right']));
 });
