@@ -77,6 +77,7 @@ test('status bar tracks page and scene, and the toolbar zoom buttons match the k
   const toolbar = page.locator('.editor-toolbar');
   await expect(status).toContainText(/Page 1 of \d+/);
   // jump deep into the script via the navigator
+  await page.getByRole('navigation', { name: 'Workspaces' }).getByRole('button', { name: 'Scenes', exact: true }).click();
   await page.locator('.scene-navigator .scene-row').last().click();
   await expect(status).toContainText('Scene 16');
   await expect(status).not.toContainText('Page 1 of');

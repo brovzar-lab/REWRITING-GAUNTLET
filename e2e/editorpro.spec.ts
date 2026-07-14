@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { openScenes } from './helpers';
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
@@ -100,6 +101,7 @@ test('revision set: marks edited lines, labels the header, survives reload', asy
   await expect(line).toHaveClass(/sp-revised/);
 
   // Navigator marks the scene as revised (icon + accessible label, not color)
+  await openScenes(page);
   const row2 = page.locator('.scene-row').nth(1);
   await expect(row2.locator('.scene-revised')).toBeVisible();
 
