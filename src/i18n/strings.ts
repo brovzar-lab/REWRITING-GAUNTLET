@@ -347,6 +347,11 @@ export const dictionaries = {
     'hp.full.climax': 'Third Act Climax',
     'hp.full.emotional_high': 'Emotional high',
     'hp.full.emotional_low': 'Emotional low',
+    'pass.tool.plot': 'Set-up / pay-off status',
+    'pass.tool.structure': 'High points',
+    'pass.tool.storyTheme': 'Theme & motifs',
+    'pass.tool.allPlaced': 'All four high points are placed.',
+    'pass.tool.appearsIn': 'in {n} scene(s)',
   },
   es: {
     'app.title': 'Rewrite Studio',
@@ -692,6 +697,11 @@ export const dictionaries = {
     'hp.full.climax': 'Clímax del Tercer Acto',
     'hp.full.emotional_high': 'Alto emocional',
     'hp.full.emotional_low': 'Bajo emocional',
+    'pass.tool.plot': 'Estado de planteamiento / pago',
+    'pass.tool.structure': 'Puntos álgidos',
+    'pass.tool.storyTheme': 'Tema y motivos',
+    'pass.tool.allPlaced': 'Los cuatro puntos álgidos están colocados.',
+    'pass.tool.appearsIn': 'en {n} escena(s)',
   },
 } as const satisfies Record<Lang, Record<string, string>>;
 

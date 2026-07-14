@@ -3,6 +3,7 @@ import { useAppStore } from '../store/appStore';
 import { resolveProvider } from '../ai';
 import { EPPS_PASSES } from '../model/passes';
 import { useT, type StringKey } from '../i18n/strings';
+import { PassToolSection } from './PassToolSection';
 import type { Finding } from '../workflow/types';
 import type { EvidenceStatus } from '../model/evidence';
 
@@ -243,6 +244,8 @@ export function PassWorkspace() {
           ))}
         </ul>
       </section>
+
+      <PassToolSection passId={pass.id} />
 
       {cutCandidates.length > 0 && (
         <section className="sp-cutlist" aria-label={t('sp.cutlist')}>

@@ -583,6 +583,57 @@
   padding: var(--space-sm);
 }
 
+/* M5: methodology tool sections inside a pass workspace (writer facts). */
+.pass-tool {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  border: 1px solid var(--divider);
+  border-left: 3px solid var(--color-confirmed);
+  border-radius: var(--rounded-control);
+  padding: var(--space-sm);
+  margin: 0 var(--space-md) var(--space-sm);
+}
+
+.pass-tool-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.pass-tool-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.pass-tool-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--font-size-label);
+}
+
+.pass-tool-row .map-status {
+  flex-basis: auto;
+}
+
+.pass-tool-theme {
+  margin: 0;
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+  color: var(--text-primary);
+}
+
+.pass-tool-count {
+  font-size: var(--font-size-label);
+  color: var(--text-secondary);
+}
+
 /* M1: Game Plan + Compass panel. Dense writer forms, token vocabulary only. */
 .game-plan {
   display: flex;
