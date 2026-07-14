@@ -1,4 +1,10 @@
-# HANDOFF — Journey / IA Realignment (2026-07-14, mid-build, pre-compaction)
+# HANDOFF — Journey / IA Realignment (2026-07-14, COMPLETE on branch, awaiting Billy's review)
+
+> **Update:** full build done. **349 unit / 65 Playwright / build exit 0, all green.**
+> The 2 previously-failing e2e were fixed and re-verified. Proof pack + README in
+> `docs/proof/ia/`. Nothing running in the background. Ready for Billy to review the
+> branch and decide approve / tweak / abandon. Everything below is the detailed record.
+
 
 ## 1. Branch
 `codex/journey-ia-realignment` (branched from `main`). **Do NOT merge to main. Do NOT delete main.**
