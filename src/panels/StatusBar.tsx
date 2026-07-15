@@ -12,6 +12,8 @@ export function StatusBar() {
   const setNoteComposerOpen = useAppStore((s) => s.setNoteComposerOpen);
   const storyBeats = useAppStore((s) => s.storyBeats);
   const setStoryBeat = useAppStore((s) => s.setStoryBeat);
+  const readModeActive = useAppStore((s) => s.readModeActive);
+  const marksCount = useAppStore((s) => s.workflow.readMarks.length);
   const t = useT();
 
   const selectedBeat = selection ? storyBeats.find((b) => b.elementId === selection.elementId) : undefined;
@@ -61,7 +63,21 @@ export function StatusBar() {
       >
         ›
       </button>
+      {readModeActive && (
+        <>
+          <span className="status-read-progress" aria-hidden="true">
+            <span
+              className="status-read-progress-fill"
+              style={{ width: `${Math.round((page / Math.max(1, pagination.pageCount)) * 100)}%` }}
+            />
+          </span>
+          <span className="status-read-marks">
+            {marksCount} {t('readmode.marksSoFar')}
+          </span>
+        </>
+      )}
       <span className="top-bar-spacer" />
+      {!readModeActive && (
       <span className="status-beats" role="group" aria-label={t('beat.mark')}>
         <button
           type="button"
@@ -82,6 +98,8 @@ export function StatusBar() {
           {t('beat.payoff')}
         </button>
       </span>
+      )}
+      {!readModeActive && (
       <button
         type="button"
         className="seg-button"
@@ -94,6 +112,7 @@ export function StatusBar() {
       >
         {t('notes.add')}
       </button>
+      )}
     </div>
   );
 }

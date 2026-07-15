@@ -4,6 +4,7 @@ description: A cinematic, tactile, focused workspace for professional screenplay
 colors:
   night-frame: "#111A21"
   night-panel: "#17232C"
+  night-desk-read: "#070B0F"
   night-divider: "#34414A"
   day-frame: "#E9E6DE"
   day-panel: "#F4F1EA"

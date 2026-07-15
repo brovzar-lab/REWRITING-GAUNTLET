@@ -5,6 +5,7 @@ import type { ElementType } from '../model/screenplay';
 import { useAppStore } from '../store/appStore';
 import { RevisionControl } from '../panels/RevisionControl';
 import { FindBar } from './FindBar';
+import { ReadingToolbar } from './ReadingToolbar';
 import { useT } from '../i18n/strings';
 
 function refocusPage() {
@@ -45,7 +46,8 @@ export function WorkstationToolbar() {
   };
 
   return (
-    <div className="editor-toolbar" role="toolbar" aria-label={t('toolbar.label')}>
+    <div className={`editor-toolbar${readModeActive ? ' is-reading' : ''}`} role="toolbar" aria-label={t('toolbar.label')}>
+      {readModeActive && <ReadingToolbar />}
       <div className="toolbar-group" role="group" aria-label={t('toolbar.group.history')}>
         <button type="button" className="tool-button" disabled={!canUndo} onClick={() => runHistory(undo)}>
           {t('toolbar.undo')}

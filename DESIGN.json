@@ -5,6 +5,7 @@
   "extensions": {
     "colorMeta": {
       "night-frame": { "role": "neutral", "displayName": "Night Frame", "canonical": "oklch(20% 0.018 240)", "tonalRamp": ["#172028", "#26313A", "#3B4750", "#56616A", "#747E85", "#969DA2", "#BBC0C3", "#E2E4E5"] },
+      "night-desk-read": { "role": "neutral", "displayName": "Night Desk (read mode)", "canonical": "#070B0F", "note": "desk behind paper during the private read (lights down)" },
       "day-frame": { "role": "neutral", "displayName": "Day Frame", "canonical": "oklch(92% 0.012 90)", "tonalRamp": ["#24231F", "#3D3B35", "#5A574F", "#77736A", "#969188", "#B6B1A8", "#D5D1C9", "#F3F0E9"] },
       "selection-amber": { "role": "primary", "displayName": "Selection Amber", "canonical": "oklch(75% 0.15 82)", "tonalRamp": ["#2D2208", "#4B390D", "#6B5113", "#8E6B1B", "#B08824", "#DCA52E", "#E8C76D", "#F4E6B4"] },
       "selection-blue": { "role": "primary", "displayName": "Selection Blue", "canonical": "oklch(56% 0.15 250)", "tonalRamp": ["#0B1E35", "#113253", "#194775", "#235D99", "#2C72C7", "#6797D5", "#9DBBE4", "#D4E1F2"] }

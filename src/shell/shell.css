@@ -830,3 +830,62 @@
 .mark-row-dropped .mark-swatch { background: var(--color-card-plum); }
 .mark-row-question { border: 1px solid color-mix(in srgb, var(--color-card-blue) 60%, transparent); }
 .mark-row-question .mark-swatch { background: var(--color-card-blue); }
+
+/* Read mode chrome (delta 3) */
+.editor-toolbar.is-reading .toolbar-group,
+.editor-toolbar.is-reading .toolbar-sep {
+  opacity: 0.35;
+  pointer-events: none;
+}
+.reading-toolbar { display: flex; align-items: center; gap: 10px; flex: 1 0 100%; padding: 2px 0; }
+.reading-toolbar .tool-button { pointer-events: auto; opacity: 1; }
+.reading-lock-chip {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+.reading-helper,
+.reading-timer { font-size: 11px; color: var(--text-secondary); opacity: 0.8; white-space: nowrap; }
+.reading-extension {
+  font-size: 10px;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.center-region.is-reading { position: relative; }
+.center-region.is-reading .sp-page-scroller { background: var(--desk-read); }
+.center-region.is-reading .sp-page { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
+.status-read-progress {
+  width: 140px;
+  height: 3px;
+  background: var(--surface-inset);
+  border-radius: 2px;
+  overflow: hidden;
+  align-self: center;
+}
+.status-read-progress-fill { display: block; height: 100%; background: var(--accent); }
+.status-read-marks { font-size: 11px; color: var(--text-secondary); opacity: 0.8; }
+
+@media print {
+  .app-menubar,
+  .editor-toolbar,
+  .journey-strip,
+  .pass-strip,
+  .workspace-rail,
+  .status-bar,
+  .mark-palette,
+  .right-panel,
+  .left-panel,
+  .read-bar { display: none !important; }
+  .center-region,
+  .sp-page-scroller { background: white !important; }
+}

@@ -429,14 +429,14 @@ export const dictionaries = {
     'railgroup.journey': 'Journey',
     'railgroup.studio': 'Studio',
     // Read mode chrome
-    'readmode.lock': 'Reading â editing is off',
-    'readmode.helper': 'one sitting Â· your marks stay private',
-    'readmode.extension': 'Studio Extension Â· Epps reads on paper',
+    'readmode.lock': 'Reading — editing is off',
+    'readmode.helper': 'one sitting · your marks stay private',
+    'readmode.extension': 'Studio Extension · Epps reads on paper',
     'readmode.print': 'Print read copy',
     'readmode.pause': 'Pause read',
     'readmode.finish': 'Finish sitting',
     'readmode.minutes': 'min',
-    'readmode.marksSoFar': 'marks so far Â· they’ll be waiting in Notes',
+    'readmode.marksSoFar': 'marks so far · they’ll be waiting in Notes',
     // Marks
     'mark.title': 'Mark',
     'mark.great': 'Great stuff',

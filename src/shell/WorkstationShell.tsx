@@ -6,6 +6,7 @@ import { ProjectPanel } from './ProjectPanel';
 import { RightContextPanel } from './RightContextPanel';
 import { PassStrip } from './PassStrip';
 import { JourneyStrip } from './JourneyStrip';
+import { MarkPalette } from './MarkPalette';
 import { EmptyScriptState } from './EmptyScriptState';
 import { WorkstationToolbar } from './WorkstationToolbar';
 import { SceneNavigator } from '../panels/SceneNavigator';
@@ -29,6 +30,7 @@ export function WorkstationShell() {
   const rightWorkspace = useAppStore((s) => s.rightWorkspace);
   const documentOpen = useAppStore((s) => s.documentOpen);
   const setBoardDock = useAppStore((s) => s.setBoardDock);
+  const readModeActive = useAppStore((s) => s.readModeActive);
 
   // The board renders in the center here; keep its internal dock in side mode.
   useEffect(() => {
@@ -57,7 +59,7 @@ export function WorkstationShell() {
             {leftWorkspace === 'project' ? <ProjectPanel /> : <SceneNavigator />}
           </div>
         )}
-        <main className="center-region">
+        <main className={`center-region${readModeActive ? ' is-reading' : ''}`}>
           {!documentOpen ? (
             <EmptyScriptState />
           ) : centerBoard ? (
@@ -67,6 +69,7 @@ export function WorkstationShell() {
               <AnnotatedReadBar />
               <PolishReadBar />
               <ScreenplayEditor />
+              {readModeActive && <MarkPalette />}
               <StatusBar />
             </>
           )}
