@@ -1036,3 +1036,40 @@
 }
 .ni-ww-attr { font-family: 'Inter', sans-serif; font-size: 9.5px; opacity: 0.55; }
 .ni-footer { font-size: 11px; color: var(--text-secondary); opacity: 0.75; }
+
+/* What worked — pinned through later stages */
+.ww-pin {
+  border: 1px solid color-mix(in srgb, var(--color-confirmed) 45%, transparent);
+  background: color-mix(in srgb, var(--color-confirmed) 8%, transparent);
+  border-radius: 6px;
+  margin: 8px 8px 0;
+  flex: 0 0 auto;
+}
+.ww-pin-toggle {
+  width: 100%;
+  border: 0;
+  background: none;
+  color: var(--color-confirmed);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: left;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+.ww-pin-toggle:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+.ww-pin-list { list-style: none; margin: 0; padding: 0 10px 10px; display: flex; flex-direction: column; gap: 6px; }
+.ww-pin-item {
+  background: var(--color-screenplay-paper);
+  color: var(--color-ink);
+  border-radius: 2px;
+  padding: 7px 9px;
+  font-family: 'Courier Prime', 'Courier New', monospace;
+  font-size: 11px;
+  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.ww-pin-attr { font-family: 'Inter', sans-serif; font-size: 9px; opacity: 0.55; }
+.ww-pin-empty { font-size: 10.5px; color: var(--text-secondary); opacity: 0.7; }
