@@ -105,10 +105,84 @@
   margin: 4px 2px;
 }
 
-/* Toolbar wraps on narrow widths */
+/* Toolbar: grouped sections with breathing room. Scoped to the workstation so
+   the legacy EditorToolbar keeps its own flat layout. Height is auto so the
+   toolbar wraps to a second row on narrow widths without clipping. */
 .workstation .editor-toolbar {
   flex: 0 0 auto;
+  height: auto;
+  min-height: 44px;
   flex-wrap: wrap;
+  align-items: center;
+  gap: 6px var(--space-sm);
+  padding: 5px var(--space-md);
+}
+
+.toolbar-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+/* Consistent control sizing across every section. */
+.workstation .editor-toolbar .tool-button {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 9px;
+}
+
+.workstation .editor-toolbar .tool-icon {
+  min-width: 28px;
+  justify-content: center;
+  padding: 5px;
+}
+
+/* Zoom reads as one control: three buttons on a recessed well. */
+.toolbar-zoom {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  padding: 1px;
+  border: 1px solid var(--divider);
+  border-radius: var(--rounded-control);
+  background: var(--surface-inset);
+}
+
+.toolbar-zoom .tool-button {
+  border-radius: 3px;
+}
+
+.tool-zoom-value {
+  min-width: 46px;
+  justify-content: center;
+}
+
+.toolbar-layout {
+  margin-left: var(--space-xs);
+}
+
+.toolbar-layout .control-label {
+  white-space: nowrap;
+}
+
+/* Export is the toolbar's primary output action — quietly emphasized by an
+   accent border and heavier weight. The label keeps --text-primary so it holds
+   WCAG AA contrast in both themes (accent-on-toolbar text can dip below 4.5:1). */
+.workstation .editor-toolbar .tool-button-strong {
+  border-color: var(--accent);
+  font-weight: 700;
+}
+
+.workstation .editor-toolbar .tool-button-strong:hover {
+  border-color: var(--accent);
+  background: var(--row-selected);
+}
+
+/* Section separators sit a touch off the controls for clear grouping. */
+.workstation .editor-toolbar .toolbar-sep {
+  height: 20px;
+  margin: 0 2px;
 }
 
 /* Disabled controls stay visibly disabled inside the workstation. */
@@ -118,15 +192,69 @@
   cursor: not-allowed;
 }
 
-/* Pass strip */
+/* Pass strip: the 11 Epps lenses promoted to the top of the Rewrite workspace.
+   Premium, readable chips that wrap gracefully instead of cramming one dense row. */
 .pass-strip {
   flex: 0 0 auto;
   display: flex;
-  gap: var(--space-xs);
-  padding: 6px 10px;
-  overflow-x: auto;
+  flex-wrap: wrap;
+  gap: var(--space-xs) 6px;
+  padding: var(--space-sm) var(--space-md);
   background: var(--surface-inset);
   border-bottom: 1px solid var(--divider);
+}
+
+.pass-strip .ds-pass-chip {
+  gap: var(--space-sm);
+  min-height: 30px;
+  padding: 4px 12px 4px 4px;
+  background: var(--surface-panel);
+  border: 1px solid var(--divider);
+  border-radius: var(--rounded-control);
+  color: var(--text-secondary);
+}
+
+.pass-strip .ds-pass-chip:hover {
+  border-color: var(--divider-strong);
+  color: var(--text-primary);
+}
+
+/* Active pass is unmistakable: accent ring, tinted field, filled order badge. */
+.pass-strip .ds-pass-chip.is-active {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+  background: var(--row-selected);
+  color: var(--text-primary);
+}
+
+.pass-strip .chip-order {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  border-radius: 4px;
+  background: var(--surface-inset);
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.pass-strip .ds-pass-chip.is-active .chip-order {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.pass-strip .chip-name {
+  font-size: var(--font-size-label);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.pass-strip .ds-pass-chip.is-active .chip-name {
+  font-weight: 700;
 }
 
 /* Body regions */
@@ -136,52 +264,71 @@
   min-height: 0;
 }
 
-/* Left workspace rail */
+/* Left workspace rail — the router. Slim, quiet, and un-boxy: the active
+   workspace is marked by a fill plus a left accent bar, not a hard outline. */
 .workspace-rail {
   flex: 0 0 auto;
-  width: 96px;
+  width: 98px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: var(--space-sm) 4px;
+  gap: 3px;
+  padding: var(--space-sm) 6px;
   background: var(--surface-toolbar);
   border-right: 1px solid var(--divider);
   overflow-y: auto;
 }
 
 .rail-item {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   background: transparent;
-  border: 1px solid transparent;
+  border: 0;
   border-radius: var(--rounded-control);
   color: var(--text-secondary);
-  padding: 7px 2px;
+  padding: 9px 2px;
   cursor: pointer;
   font-family: var(--font-ui);
+  transition: background var(--motion-state-fast), color var(--motion-state-fast);
 }
 
 .rail-item:hover {
   color: var(--text-primary);
-  background: var(--surface-inset);
+  background: var(--row-hover);
 }
 
 .rail-item.is-active {
   color: var(--text-primary);
   background: var(--surface-inset);
-  border-color: var(--accent);
+}
+
+/* Left accent bar reads as "you are here" without boxing the whole tile. */
+.rail-item.is-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--accent);
+}
+
+.rail-item.is-active .rail-glyph {
+  color: var(--accent);
 }
 
 .rail-glyph {
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1;
 }
 
 .rail-label {
-  font-size: 9.5px;
-  letter-spacing: 0.02em;
+  font-size: 10px;
+  line-height: 1.25;
+  letter-spacing: 0.01em;
   text-align: center;
 }
 
@@ -228,7 +375,8 @@
   min-height: 0;
 }
 
-/* Journey guide */
+/* Journey guide — "what to do next". Light polish: calmer rhythm, a clearer
+   current step, and finished steps that quietly recede. */
 .journey-guide {
   padding-bottom: var(--space-lg);
 }
@@ -239,7 +387,7 @@
   padding: 0 var(--space-md);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .jg-stage {
@@ -248,28 +396,31 @@
   align-items: flex-start;
   border: 1px solid transparent;
   border-radius: var(--rounded-control);
-  padding: 6px 8px;
+  padding: 8px 10px;
 }
 
 .jg-stage.is-current {
   border-color: var(--accent);
-  background: var(--surface-inset);
+  box-shadow: inset 0 0 0 1px var(--accent);
+  background: var(--row-selected);
 }
 
 .jg-marker {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   flex: 0 0 auto;
   display: grid;
   place-items: center;
   border-radius: 50%;
   border: 1px solid var(--divider-strong);
   font-size: 11px;
+  font-weight: var(--font-weight-label);
   color: var(--text-secondary);
 }
 
 .jg-stage.is-done .jg-marker {
-  color: var(--color-confirmed);
+  color: var(--accent-contrast);
+  background: var(--color-confirmed);
   border-color: var(--color-confirmed);
 }
 
@@ -282,6 +433,7 @@
   display: flex;
   flex-direction: column;
   gap: 3px;
+  padding-top: 1px;
 }
 
 .jg-name {
@@ -289,16 +441,30 @@
   font-weight: var(--font-weight-title);
 }
 
+.jg-stage.is-done .jg-name {
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-body);
+}
+
 .jg-why {
   margin: 0;
   font-size: var(--font-size-label);
+  line-height: 1.4;
   color: var(--text-secondary);
 }
 
+/* The current step's action is the panel's one clear call to action. */
 .jg-action {
   align-self: flex-start;
-  margin-top: 2px;
+  margin-top: var(--space-xs);
+  background: var(--accent);
+  color: var(--accent-contrast);
   border-color: var(--accent);
+}
+
+.jg-action:hover {
+  border-color: var(--accent);
+  filter: brightness(1.06);
 }
 
 /* Project panel */
@@ -327,11 +493,51 @@
   color: var(--text-secondary);
 }
 
+/* Real project actions, not utility chips: a full-width primary plus a paired
+   secondary row. Hierarchy makes "Open Project" the obvious way in. */
 .proj-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-xs);
-  padding: var(--space-sm) var(--space-md) 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md) var(--space-md);
+}
+
+.proj-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 8px 12px;
+  background: var(--surface-inset);
+  color: var(--text-primary);
+  border: 1px solid var(--divider-strong);
+  border-radius: var(--rounded-control);
+  font-family: var(--font-ui);
+  font-size: var(--font-size-body);
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color var(--motion-state-fast), background var(--motion-state-fast);
+}
+
+.proj-action:hover {
+  border-color: var(--accent);
+  background: var(--surface-panel);
+}
+
+.proj-action-wide {
+  grid-column: 1 / -1;
+}
+
+.proj-action-primary {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border-color: var(--accent);
+}
+
+.proj-action-primary:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  filter: brightness(1.06);
 }
 
 .proj-docs,

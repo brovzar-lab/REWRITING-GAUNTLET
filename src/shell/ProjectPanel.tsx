@@ -44,16 +44,16 @@ export function ProjectPanel() {
       <p className="proj-draft">{screenplay.draftLabel}</p>
 
       <div className="proj-actions">
-        <button type="button" className="seg-button" onClick={() => setImportOpen(true)}>
+        <button type="button" className="proj-action proj-action-primary proj-action-wide" onClick={() => setImportOpen(true)}>
           {t('proj.open')}
         </button>
-        <button type="button" className="seg-button" onClick={() => setImportOpen(true)}>
+        <button type="button" className="proj-action" onClick={() => setImportOpen(true)}>
           {t('mi.import')}
         </button>
-        <button type="button" className="seg-button" onClick={() => setExportOpen(true)}>
+        <button type="button" className="proj-action" onClick={() => setExportOpen(true)}>
           {t('mi.export')}
         </button>
-        <button type="button" className="seg-button" onClick={() => void newProject()}>
+        <button type="button" className="proj-action proj-action-wide" onClick={() => void newProject()}>
           {t('proj.new')}
         </button>
       </div>

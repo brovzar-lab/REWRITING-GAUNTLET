@@ -46,84 +46,107 @@ export function WorkstationToolbar() {
 
   return (
     <div className="editor-toolbar" role="toolbar" aria-label={t('toolbar.label')}>
-      <button type="button" className="tool-button" disabled={!canUndo} onClick={() => runHistory(undo)}>
-        {t('toolbar.undo')}
-      </button>
-      <button type="button" className="tool-button" disabled={!canRedo} onClick={() => runHistory(redo)}>
-        {t('toolbar.redo')}
-      </button>
-      <span className="toolbar-sep" aria-hidden="true" />
-      <select
-        className="toolbar-element-select"
-        aria-label={t('toolbar.element')}
-        value={selectedType}
-        disabled={!selectedType || readModeActive || readOnly}
-        onChange={(e) => {
-          const v = getEditorView();
-          if (!v) return;
-          applyElementType(v, e.target.value as ElementType);
-          refocusPage();
-        }}
-      >
-        {selectedType === '' && <option value="" />}
-        {ELEMENT_KEY_ORDER.map((type) => (
-          <option key={type} value={type}>
-            {t(`element.${type}`)}
-          </option>
-        ))}
-      </select>
-      <span className="toolbar-sep" aria-hidden="true" />
-      <button type="button" className="tool-button" aria-pressed={findOpen} onClick={() => setFindOpen(!findOpen)}>
-        {t('toolbar.find')}
-      </button>
-      <button type="button" className="tool-button" disabled={!documentOpen} onClick={() => setGoToPageOpen(true)}>
-        {t('toolbar.gotopage')}
-      </button>
-      <button
-        type="button"
-        className="tool-button"
-        aria-pressed={layoutMode === 'board'}
-        onClick={() => setLayoutMode(layoutMode === 'board' ? 'workbench' : 'board')}
-      >
-        {t('toolbar.pageBoard')}
-      </button>
-      <span className="toolbar-sep" aria-hidden="true" />
-      <span className="control-group" role="group" aria-label="Zoom">
-        <button type="button" className="tool-button" aria-label={t('status.zoomOut')} onClick={() => setZoom(Math.round((zoom - 0.1) * 10) / 10)}>
-          −
+      <div className="toolbar-group" role="group" aria-label={t('toolbar.group.history')}>
+        <button type="button" className="tool-button" disabled={!canUndo} onClick={() => runHistory(undo)}>
+          {t('toolbar.undo')}
         </button>
-        <button type="button" className="tool-button" aria-label={t('status.zoomReset')} onClick={() => setZoom(1)}>
-          {Math.round(zoom * 100)}%
+        <button type="button" className="tool-button" disabled={!canRedo} onClick={() => runHistory(redo)}>
+          {t('toolbar.redo')}
         </button>
-        <button type="button" className="tool-button" aria-label={t('status.zoomIn')} onClick={() => setZoom(Math.round((zoom + 0.1) * 10) / 10)}>
-          +
-        </button>
-      </span>
+      </div>
+
       <span className="toolbar-sep" aria-hidden="true" />
-      <RevisionControl />
-      <span className="top-bar-spacer" />
-      <button type="button" className="tool-button" onClick={() => setRightWorkspace('evidence')}>
-        {t('toolbar.notes')}
-      </button>
-      <button type="button" className="tool-button" onClick={() => setExportOpen(true)}>
-        {t('toolbar.export')}
-      </button>
-      <span className="control-group">
-        <label className="control-label" htmlFor="layout-select">
-          {t('toolbar.layout')}
-        </label>
+
+      <div className="toolbar-group" role="group" aria-label={t('toolbar.group.writing')}>
         <select
-          id="layout-select"
-          className="seg-button"
-          value={layoutMode}
-          onChange={(e) => setLayoutMode(e.target.value as 'workbench' | 'board' | 'focus' | 'script_notes')}
+          className="toolbar-element-select"
+          aria-label={t('toolbar.element')}
+          value={selectedType}
+          disabled={!selectedType || readModeActive || readOnly}
+          onChange={(e) => {
+            const v = getEditorView();
+            if (!v) return;
+            applyElementType(v, e.target.value as ElementType);
+            refocusPage();
+          }}
         >
-          <option value="workbench">{t('layout.workbench')}</option>
-          <option value="script_notes">{t('layout.script_notes')}</option>
-          <option value="board">{t('layout.board')}</option>
-          <option value="focus">{t('layout.focus')}</option>
+          {selectedType === '' && <option value="" />}
+          {ELEMENT_KEY_ORDER.map((type) => (
+            <option key={type} value={type}>
+              {t(`element.${type}`)}
+            </option>
+          ))}
         </select>
-      </span>
+      </div>
+
+      <span className="toolbar-sep" aria-hidden="true" />
+
+      <div className="toolbar-group" role="group" aria-label={t('toolbar.group.navigation')}>
+        <button type="button" className="tool-button" aria-pressed={findOpen} onClick={() => setFindOpen(!findOpen)}>
+          {t('toolbar.find')}
+        </button>
+        <button type="button" className="tool-button" disabled={!documentOpen} onClick={() => setGoToPageOpen(true)}>
+          {t('toolbar.gotopage')}
+        </button>
+      </div>
+
+      <span className="toolbar-sep" aria-hidden="true" />
+
+      <div className="toolbar-group" role="group" aria-label={t('toolbar.group.view')}>
+        <button
+          type="button"
+          className="tool-button"
+          aria-pressed={layoutMode === 'board'}
+          onClick={() => setLayoutMode(layoutMode === 'board' ? 'workbench' : 'board')}
+        >
+          {t('toolbar.pageBoard')}
+        </button>
+        <span className="toolbar-zoom" role="group" aria-label="Zoom">
+          <button type="button" className="tool-button tool-icon" aria-label={t('status.zoomOut')} onClick={() => setZoom(Math.round((zoom - 0.1) * 10) / 10)}>
+            −
+          </button>
+          <button type="button" className="tool-button tool-zoom-value" aria-label={t('status.zoomReset')} onClick={() => setZoom(1)}>
+            {Math.round(zoom * 100)}%
+          </button>
+          <button type="button" className="tool-button tool-icon" aria-label={t('status.zoomIn')} onClick={() => setZoom(Math.round((zoom + 0.1) * 10) / 10)}>
+            +
+          </button>
+        </span>
+        <span className="control-group toolbar-layout">
+          <label className="control-label" htmlFor="layout-select">
+            {t('toolbar.layout')}
+          </label>
+          <select
+            id="layout-select"
+            className="seg-button"
+            value={layoutMode}
+            onChange={(e) => setLayoutMode(e.target.value as 'workbench' | 'board' | 'focus' | 'script_notes')}
+          >
+            <option value="workbench">{t('layout.workbench')}</option>
+            <option value="script_notes">{t('layout.script_notes')}</option>
+            <option value="board">{t('layout.board')}</option>
+            <option value="focus">{t('layout.focus')}</option>
+          </select>
+        </span>
+      </div>
+
+      <span className="toolbar-sep" aria-hidden="true" />
+
+      <div className="toolbar-group" role="group" aria-label={t('toolbar.group.revision')}>
+        <RevisionControl />
+      </div>
+
+      <span className="toolbar-sep" aria-hidden="true" />
+
+      <div className="toolbar-group toolbar-group-output" role="group" aria-label={t('toolbar.group.output')}>
+        <button type="button" className="tool-button" onClick={() => setRightWorkspace('evidence')}>
+          {t('toolbar.notes')}
+        </button>
+        <button type="button" className="tool-button tool-button-strong" onClick={() => setExportOpen(true)}>
+          {t('toolbar.export')}
+        </button>
+      </div>
+
       {findOpen && <FindBar />}
     </div>
   );

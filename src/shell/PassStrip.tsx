@@ -36,11 +36,13 @@ export function PassStrip() {
             type="button"
             className={`ds-pass-chip${active ? ' is-active' : ''}${stateful ? ` run-${runState}` : ''}`}
             aria-pressed={active}
-            title={pass.blurb}
+            title={`${pass.name} — ${pass.blurb}`}
             onClick={() => setActivePass(pass.id)}
           >
-            <span className="chip-order">{pass.order}</span>
-            {pass.name.toUpperCase()}
+            <span className="chip-order" aria-hidden="true">
+              {pass.order}
+            </span>
+            <span className="chip-name">{pass.short.toUpperCase()}</span>
             {stateful && (
               <span className={`chip-state chip-state-${runState}`} aria-hidden="true">
                 {STATE_MARK[runState]}
