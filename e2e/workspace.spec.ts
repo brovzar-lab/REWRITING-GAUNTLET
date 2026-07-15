@@ -10,8 +10,8 @@ test.describe('workspace', () => {
     await expect(page.locator('.project-panel')).toBeVisible();
     await expect(rail(page, 'Project')).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator('.project-panel').getByRole('button', { name: 'Open Project' })).toBeVisible();
-    // "What to do next" guide on the right.
-    await expect(page.locator('.journey-guide')).toBeVisible();
+    // The journey strip carries "what to do next" under the toolbar.
+    await expect(page.locator('.journey-strip')).toBeVisible();
     // The scene list is NOT the permanent left column, and the pass tray is gone.
     await expect(page.locator('.scene-navigator')).toHaveCount(0);
     await expect(page.locator('.pass-tray')).toHaveCount(0);

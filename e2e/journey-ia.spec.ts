@@ -11,8 +11,8 @@ test('first open leads with Open / Import / New Project, not a wall of tools', a
   await expect(page.locator('.project-panel').getByRole('button', { name: 'Open Project' })).toBeVisible();
   await expect(page.locator('.project-panel').getByRole('button', { name: 'Import…' })).toBeVisible();
   await expect(page.locator('.project-panel').getByRole('button', { name: 'New Project' })).toBeVisible();
-  // "What to do next" is right there.
-  await expect(page.locator('.journey-guide')).toContainText('Private annotated read');
+  // The journey strip is right there with the current stage marked.
+  await expect(page.locator('.journey-strip .js-stage.is-current')).toContainText('Private read');
   // The scene list is NOT the default left column, and the pass tray is gone.
   await expect(page.locator('.scene-navigator')).toHaveCount(0);
   await expect(page.locator('.pass-tray')).toHaveCount(0);
@@ -61,11 +61,11 @@ test('layout modes reconfigure the workspace', async ({ page }) => {
   await expect(page.locator('.workspace-rail')).toBeVisible();
 });
 
-test('the journey guide advances as the writer works', async ({ page }) => {
+test('the journey strip advances as the writer works', async ({ page }) => {
   await freshApp(page);
-  // Current stage is the private read.
-  await expect(page.locator('.jg-stage.is-current')).toContainText('Private annotated read');
-  await page.locator('.journey-guide').getByRole('button', { name: 'Start read' }).click();
+  // Current stage is the private read; the continue pill starts it.
+  await expect(page.locator('.journey-strip .js-stage.is-current')).toContainText('Private read');
+  await page.locator('.journey-strip').getByRole('button', { name: 'Start your private read' }).click();
   await expect(page.getByRole('region', { name: 'Private annotated read' })).toBeVisible();
 });
 
@@ -92,7 +92,7 @@ test('only the selected workspace carries the strong rail active state', async (
   // a second active bar.
   await expect(page.locator('.rail-item.is-active')).toHaveCount(1);
   await expect(rail(page, 'Project')).toHaveClass(/is-active/);
-  await expect(rail(page, 'Journey')).not.toHaveClass(/is-active/);
+  await expect(rail(page, 'Read')).not.toHaveClass(/is-active/);
   // Selecting Scenes moves the single strong state there.
   await openScenes(page);
   await expect(page.locator('.rail-item.is-active')).toHaveCount(1);

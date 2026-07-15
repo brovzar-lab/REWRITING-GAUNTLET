@@ -17,6 +17,7 @@
   /* Desk: the recessed surface the paper rests on (tonal layer of the frame). */
   --desk: #0D141A;
   --desk-read: var(--color-night-desk-read);
+  --confirmed-text: #8FC3A0;
   /* Tonal steps derived from the night palette, like --desk: toolbar bands sit
      a step darker than panels; wells recess; seams read stronger than dividers. */
   --surface-toolbar: #141E26;
@@ -39,6 +40,7 @@
   --row-selected: rgba(44, 114, 199, 0.14);
   --desk: #DDD8CC;
   --desk-read: #CFC8B8;
+  --confirmed-text: #2E5A40;
   /* Day twins: toolbar a step lighter than panels; wells a step darker. */
   --surface-toolbar: #F8F6F0;
   --surface-inset: #ECE8DF;
@@ -61,6 +63,7 @@
     --row-selected: rgba(44, 114, 199, 0.14);
     --desk: #DDD8CC;
     --desk-read: #CFC8B8;
+    --confirmed-text: #2E5A40;
     --surface-toolbar: #F8F6F0;
     --surface-inset: #ECE8DF;
     --divider-strong: #B3AEA2;
@@ -82,6 +85,7 @@
     --row-selected: rgba(220, 165, 46, 0.16);
     --desk: #0D141A;
     --desk-read: var(--color-night-desk-read);
+    --confirmed-text: #8FC3A0;
     --surface-toolbar: #141E26;
     --surface-inset: #121B23;
     --divider-strong: #43525C;

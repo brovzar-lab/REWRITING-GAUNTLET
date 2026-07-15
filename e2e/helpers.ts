@@ -38,7 +38,7 @@ export async function openPass(page: Page, name: string | RegExp) {
 
 /** Do the private annotated read to completion (unlocks AI). */
 export async function completeRead(page: Page) {
-  await page.getByRole('button', { name: 'Start read' }).click();
+  await page.locator('.journey-strip').getByRole('button', { name: 'Start your private read' }).click();
   const bar = page.getByRole('region', { name: 'Private annotated read' });
   for (let i = 0; i < 30; i++) {
     const next = bar.getByRole('button', { name: 'Next scene' });

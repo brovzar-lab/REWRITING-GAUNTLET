@@ -48,6 +48,9 @@ export function WorkstationToolbar() {
   return (
     <div className={`editor-toolbar${readModeActive ? ' is-reading' : ''}`} role="toolbar" aria-label={t('toolbar.label')}>
       {readModeActive && <ReadingToolbar />}
+      {/* While reading, the working tools stay visible but genuinely disabled
+          (dimmed 35%); disabled controls are exempt from WCAG contrast. */}
+      <fieldset className="toolbar-rest" disabled={readModeActive}>
       <div className="toolbar-group" role="group" aria-label={t('toolbar.group.history')}>
         <button type="button" className="tool-button" disabled={!canUndo} onClick={() => runHistory(undo)}>
           {t('toolbar.undo')}
@@ -148,6 +151,8 @@ export function WorkstationToolbar() {
           {t('toolbar.export')}
         </button>
       </div>
+
+      </fieldset>
 
       {findOpen && <FindBar />}
     </div>
