@@ -12,3 +12,6 @@ e2e/screenshots/
 *.local
 .DS_Store
 .playwright-mcp/
+
+# local Claude session settings
+.claude/
