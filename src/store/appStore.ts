@@ -9,6 +9,7 @@ import {
   type Approval,
   type Finding,
   type Reader,
+  type ReaderNote,
   type ReadMark,
   type WorkflowState,
 } from '../workflow/types';
@@ -155,6 +156,8 @@ export interface AppState {
   /** Move the read to a scene by index; clamps, selects, and records the visit. */
   goToReadScene: (index: number) => void;
   addReader: (name: string, role: Reader['role'], title?: string) => void;
+  addReaderNote: (readerId: string, note: ReaderNote) => void;
+  setReaderNoteKind: (readerId: string, noteId: string, kind: ReaderNote['kind']) => void;
   /** Private-read pencil marks (writer only; element-level). */
   addReadMark: (mark: ReadMark) => void;
   removeReadMark: (id: string) => void;
@@ -476,7 +479,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     get().markSceneVisited(scene.id);
   },
 
-  addReader: (name, role) => {
+  addReader: (name, role, title) => {
     const readers = get().workflow.readers;
     if (role === 'initial' && readers.filter((r) => r.role === 'initial').length >= MAX_INITIAL_READERS) {
       throw new Error('Epps rule: never more than five initial readers (three are recommended).');
@@ -484,9 +487,31 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (role === 'interim' && readers.filter((r) => r.role === 'interim').length >= MAX_INTERIM_READERS) {
       throw new Error('Epps rule: exactly one trusted interim reader.');
     }
-    const reader: Reader = { id: `reader-${crypto.randomUUID()}`, name, role, addedAt: Date.now() };
+    const reader: Reader = { id: `reader-${crypto.randomUUID()}`, name, role, title, addedAt: Date.now(), notes: [] };
     set((s) => ({ workflow: { ...s.workflow, readers: [...s.workflow.readers, reader] } }));
   },
+
+  addReaderNote: (readerId, note) =>
+    set((s) => ({
+      workflow: {
+        ...s.workflow,
+        readers: s.workflow.readers.map((r) =>
+          r.id === readerId ? { ...r, notes: [...(r.notes ?? []), note] } : r,
+        ),
+      },
+    })),
+
+  setReaderNoteKind: (readerId, noteId, kind) =>
+    set((s) => ({
+      workflow: {
+        ...s.workflow,
+        readers: s.workflow.readers.map((r) =>
+          r.id === readerId
+            ? { ...r, notes: (r.notes ?? []).map((n) => (n.id === noteId ? { ...n, kind } : n)) }
+            : r,
+        ),
+      },
+    })),
 
   removeReader: (readerId) =>
     set((s) => ({ workflow: { ...s.workflow, readers: s.workflow.readers.filter((r) => r.id !== readerId) } })),

@@ -269,3 +269,31 @@ describe('read marks (private-read pencil vocabulary)', () => {
     expect(useAppStore.getState().workflow.readers[0].notes).toEqual([]);
   });
 });
+
+describe('reader notes (stage 3 intake)', () => {
+  it('a remedy note stays linked to its symptom but keeps its own kind', () => {
+    useAppStore.getState().resetToSample();
+    useAppStore.getState().addReader('Rodrigo', 'initial', 'director');
+    const reader = useAppStore.getState().workflow.readers[0];
+    expect(reader.title).toBe('director');
+    expect(reader.notes).toEqual([]);
+    useAppStore.getState().addReaderNote(reader.id, {
+      id: 'n1', quote: 'The second act sags', kind: 'symptom', createdAt: 1,
+    });
+    useAppStore.getState().addReaderNote(reader.id, {
+      id: 'n2', quote: 'Cut the insurance subplot', kind: 'remedy', linkedSymptomId: 'n1', createdAt: 2,
+    });
+    const notes = useAppStore.getState().workflow.readers[0].notes ?? [];
+    expect(notes[1].kind).toBe('remedy');
+    expect(notes[1].linkedSymptomId).toBe('n1');
+  });
+
+  it('setReaderNoteKind retags a note (post-session tagging)', () => {
+    useAppStore.getState().resetToSample();
+    useAppStore.getState().addReader('Ana', 'initial');
+    const reader = useAppStore.getState().workflow.readers[0];
+    useAppStore.getState().addReaderNote(reader.id, { id: 'n1', quote: 'The kitchen scene sings', kind: 'symptom', createdAt: 1 });
+    useAppStore.getState().setReaderNoteKind(reader.id, 'n1', 'whatWorked');
+    expect((useAppStore.getState().workflow.readers[0].notes ?? [])[0].kind).toBe('whatWorked');
+  });
+});

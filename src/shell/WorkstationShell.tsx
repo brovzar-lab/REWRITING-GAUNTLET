@@ -15,6 +15,7 @@ import { AnnotatedReadBar } from '../panels/AnnotatedReadBar';
 import { PolishReadBar } from '../panels/PolishReadBar';
 import { ScreenplayEditor } from '../editor/ScreenplayEditor';
 import { Board } from '../board/Board';
+import { NotesIntake } from '../panels/NotesIntake';
 // Shared control styles (tool/seg buttons, scene rows, chips, save indicator).
 // PanelLayout used to import this; the shell owns it now. Keep before shell.css
 // so the workstation overrides win the cascade.
@@ -31,6 +32,7 @@ export function WorkstationShell() {
   const documentOpen = useAppStore((s) => s.documentOpen);
   const setBoardDock = useAppStore((s) => s.setBoardDock);
   const readModeActive = useAppStore((s) => s.readModeActive);
+  const notesIntakeOpen = useAppStore((s) => s.notesIntakeOpen);
 
   // The board renders in the center here; keep its internal dock in side mode.
   useEffect(() => {
@@ -62,6 +64,8 @@ export function WorkstationShell() {
         <main className={`center-region${readModeActive ? ' is-reading' : ''}`}>
           {!documentOpen ? (
             <EmptyScriptState />
+          ) : notesIntakeOpen ? (
+            <NotesIntake />
           ) : centerBoard ? (
             <Board />
           ) : (
