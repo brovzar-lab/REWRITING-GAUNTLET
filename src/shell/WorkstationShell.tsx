@@ -5,6 +5,7 @@ import { WorkspaceRail } from './WorkspaceRail';
 import { ProjectPanel } from './ProjectPanel';
 import { RightContextPanel } from './RightContextPanel';
 import { PassStrip } from './PassStrip';
+import { JourneyStrip } from './JourneyStrip';
 import { EmptyScriptState } from './EmptyScriptState';
 import { WorkstationToolbar } from './WorkstationToolbar';
 import { SceneNavigator } from '../panels/SceneNavigator';
@@ -47,6 +48,7 @@ export function WorkstationShell() {
     <div className={`workstation mode-${layoutMode}`}>
       <AppMenuBar />
       <WorkstationToolbar />
+      {documentOpen && <JourneyStrip />}
       {showPassStrip && <PassStrip />}
       <div className="workstation-body">
         {showRail && <WorkspaceRail />}

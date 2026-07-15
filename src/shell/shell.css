@@ -701,3 +701,57 @@
 .workstation.mode-focus .workstation-body {
   justify-content: center;
 }
+
+/* Journey strip — 36px, sits under the toolbar, full width. */
+.journey-strip {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 36px;
+  flex: 0 0 auto;
+  padding: 0 8px;
+  background: var(--surface-toolbar);
+  border-bottom: 1px solid var(--divider-strong);
+  overflow-x: auto;
+}
+.js-segment { display: inline-flex; align-items: center; gap: 2px; }
+.js-sep { color: var(--text-secondary); opacity: 0.45; font-size: 11px; padding: 0 2px; }
+.js-stage {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  background: none;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 0 6px;
+  height: 36px;
+  cursor: pointer;
+  opacity: 0.7;
+  white-space: nowrap;
+}
+.js-stage .js-num { font-size: 11px; opacity: 0.65; font-variant-numeric: tabular-nums; }
+.js-stage .js-stat { font-size: 10px; opacity: 0.65; text-transform: none; }
+.js-stage.is-done { opacity: 0.55; }
+.js-stage.is-done .js-num { color: var(--color-confirmed); opacity: 1; }
+.js-stage.is-current { opacity: 1; color: var(--text-primary); box-shadow: inset 0 -2px 0 var(--accent); }
+.js-stage.is-current .js-num { color: var(--accent); opacity: 1; font-weight: 700; }
+.js-stage:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+.js-spacer { flex: 1; }
+.js-continue {
+  border: 0;
+  border-radius: 4px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.js-continue:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
