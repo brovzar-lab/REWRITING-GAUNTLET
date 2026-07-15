@@ -38,9 +38,12 @@ await page.locator('[data-card-frame="sc4"]').getByLabel('High point').selectOpt
 await shot('04-board-mode.png');
 await railBtn('Board').click(); // back to workbench
 
-// 4. Scenes workspace with search.
+// 4. Scenes workspace with search — Night, then the Day twin.
 await railBtn('Scenes').click();
 await shot('05-scenes-workspace.png');
+await page.getByLabel('Appearance').selectOption('day');
+await shot('05b-scenes-workspace-day.png');
+await page.getByLabel('Appearance').selectOption('night');
 
 // 5. Project panel with a document open.
 await railBtn('Project').click();
