@@ -368,3 +368,33 @@
   outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
+
+/* Private-read marks on the paper (delta 3). Paper is cream in both themes,
+   so ink-side colors are the fixed paper palette, like the paper itself. */
+.sp-mark-great { background: rgba(143, 165, 132, 0.28); }
+.sp-mark-cut {
+  text-decoration: line-through;
+  text-decoration-color: rgba(197, 83, 75, 0.7);
+  text-decoration-thickness: 1.5px;
+  color: rgba(32, 35, 33, 0.75);
+}
+.sp-mark-dropped { border-bottom: 2px dotted rgba(154, 130, 159, 0.9); }
+.sp-mark-question { border-bottom: 2px dotted rgba(141, 175, 193, 0.9); }
+.sp-mark-tag {
+  position: absolute;
+  right: -14px;
+  transform: translateX(100%) rotate(-2deg);
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+  padding: 1px 5px;
+  user-select: none;
+  white-space: nowrap;
+}
+.sp-mark-tag-great { color: #4f8b62; }
+.sp-mark-tag-cut { color: #c5534b; transform: translateX(100%) rotate(1.5deg); }
+.sp-mark-tag-dropped { color: #9a829f; transform: translateX(100%) rotate(-1deg); }
+.sp-mark-tag-question { color: #8dafc1; }

@@ -10,6 +10,7 @@ import { nextElementOnEnter, nextElementOnTab } from './elementCycling';
 import { paginationPlugin } from './paginationPlugin';
 import { revisionPlugin } from './revisionPlugin';
 import { annotationPlugin } from './annotationPlugin';
+import { readMarksPlugin } from './readMarksPlugin';
 import { currentBlock, professionalKeymap, zoomKeymap } from './editorKeymap';
 import { registerEditorView } from './editorHandle';
 import { suggestCharacters } from './smartType';
@@ -98,12 +99,16 @@ export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
   const syncingFromEditor = useRef(false);
   const zoom = useAppStore((s) => s.zoom);
   const readOnly = useAppStore((s) => s.readOnly);
+  const readModeActive = useAppStore((s) => s.readModeActive);
   const t = useT();
 
-  // Re-evaluate ProseMirror's editable() when read-only toggles.
+  // Re-evaluate ProseMirror's editable() when read-only or read mode toggles.
+  // Read mode is a hard lock (delta 3): no caret, no typing, for the sitting.
   useEffect(() => {
-    viewRef.current?.setProps({ editable: () => !readOnly });
-  }, [readOnly]);
+    viewRef.current?.setProps({
+      editable: () => !useAppStore.getState().readOnly && !useAppStore.getState().readModeActive,
+    });
+  }, [readOnly, readModeActive]);
 
   const [smartType, setSmartType] = useState<SmartTypeState | null>(null);
   const smartTypeRef = useRef<SmartTypeState | null>(null);
@@ -184,6 +189,7 @@ export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
         ),
         revisionPlugin(() => store.getState().revisionBaseline),
         annotationPlugin(() => annotationCounts(store.getState())),
+        readMarksPlugin(() => store.getState().workflow.readMarks),
         selectedLinePlugin,
       ],
     });
@@ -222,7 +228,7 @@ export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
 
     const view = new EditorView(host, {
       state,
-      editable: () => !store.getState().readOnly,
+      editable: () => !store.getState().readOnly && !store.getState().readModeActive,
       dispatchTransaction(tr) {
         const newState = view.state.apply(tr);
         view.updateState(newState);
@@ -258,10 +264,14 @@ export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
     let prevBaseline = store.getState().revisionBaseline;
     let prevEvidence = store.getState().evidence;
     let prevFindings = store.getState().workflow.findings;
+    let prevReadMarks = store.getState().workflow.readMarks;
     const unsubscribe = store.subscribe((s) => {
       const outsideDocChange = s.screenplay !== prevScreenplay && !syncingFromEditor.current;
       const revisionChange = s.revisionBaseline !== prevBaseline;
-      const annotationChange = s.evidence !== prevEvidence || s.workflow.findings !== prevFindings;
+      const annotationChange =
+        s.evidence !== prevEvidence ||
+        s.workflow.findings !== prevFindings ||
+        s.workflow.readMarks !== prevReadMarks;
       if (outsideDocChange || revisionChange || annotationChange) {
         const doc = outsideDocChange ? buildDoc(s.screenplay) : view.state.doc;
         view.updateState(
@@ -272,6 +282,7 @@ export function ScreenplayEditor({ onReady }: ScreenplayEditorProps) {
       prevBaseline = s.revisionBaseline;
       prevEvidence = s.evidence;
       prevFindings = s.workflow.findings;
+      prevReadMarks = s.workflow.readMarks;
 
       if (s.selection !== prevSelection && s.selection && !syncingFromEditor.current) {
         let targetPos: number | null = null;
