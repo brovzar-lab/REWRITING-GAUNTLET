@@ -4,6 +4,7 @@ import { useAppStore, elementText } from '../store/appStore';
 import { db, initPersistence } from '../store/persistence';
 import { parseFountain } from '../io/fountain';
 import type { Finding } from './types';
+import { emptyWorkflow } from './types';
 
 async function until(check: () => Promise<boolean> | boolean, timeoutMs = 2000): Promise<void> {
   const start = performance.now();
@@ -234,5 +235,37 @@ describe('snapshots and document replacement', () => {
     useAppStore.getState().resetToSample();
     dispose = await initPersistence({ debounceMs: 5 });
     expect(useAppStore.getState().screenplay.title).toBe('TEST');
+  });
+});
+
+describe('read marks (private-read pencil vocabulary)', () => {
+  it('emptyWorkflow starts with no read marks', () => {
+    expect(emptyWorkflow().readMarks).toEqual([]);
+  });
+
+  it('addReadMark and removeReadMark round-trip through the store', () => {
+    useAppStore.getState().resetToSample();
+    useAppStore.getState().addReadMark({
+      id: 'm1', type: 'great', sceneId: 's1', elementId: 'e1', page: 3, createdAt: 1,
+    });
+    expect(useAppStore.getState().workflow.readMarks).toHaveLength(1);
+    useAppStore.getState().removeReadMark('m1');
+    expect(useAppStore.getState().workflow.readMarks).toHaveLength(0);
+  });
+
+  it('enterReadMode stamps the sitting start; exit clears it', () => {
+    useAppStore.getState().resetToSample();
+    useAppStore.getState().enterReadMode();
+    expect(useAppStore.getState().readSittingStartedAt).not.toBeNull();
+    useAppStore.getState().exitReadMode();
+    expect(useAppStore.getState().readSittingStartedAt).toBeNull();
+  });
+
+  it('loadWorkflow normalizes legacy rows without readMarks or reader notes', () => {
+    const legacy = { ...emptyWorkflow(), readers: [{ id: 'r1', name: 'A', role: 'initial', addedAt: 1 }] };
+    delete (legacy as Record<string, unknown>).readMarks;
+    useAppStore.getState().loadWorkflow(legacy as never, [], []);
+    expect(useAppStore.getState().workflow.readMarks).toEqual([]);
+    expect(useAppStore.getState().workflow.readers[0].notes).toEqual([]);
   });
 });

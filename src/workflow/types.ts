@@ -78,6 +78,21 @@ export interface Approval {
   approvedAt: number;
 }
 
+/** The margin-pencil vocabulary from the private read. Element-level, matching
+    the app's Selection model. These are the WRITER's marks — they surface in
+    Notes as a distinct lane, never as one of the five reader slots. */
+export type ReadMarkType = 'great' | 'cut' | 'dropped' | 'question';
+
+export interface ReadMark {
+  id: string;
+  type: ReadMarkType;
+  sceneId: string;
+  elementId: string;
+  page: number;
+  note?: string;
+  createdAt: number;
+}
+
 export type PassRunState = 'not_started' | 'diagnosing' | 'reviewing' | 'complete';
 
 export interface WorkflowState {
@@ -88,6 +103,8 @@ export interface WorkflowState {
   approvals: Approval[];
   passRuns: Record<string, PassRunState>;
   cloudAiConsent: boolean;
+  /** Private-read marks (writer only). */
+  readMarks: ReadMark[];
 }
 
 export function emptyWorkflow(): WorkflowState {
@@ -99,5 +116,6 @@ export function emptyWorkflow(): WorkflowState {
     approvals: [],
     passRuns: {},
     cloudAiConsent: false,
+    readMarks: [],
   };
 }

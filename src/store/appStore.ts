@@ -9,6 +9,7 @@ import {
   type Approval,
   type Finding,
   type Reader,
+  type ReadMark,
   type WorkflowState,
 } from '../workflow/types';
 import { EPPS_PASSES } from '../model/passes';
@@ -153,7 +154,12 @@ export interface AppState {
   exitReadMode: () => void;
   /** Move the read to a scene by index; clamps, selects, and records the visit. */
   goToReadScene: (index: number) => void;
-  addReader: (name: string, role: Reader['role']) => void;
+  addReader: (name: string, role: Reader['role'], title?: string) => void;
+  /** Private-read pencil marks (writer only; element-level). */
+  addReadMark: (mark: ReadMark) => void;
+  removeReadMark: (id: string) => void;
+  /** Wall-clock start of the current sitting; null when not reading. */
+  readSittingStartedAt: number | null;
   removeReader: (readerId: string) => void;
   markSceneVisited: (sceneId: string) => void;
   completeAnnotatedRead: () => void;
@@ -446,11 +452,21 @@ export const useAppStore = create<AppState>((set, get) => ({
   readModeActive: false,
 
   enterReadMode: () => {
-    set({ readModeActive: true });
+    set({ readModeActive: true, readSittingStartedAt: Date.now() });
     get().goToReadScene(0);
   },
 
-  exitReadMode: () => set({ readModeActive: false }),
+  exitReadMode: () => set({ readModeActive: false, readSittingStartedAt: null }),
+
+  readSittingStartedAt: null,
+
+  addReadMark: (mark) =>
+    set((s) => ({ workflow: { ...s.workflow, readMarks: [...s.workflow.readMarks, mark] } })),
+
+  removeReadMark: (id) =>
+    set((s) => ({
+      workflow: { ...s.workflow, readMarks: s.workflow.readMarks.filter((m) => m.id !== id) },
+    })),
 
   goToReadScene: (index) => {
     const scenes = get().screenplay.scenes;
@@ -621,7 +637,18 @@ export const useAppStore = create<AppState>((set, get) => ({
       projectNotes: '',
     }),
 
-  loadWorkflow: (workflow, evidence, connections) => set({ workflow, evidence, connections }),
+  loadWorkflow: (workflow, evidence, connections) =>
+    // Normalize legacy rows: pre-handoff workflows lack readMarks/reader notes.
+    set({
+      workflow: {
+        ...emptyWorkflow(),
+        ...workflow,
+        readMarks: workflow.readMarks ?? [],
+        readers: (workflow.readers ?? []).map((r) => ({ notes: [], ...r })),
+      },
+      evidence,
+      connections,
+    }),
 
   takeSnapshot: async (label) => {
     const s = get();

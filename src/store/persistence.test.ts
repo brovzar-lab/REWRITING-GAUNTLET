@@ -176,7 +176,9 @@ describe('persistence', () => {
         approvals: [],
         passRuns: { polish: 'complete' },
         cloudAiConsent: false,
-      },
+        // Legacy row: intentionally no readMarks / reader notes — hydration
+        // must normalize them (see loadWorkflow).
+      } as unknown as import('../workflow/types').WorkflowState,
       evidence: [],
       connections: [],
     });
