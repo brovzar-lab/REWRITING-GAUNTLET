@@ -11,11 +11,18 @@
   display: flex;
   align-items: center;
   gap: var(--space-md);
-  padding-right: var(--space-md);
+  min-height: 42px;
+  padding: 0 var(--space-md);
+  border-bottom: 1px solid var(--divider);
 }
 
 .board-header .panel-title {
-  padding-bottom: var(--space-sm);
+  padding: 0;
+}
+
+/* The full-board toggle anchors to the right edge in every dock. */
+.board-header .seg-button {
+  margin-left: auto;
 }
 
 .board-hint {
@@ -26,6 +33,14 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Scene count reads as a quiet chip beside the title. */
+.board-count {
+  border: 1px solid var(--divider);
+  border-radius: var(--rounded-control);
+  padding: 2px 8px;
+  background: var(--surface-inset);
 }
 
 /* The side dock is too narrow for the drag hint; full board keeps it.
@@ -87,7 +102,17 @@
 .board-side .card-row,
 .board.is-full .card-row {
   flex-wrap: wrap;
+  gap: var(--space-md);
   padding: var(--space-sm) 0 var(--space-md);
+}
+
+/* Board-as-a-mode: let the cards breathe between wrapped rows. */
+.board-side:not(.is-full) .card-row {
+  row-gap: var(--space-lg);
+}
+
+.board-side:not(.is-full) .board-canvas {
+  padding: var(--space-sm) var(--space-md) var(--space-lg);
 }
 
 /* Bottom dock: single filmstrip row; act sections lay out inline. */
