@@ -1,9 +1,10 @@
 import { useAppStore } from '../store/appStore';
 import { useT, type StringKey } from '../i18n/strings';
 
-/** The left workspace rail — the router. Starts with Project. Each item drives
-    one region (a left panel, the right context panel, or a center mode), so the
-    workspace never shows everything at once. */
+/** The left workspace rail — the router. Grouped by the Epps journey (in
+    journey order) vs. studio tools. Each item drives one region (a left
+    panel, the right context panel, or a center mode), so the workspace never
+    shows everything at once. */
 
 type RailId =
   | 'project'
@@ -30,17 +31,12 @@ const GLYPH: Record<RailId, string> = {
   layouts: '▤',
 };
 
-const ORDER: RailId[] = [
-  'project',
-  'journey',
-  'scenes',
-  'board',
-  'evidence',
-  'gameplan',
-  'passes',
-  'polish',
-  'history',
-  'layouts',
+/** Delta 2: two labeled groups. JOURNEY holds the Epps stages in journey
+    order; STUDIO holds the workshop tools. The `journey` id is the Read item
+    (the private annotated read). */
+const GROUPS: { key: 'journey' | 'studio'; items: RailId[] }[] = [
+  { key: 'journey', items: ['project', 'journey', 'evidence', 'gameplan', 'passes', 'polish'] },
+  { key: 'studio', items: ['scenes', 'board', 'history', 'layouts'] },
 ];
 
 const LAYOUT_CYCLE = ['workbench', 'focus', 'board', 'script_notes'] as const;
@@ -56,7 +52,7 @@ export function WorkspaceRail() {
       case 'scenes':
         return s.leftWorkspace === 'scenes';
       case 'journey':
-        return false; // placeholder until Task 5 gives Read its behavior
+        return s.readModeActive;
       case 'evidence':
         return s.rightWorkspace === 'evidence';
       case 'gameplan':
@@ -77,14 +73,20 @@ export function WorkspaceRail() {
   const activate = (id: RailId) => {
     // History opens a dialog and Layouts cycles a mode; neither is a workspace
     // selection, so neither takes the rail focus.
-    if (id !== 'history' && id !== 'layouts') s.setRailFocus(id);
+    if (id !== 'history' && id !== 'layouts') {
+      s.setRailFocus(id);
+      // Leaving for any workspace closes the stage-3 Notes intake center view.
+      s.setNotesIntakeOpen(false);
+    }
     switch (id) {
       case 'project':
         return s.setLeftWorkspace('project');
       case 'scenes':
         return s.setLeftWorkspace('scenes');
       case 'journey':
-        return s.setRightWorkspace('evidence'); // placeholder until Task 5
+        // Read: the guided private annotated read (journey stage 2).
+        if (s.layoutMode === 'board') s.setLayoutMode('workbench');
+        return s.enterReadMode();
       case 'evidence':
         return s.setRightWorkspace('evidence');
       case 'gameplan':
@@ -109,29 +111,36 @@ export function WorkspaceRail() {
 
   return (
     <nav className="workspace-rail" aria-label={t('rail.label')}>
-      {ORDER.map((id) => {
-        // Strong active state belongs to the one workspace the writer selected;
-        // other region-active items (e.g. Journey merely holding the right
-        // panel) show a quiet "live" dot instead of a second active bar.
-        const regionActive = isActive(id);
-        const selected = regionActive && s.railFocus === id;
-        const live = regionActive && !selected;
-        return (
-          <button
-            key={id}
-            type="button"
-            className={`rail-item${selected ? ' is-active' : ''}${live ? ' is-live' : ''}`}
-            aria-pressed={regionActive}
-            title={t(`ws.${id}` as StringKey)}
-            onClick={() => activate(id)}
-          >
-            <span className="rail-glyph" aria-hidden="true">
-              {GLYPH[id]}
-            </span>
-            <span className="rail-label">{t(`ws.${id}` as StringKey)}</span>
-          </button>
-        );
-      })}
+      {GROUPS.map((group, gi) => (
+        <div key={group.key} className="rail-group" role="group" aria-label={t(`railgroup.${group.key}` as StringKey)}>
+          {gi > 0 && <span className="rail-divider" aria-hidden="true" />}
+          <span className="rail-group-label" aria-hidden="true">
+            {t(`railgroup.${group.key}` as StringKey)}
+          </span>
+          {group.items.map((id) => {
+            // Strong active state belongs to the one workspace the writer
+            // selected; other region-active items show a quiet "live" dot.
+            const regionActive = isActive(id);
+            const selected = regionActive && s.railFocus === id;
+            const live = regionActive && !selected;
+            return (
+              <button
+                key={id}
+                type="button"
+                className={`rail-item${selected ? ' is-active' : ''}${live ? ' is-live' : ''}`}
+                aria-pressed={regionActive}
+                title={t(`ws.${id}` as StringKey)}
+                onClick={() => activate(id)}
+              >
+                <span className="rail-glyph" aria-hidden="true">
+                  {GLYPH[id]}
+                </span>
+                <span className="rail-label">{t(`ws.${id}` as StringKey)}</span>
+              </button>
+            );
+          })}
+        </div>
+      ))}
     </nav>
   );
 }
