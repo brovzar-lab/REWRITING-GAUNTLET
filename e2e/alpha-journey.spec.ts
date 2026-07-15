@@ -31,7 +31,7 @@ test('the full alpha journey', async ({ page }) => {
   await importDialog.getByLabel(/Paste your script/).fill(SCRIPT);
   await expect(importDialog.getByText('Scenes: 3')).toBeVisible();
   await importDialog.getByRole('button', { name: 'Import and replace draft' }).click();
-  await expect(page.locator('.project-panel')).toContainText('THE LEDGER');
+  await expect(page.locator('.project-chip')).toContainText('THE LEDGER');
 
   // 2. Choosing a pass opens the workspace; diagnosis is locked before the read.
   await openPass(page, /POLISH/);
@@ -93,7 +93,7 @@ test('the full alpha journey', async ({ page }) => {
 
   // 9. Export straight from the summary: approved in, rejected out.
   await summaryDialog.getByRole('button', { name: 'Export now' }).click();
-  await expect(page.locator('.project-panel')).toContainText('Rewrite 1');
+  await expect(page.locator('.project-chip')).toContainText('Rewrite 1');
   await expect(page.locator('.pass-strip .ds-pass-chip.run-complete')).toContainText('POLISH');
   const [download] = await Promise.all([
     page.waitForEvent('download'),
@@ -109,7 +109,7 @@ test('the full alpha journey', async ({ page }) => {
   // 10. Everything survives a reload.
   await page.waitForTimeout(1200);
   await page.reload();
-  await expect(page.locator('.project-panel')).toContainText('THE LEDGER');
-  await expect(page.locator('.project-panel')).toContainText('Rewrite 1');
+  await expect(page.locator('.project-chip')).toContainText('THE LEDGER');
+  await expect(page.locator('.project-chip')).toContainText('Rewrite 1');
   await expect(page.locator('.sp-action', { hasText: 'The radio hums.' })).toHaveClass(/sp-revised/);
 });

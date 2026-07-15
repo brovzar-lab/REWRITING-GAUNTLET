@@ -179,6 +179,24 @@ export function AppMenuBar() {
           )}
         </div>
       ))}
+      {s.documentOpen && (
+        <button
+          type="button"
+          className={`project-chip${s.leftWorkspace === 'project' ? ' is-open' : ''}`}
+          aria-expanded={s.leftWorkspace === 'project'}
+          title={t('proj.title')}
+          onClick={() => {
+            s.setRailFocus('project');
+            s.setLeftWorkspace('project');
+          }}
+        >
+          <span className="project-chip-title">{s.screenplay.title}</span>
+          <span className="project-chip-draft">{s.screenplay.draftLabel}</span>
+          <span className="project-chip-caret" aria-hidden="true">
+            ▾
+          </span>
+        </button>
+      )}
       <span className="top-bar-spacer" />
       <span className={`save-indicator save-${s.saveState}`} aria-live="polite">
         {s.saveState === 'saved' ? t('topbar.saved') : t('topbar.saving')}
@@ -189,21 +207,6 @@ export function AppMenuBar() {
             {l.toUpperCase()}
           </button>
         ))}
-      </span>
-      <span className="control-group">
-        <label className="control-label" htmlFor="appearance-select">
-          {t('topbar.appearance')}
-        </label>
-        <select
-          id="appearance-select"
-          className="seg-button"
-          value={s.theme}
-          onChange={(e) => s.setTheme(e.target.value as ThemeChoice)}
-        >
-          <option value="day">{t('theme.day')}</option>
-          <option value="night">{t('theme.night')}</option>
-          <option value="system">{t('theme.system')}</option>
-        </select>
       </span>
     </div>
   );

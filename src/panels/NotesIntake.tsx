@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAppStore } from '../store/appStore';
 import { useT, type StringKey } from '../i18n/strings';
 import { MAX_INITIAL_READERS, type ReaderNote } from '../workflow/types';
+import { ReadersManager } from './ReadersManager';
 
 const AVATAR_TOKENS = [
   'var(--color-confirmed)',
@@ -180,6 +181,12 @@ export function NotesIntake() {
               ))}
           </ul>
         </aside>
+      </div>
+
+      {/* Full reader management (roles, interim reader, removal) belongs to
+          this stage, not to the always-visible Evidence panel. */}
+      <div className="ni-readers-manage">
+        <ReadersManager />
       </div>
 
       <footer className="ni-footer">

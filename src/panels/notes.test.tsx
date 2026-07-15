@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EvidenceInspector } from './EvidenceInspector';
+import { ReadersManager } from './ReadersManager';
 import { SceneNavigator } from './SceneNavigator';
 import { StatusBar } from './StatusBar';
 import { useAppStore } from '../store/appStore';
@@ -137,7 +138,7 @@ describe('screenplay-native annotation flow', () => {
 describe('readers manager', () => {
   it('registers readers and shows the Epps recommendation', async () => {
     const user = userEvent.setup();
-    render(<EvidenceInspector />);
+    render(<ReadersManager />);
     expect(screen.getByText(/three readers are recommended/i)).toBeInTheDocument();
     await user.type(screen.getByLabelText(/reader name/i), 'Ana P.');
     await user.click(screen.getByRole('button', { name: /add reader/i }));
@@ -148,7 +149,7 @@ describe('readers manager', () => {
   it('refuses a sixth initial reader with a visible message', async () => {
     for (let i = 0; i < 5; i++) useAppStore.getState().addReader(`Reader ${i + 1}`, 'initial');
     const user = userEvent.setup();
-    render(<EvidenceInspector />);
+    render(<ReadersManager />);
     await user.type(screen.getByLabelText(/reader name/i), 'One Too Many');
     await user.click(screen.getByRole('button', { name: /add reader/i }));
     expect(useAppStore.getState().workflow.readers).toHaveLength(5);
@@ -158,7 +159,7 @@ describe('readers manager', () => {
   it('refuses a second interim reader with a visible message', async () => {
     useAppStore.getState().addReader('Diego M.', 'interim');
     const user = userEvent.setup();
-    render(<EvidenceInspector />);
+    render(<ReadersManager />);
     await user.type(screen.getByLabelText(/reader name/i), 'Second Interim');
     await user.selectOptions(screen.getByLabelText(/reader role/i), 'interim');
     await user.click(screen.getByRole('button', { name: /add reader/i }));
@@ -169,7 +170,7 @@ describe('readers manager', () => {
   it('removes a reader', async () => {
     useAppStore.getState().addReader('Ana P.', 'initial');
     const user = userEvent.setup();
-    render(<EvidenceInspector />);
+    render(<ReadersManager />);
     await user.click(screen.getByRole('button', { name: /remove ana p\./i }));
     expect(useAppStore.getState().workflow.readers).toHaveLength(0);
   });

@@ -105,6 +105,61 @@
   margin: 4px 2px;
 }
 
+/* Project chip: the collapsed project. Title + draft stay visible in the top
+   bar; clicking opens the Project drawer on the left. */
+.project-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  max-width: 320px;
+  margin-left: var(--space-sm);
+  padding: 4px 10px;
+  background: transparent;
+  border: 1px solid var(--divider);
+  border-radius: var(--rounded-control);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: border-color var(--motion-state-fast), background var(--motion-state-fast);
+}
+
+.project-chip:hover {
+  border-color: var(--divider-strong);
+  background: var(--row-hover);
+}
+
+.project-chip.is-open {
+  border-color: var(--accent);
+  background: var(--surface-inset);
+}
+
+.project-chip-title {
+  font-size: var(--font-size-label);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.project-chip-draft {
+  font-size: var(--font-size-label);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.project-chip-caret {
+  font-size: 9px;
+  color: var(--text-secondary);
+}
+
+/* Reader management inside the Notes intake stage. */
+.ni-readers-manage {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg) var(--space-lg);
+}
+
 /* Toolbar: grouped sections with breathing room. Scoped to the workstation so
    the legacy EditorToolbar keeps its own flat layout. Height is auto so the
    toolbar wraps to a second row on narrow widths without clipping. */

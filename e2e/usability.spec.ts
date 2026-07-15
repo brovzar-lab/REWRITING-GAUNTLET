@@ -22,7 +22,7 @@ async function pasteImport(page: Page) {
   await dialog.getByRole('button', { name: 'Paste screenplay' }).click();
   await dialog.getByLabel(/Paste your script/).fill(SCRIPT);
   await dialog.getByRole('button', { name: 'Import and replace draft' }).click();
-  await expect(page.locator('.project-panel')).toContainText('THE LEDGER');
+  await expect(page.locator('.project-chip')).toContainText('THE LEDGER');
 }
 
 test('clicking a pass visibly changes the workspace', async ({ page }) => {

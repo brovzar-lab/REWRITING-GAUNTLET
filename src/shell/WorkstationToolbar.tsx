@@ -30,6 +30,8 @@ export function WorkstationToolbar() {
   const findOpen = useAppStore((s) => s.findOpen);
   const setFindOpen = useAppStore((s) => s.setFindOpen);
   const documentOpen = useAppStore((s) => s.documentOpen);
+  const theme = useAppStore((s) => s.theme);
+  const setTheme = useAppStore((s) => s.setTheme);
   const t = useT();
 
   const view = getEditorView();
@@ -131,6 +133,21 @@ export function WorkstationToolbar() {
             <option value="script_notes">{t('layout.script_notes')}</option>
             <option value="board">{t('layout.board')}</option>
             <option value="focus">{t('layout.focus')}</option>
+          </select>
+        </span>
+        <span className="control-group toolbar-layout">
+          <label className="control-label" htmlFor="appearance-select">
+            {t('topbar.appearance')}
+          </label>
+          <select
+            id="appearance-select"
+            className="seg-button"
+            value={theme}
+            onChange={(e) => setTheme(e.target.value as 'day' | 'night' | 'system')}
+          >
+            <option value="day">{t('theme.day')}</option>
+            <option value="night">{t('theme.night')}</option>
+            <option value="system">{t('theme.system')}</option>
           </select>
         </span>
       </div>

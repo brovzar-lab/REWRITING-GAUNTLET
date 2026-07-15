@@ -22,9 +22,10 @@ describe('WorkspaceRail groups', () => {
     expect(useAppStore.getState().readModeActive).toBe(true);
   });
 
-  it('keeps journey-order: Project, Read, Evidence, Game plan, Passes, Polish before the divider', () => {
+  it('journey group starts at Read; Project is a Studio (management) item', () => {
     render(<WorkspaceRail />);
     const labels = Array.from(document.querySelectorAll('.rail-item .rail-label')).map((n) => n.textContent);
-    expect(labels.slice(0, 6)).toEqual(['Project', 'Read', 'Evidence', 'Game plan', 'Rewrite passes', 'Polish']);
+    expect(labels.slice(0, 5)).toEqual(['Read', 'Evidence', 'Game plan', 'Rewrite passes', 'Polish']);
+    expect(labels.slice(5)).toEqual(['Project', 'Scenes', 'Board', 'History', 'Layouts']);
   });
 });

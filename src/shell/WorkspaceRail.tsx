@@ -33,10 +33,11 @@ const GLYPH: Record<RailId, string> = {
 
 /** Delta 2: two labeled groups. JOURNEY holds the Epps stages in journey
     order; STUDIO holds the workshop tools. The `journey` id is the Read item
-    (the private annotated read). */
+    (the private annotated read). Project is management, not a journey stage:
+    once a script is open it lives in Studio (and the top-bar project chip). */
 const GROUPS: { key: 'journey' | 'studio'; items: RailId[] }[] = [
-  { key: 'journey', items: ['project', 'journey', 'evidence', 'gameplan', 'passes', 'polish'] },
-  { key: 'studio', items: ['scenes', 'board', 'history', 'layouts'] },
+  { key: 'journey', items: ['journey', 'evidence', 'gameplan', 'passes', 'polish'] },
+  { key: 'studio', items: ['project', 'scenes', 'board', 'history', 'layouts'] },
 ];
 
 const LAYOUT_CYCLE = ['workbench', 'focus', 'board', 'script_notes'] as const;

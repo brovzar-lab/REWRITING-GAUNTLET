@@ -9,10 +9,13 @@ describe('JourneyStrip', () => {
     useAppStore.getState().resetToSample();
   });
 
-  it('renders nine stages with the current one marked', () => {
+  it('renders the eight development stages, starting at Private read', () => {
     render(<JourneyStrip />);
     const nav = screen.getByRole('navigation', { name: 'Rewrite journey' });
-    expect(nav.querySelectorAll('.js-stage')).toHaveLength(9);
+    // The Script stage is project management (File menu / project chip), not a
+    // development stage: once a script is open the journey begins with Read.
+    expect(nav.querySelectorAll('.js-stage')).toHaveLength(8);
+    expect(nav.querySelector('.js-stage .js-name')?.textContent).toMatch(/Private read/);
     // Sample doc is open, read not complete → Private read is current.
     expect(screen.getByRole('button', { name: /Private read/ })).toHaveAttribute('aria-current', 'step');
   });

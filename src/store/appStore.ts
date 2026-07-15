@@ -242,7 +242,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   inspectorTab: 'evidence',
   setInspectorTab: (inspectorTab) => set({ inspectorTab }),
 
-  leftWorkspace: 'project',
+  // No left panel by default: once a script is open the page gets the width.
+  // Project is a drawer the writer opens (top-bar chip or Studio rail item).
+  leftWorkspace: null,
   setLeftWorkspace: (leftWorkspace) => set((s) => ({ leftWorkspace: s.leftWorkspace === leftWorkspace ? null : leftWorkspace })),
   rightWorkspace: 'evidence',
   setRightWorkspace: (rightWorkspace) => set({ rightWorkspace }),
@@ -265,7 +267,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   documentOpen: true,
   newProject: async () => {
     await get().takeSnapshot(`Before new project: ${get().screenplay.title}`);
-    set({ documentOpen: false, leftWorkspace: 'project', rightWorkspace: 'evidence', layoutMode: 'workbench', railFocus: 'project' });
+    set({ documentOpen: false, leftWorkspace: null, rightWorkspace: 'evidence', layoutMode: 'workbench', railFocus: 'project' });
   },
   openSampleProject: () => {
     get().resetToSample();
@@ -651,7 +653,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       polishReadComplete: false,
       readModeActive: false,
       notesIntakeOpen: false,
-      leftWorkspace: 'project',
+      leftWorkspace: null,
       rightWorkspace: 'evidence',
       layoutMode: 'workbench',
       railFocus: 'project',
@@ -784,7 +786,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       notesIntakeOpen: false,
       noteComposerOpen: false,
       inspectorTab: 'evidence',
-      leftWorkspace: 'project',
+      leftWorkspace: null,
       rightWorkspace: 'evidence',
       layoutMode: 'workbench',
       railFocus: 'project',

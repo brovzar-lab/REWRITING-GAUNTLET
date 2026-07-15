@@ -35,7 +35,7 @@ test('paste-import replaces the draft and paginates it', async ({ page }) => {
   await dialog.getByRole('button', { name: 'Import and replace draft' }).click();
   await expect(dialog).toBeHidden();
 
-  await expect(page.locator('.project-panel')).toContainText('THE LONG NIGHT');
+  await expect(page.locator('.project-chip')).toContainText('THE LONG NIGHT');
   await expect(page.locator('.sp-page').first()).toBeVisible();
   await expect(page.locator('.sp-page').first()).toContainText('INT. KITCHEN - NIGHT');
   await expect(page.locator('.status-bar')).toContainText('Page');
@@ -52,7 +52,7 @@ test('cancelling the import leaves the current draft untouched', async ({ page }
   await dialog.getByLabel(/Paste your script/).fill(FOUNTAIN);
   await dialog.getByRole('button', { name: 'Cancel' }).click();
   await expect(dialog).toBeHidden();
-  await expect(page.locator('.project-panel')).toContainText('LAS GARZAS');
+  await expect(page.locator('.project-chip')).toContainText('LAS GARZAS');
 });
 
 test('PDF import is best effort: extracts text, warns, and imports', async ({ page }) => {

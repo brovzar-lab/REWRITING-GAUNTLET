@@ -2,14 +2,17 @@ import { expect, test } from '@playwright/test';
 import { freshApp, rail, openScenes, openBoardMode, openEvidence, openPass } from './helpers';
 
 test.describe('workspace', () => {
-  test('opens on the Project workspace with the script centered, scenes not the default column', async ({ page }) => {
+  test('opens with the script centered and no permanent left panel', async ({ page }) => {
     await freshApp(page);
     await expect(page.locator('.app-menubar')).toBeVisible();
     await expect(page.locator('.sp-scene_heading').first()).toHaveText('EXT. HIGHWAY 2 - SONORAN DESERT - DAY');
-    // Project is the default left workspace; Open / Import are right there.
-    await expect(page.locator('.project-panel')).toBeVisible();
-    await expect(rail(page, 'Project')).toHaveAttribute('aria-pressed', 'true');
+    // No default left panel: the Project drawer opens on demand (chip or rail).
+    await expect(page.locator('.project-panel')).toHaveCount(0);
+    await expect(page.locator('.left-panel')).toHaveCount(0);
+    await expect(page.locator('.project-chip')).toContainText('LAS GARZAS');
+    await rail(page, 'Project').click();
     await expect(page.locator('.project-panel').getByRole('button', { name: 'Open Project' })).toBeVisible();
+    await rail(page, 'Project').click(); // collapse again
     // The journey strip carries "what to do next" under the toolbar.
     await expect(page.locator('.journey-strip')).toBeVisible();
     // The scene list is NOT the permanent left column, and the pass tray is gone.
@@ -25,7 +28,7 @@ test.describe('workspace', () => {
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'day');
     const dayPaper = await paper.evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(dayPaper).toBe(nightPaper);
-    await expect(page.locator('.project-panel')).toBeVisible();
+    await expect(page.locator('.project-chip')).toBeVisible();
     await expect(page.locator('.right-panel')).toBeVisible();
   });
 

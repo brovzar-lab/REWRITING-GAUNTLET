@@ -4,14 +4,25 @@ import { freshApp, rail, openScenes, openBoardMode, openPasses } from './helpers
 
 /** Acceptance for the WriterDuet-informed Journey / IA realignment. */
 
-test('first open leads with Open / Import / New Project, not a wall of tools', async ({ page }) => {
+test('once a script is open, Project collapses to a chip and the page gets the width', async ({ page }) => {
   await freshApp(page);
-  // The Project workspace is the starting place.
-  await expect(page.locator('.project-panel')).toBeVisible();
-  await expect(page.locator('.project-panel').getByRole('button', { name: 'Open Project' })).toBeVisible();
-  await expect(page.locator('.project-panel').getByRole('button', { name: 'Import…' })).toBeVisible();
-  await expect(page.locator('.project-panel').getByRole('button', { name: 'New Project' })).toBeVisible();
-  // The journey strip is right there with the current stage marked.
+  // No permanent Project panel: development real estate belongs to the page.
+  await expect(page.locator('.project-panel')).toHaveCount(0);
+  // Script title + draft + save state stay visible in the top bar.
+  await expect(page.locator('.project-chip')).toContainText('LAS GARZAS');
+  await expect(page.locator('.app-menubar .save-indicator')).toBeVisible();
+  // Project management is one click away: the chip opens the drawer.
+  await page.locator('.project-chip').click();
+  const drawer = page.locator('.project-panel');
+  await expect(drawer).toBeVisible();
+  await expect(drawer.getByRole('button', { name: 'Open Project' })).toBeVisible();
+  await expect(drawer.getByRole('button', { name: 'Import…' })).toBeVisible();
+  await expect(drawer.getByRole('button', { name: 'New Project' })).toBeVisible();
+  // Clicking the chip again collapses it.
+  await page.locator('.project-chip').click();
+  await expect(page.locator('.project-panel')).toHaveCount(0);
+  // The journey strip begins with the Private read (no Script stage).
+  await expect(page.locator('.journey-strip .js-stage').first()).toContainText('Private read');
   await expect(page.locator('.journey-strip .js-stage.is-current')).toContainText('Private read');
   // The scene list is NOT the default left column, and the pass tray is gone.
   await expect(page.locator('.scene-navigator')).toHaveCount(0);
@@ -88,12 +99,11 @@ test('scene rows keep number, slug, and page as separate aligned regions', async
 
 test('only the selected workspace carries the strong rail active state', async ({ page }) => {
   await freshApp(page);
-  // First open: Project is the selection; Journey (right panel) must not show
-  // a second active bar.
-  await expect(page.locator('.rail-item.is-active')).toHaveCount(1);
-  await expect(rail(page, 'Project')).toHaveClass(/is-active/);
+  // First open: no left panel, nothing explicitly selected — at most a quiet
+  // dot on region-active items, never a strong bar.
+  await expect(page.locator('.rail-item.is-active')).toHaveCount(0);
   await expect(rail(page, 'Read')).not.toHaveClass(/is-active/);
-  // Selecting Scenes moves the single strong state there.
+  // Selecting Scenes gives it the single strong state.
   await openScenes(page);
   await expect(page.locator('.rail-item.is-active')).toHaveCount(1);
   await expect(rail(page, 'Scenes')).toHaveClass(/is-active/);
@@ -119,7 +129,7 @@ test('Day and Night both work in the new shell', async ({ page }) => {
   await page.getByLabel('Appearance').selectOption('day');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'day');
   await expect(page.locator('.app-menubar')).toBeVisible();
-  await expect(page.locator('.project-panel')).toBeVisible();
+  await expect(page.locator('.project-chip')).toBeVisible();
   await page.getByLabel('Appearance').selectOption('night');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'night');
 });

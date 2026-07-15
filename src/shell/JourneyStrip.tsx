@@ -13,18 +13,22 @@ export function JourneyStrip() {
   useAppStore((s) => s.polishReadComplete);
   useAppStore((s) => s.screenplay.scenes.length);
   const state = useAppStore.getState();
-  const current = currentJourneyStage(state);
-  const currentStage = JOURNEY_STAGES[current];
+  const currentId = JOURNEY_STAGES[currentJourneyStage(state)].id;
+  // The strip only renders once a script is open, so the journey it shows
+  // begins with the Private read; getting a script in is project management
+  // (File menu / project chip), not a development stage.
+  const stages = JOURNEY_STAGES.filter((stage) => stage.id !== 'script');
+  const currentStage = stages.find((stage) => stage.id === currentId) ?? stages[0];
 
-  const run = (index: number) => {
+  const run = (stage: (typeof stages)[number]) => {
     const s = useAppStore.getState();
-    if (JOURNEY_STAGES[index].id !== 'notes') s.setNotesIntakeOpen(false);
-    JOURNEY_STAGES[index].act(s);
+    if (stage.id !== 'notes') s.setNotesIntakeOpen(false);
+    stage.act(s);
   };
 
   return (
     <nav className="journey-strip" aria-label={t('js.label')} title={t('js.orderNote')}>
-      {JOURNEY_STAGES.map((stage, i) => {
+      {stages.map((stage, i) => {
         const done = stage.done(state);
         const stat = stageStat(state, stage.id);
         return (
@@ -36,9 +40,9 @@ export function JourneyStrip() {
             )}
             <button
               type="button"
-              className={`js-stage${i === current ? ' is-current' : ''}${done ? ' is-done' : ''}`}
-              aria-current={i === current ? 'step' : undefined}
-              onClick={() => run(i)}
+              className={`js-stage${stage.id === currentStage.id ? ' is-current' : ''}${done ? ' is-done' : ''}`}
+              aria-current={stage.id === currentStage.id ? 'step' : undefined}
+              onClick={() => run(stage)}
             >
               <span className="js-num" aria-hidden="true">
                 {done ? '✓' : i + 1}
@@ -54,7 +58,7 @@ export function JourneyStrip() {
         );
       })}
       <span className="js-spacer" />
-      <button type="button" className="js-continue" onClick={() => run(current)}>
+      <button type="button" className="js-continue" onClick={() => run(currentStage)}>
         {t(`js.${currentStage.id}.cta` as StringKey)}
       </button>
     </nav>

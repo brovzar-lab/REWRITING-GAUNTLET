@@ -2,7 +2,6 @@ import { useAppStore } from '../store/appStore';
 import { useT } from '../i18n/strings';
 import type { EvidenceRecord, EvidenceStatus, NoteSource } from '../model/evidence';
 import { NoteComposer } from './NoteComposer';
-import { ReadersManager } from './ReadersManager';
 import { ScenePointCard } from './ScenePointCard';
 import './inspector.css';
 
@@ -106,7 +105,6 @@ export function EvidenceInspector() {
           )}
         </>
       )}
-      <ReadersManager />
     </aside>
   );
 }

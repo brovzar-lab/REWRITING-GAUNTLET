@@ -4,10 +4,12 @@ import { freshApp, rail } from './helpers';
 /** Acceptance for the Epps journey cleanup: journey strip, grouped rail,
     Private Read mode with marks, and the Notes intake screen. */
 
-test('journey strip shows nine stages and drives navigation', async ({ page }) => {
+test('journey strip shows the eight development stages and drives navigation', async ({ page }) => {
   await freshApp(page);
   const strip = page.getByRole('navigation', { name: 'Rewrite journey' });
-  await expect(strip.locator('.js-stage')).toHaveCount(9);
+  // Script intake is project management (chip / File menu), not a dev stage.
+  await expect(strip.locator('.js-stage')).toHaveCount(8);
+  await expect(strip.locator('.js-stage').first()).toContainText('Private read');
   // Stages are never locked: jump straight to Game plan.
   await strip.getByRole('button', { name: /Game plan/ }).click();
   await expect(page.locator('.right-context .gameplan-panel, .right-context')).toBeVisible();
