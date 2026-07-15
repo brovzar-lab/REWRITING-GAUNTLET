@@ -65,8 +65,8 @@ export interface AppState {
       independently so the workspace shows one thing per region, not all. */
   leftWorkspace: 'project' | 'scenes' | null;
   setLeftWorkspace: (ws: 'project' | 'scenes' | null) => void;
-  rightWorkspace: 'journey' | 'passes' | 'evidence' | 'gameplan';
-  setRightWorkspace: (ws: 'journey' | 'passes' | 'evidence' | 'gameplan') => void;
+  rightWorkspace: 'passes' | 'evidence' | 'gameplan';
+  setRightWorkspace: (ws: 'passes' | 'evidence' | 'gameplan') => void;
   layoutMode: 'workbench' | 'board' | 'focus' | 'script_notes';
   setLayoutMode: (mode: 'workbench' | 'board' | 'focus' | 'script_notes') => void;
   /** The rail item the writer explicitly selected. Only this one carries the
@@ -235,7 +235,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   leftWorkspace: 'project',
   setLeftWorkspace: (leftWorkspace) => set((s) => ({ leftWorkspace: s.leftWorkspace === leftWorkspace ? null : leftWorkspace })),
-  rightWorkspace: 'journey',
+  rightWorkspace: 'evidence',
   setRightWorkspace: (rightWorkspace) => set({ rightWorkspace }),
   layoutMode: 'workbench',
   setLayoutMode: (layoutMode) =>
@@ -256,7 +256,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   documentOpen: true,
   newProject: async () => {
     await get().takeSnapshot(`Before new project: ${get().screenplay.title}`);
-    set({ documentOpen: false, leftWorkspace: 'project', rightWorkspace: 'journey', layoutMode: 'workbench', railFocus: 'project' });
+    set({ documentOpen: false, leftWorkspace: 'project', rightWorkspace: 'evidence', layoutMode: 'workbench', railFocus: 'project' });
   },
   openSampleProject: () => {
     get().resetToSample();
@@ -611,7 +611,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       readModeActive: false,
       notesIntakeOpen: false,
       leftWorkspace: 'project',
-      rightWorkspace: 'journey',
+      rightWorkspace: 'evidence',
       layoutMode: 'workbench',
       railFocus: 'project',
       focusMode: false,
@@ -733,7 +733,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       noteComposerOpen: false,
       inspectorTab: 'evidence',
       leftWorkspace: 'project',
-      rightWorkspace: 'journey',
+      rightWorkspace: 'evidence',
       layoutMode: 'workbench',
       railFocus: 'project',
       documentOpen: true,

@@ -3,6 +3,7 @@ import { redo, undo } from 'prosemirror-history';
 import { getEditorView } from '../editor/editorHandle';
 import { useAppStore, type ThemeChoice, type UiLang } from '../store/appStore';
 import { useT, type StringKey } from '../i18n/strings';
+import { JOURNEY_STAGES, currentJourneyStage } from './journeyStages';
 import type { DocFormat } from '../model/screenplay';
 import { ExtChip } from '../panels/ExtChip';
 
@@ -118,7 +119,15 @@ export function AppMenuBar() {
       id: 'help',
       label: 'menu.help',
       items: [
-        { kind: 'item', label: t('mi.helpJourney'), onClick: () => s.setRightWorkspace('journey') },
+        {
+          kind: 'item',
+          label: t('mi.helpJourney'),
+          // Jump to the current journey stage; the strip owns orientation now.
+          onClick: () => {
+            const state = useAppStore.getState();
+            JOURNEY_STAGES[currentJourneyStage(state)].act(state);
+          },
+        },
         { kind: 'item', label: t('mi.helpPass'), onClick: () => s.setRightWorkspace('passes') },
       ],
     },

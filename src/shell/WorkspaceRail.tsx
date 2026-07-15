@@ -56,7 +56,7 @@ export function WorkspaceRail() {
       case 'scenes':
         return s.leftWorkspace === 'scenes';
       case 'journey':
-        return s.rightWorkspace === 'journey' && s.layoutMode !== 'board';
+        return false; // placeholder until Task 5 gives Read its behavior
       case 'evidence':
         return s.rightWorkspace === 'evidence';
       case 'gameplan':
@@ -84,9 +84,7 @@ export function WorkspaceRail() {
       case 'scenes':
         return s.setLeftWorkspace('scenes');
       case 'journey':
-        s.setRightWorkspace('journey');
-        if (s.layoutMode === 'board') s.setLayoutMode('workbench');
-        return;
+        return s.setRightWorkspace('evidence'); // placeholder until Task 5
       case 'evidence':
         return s.setRightWorkspace('evidence');
       case 'gameplan':
