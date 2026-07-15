@@ -13,6 +13,10 @@ import { AnnotatedReadBar } from '../panels/AnnotatedReadBar';
 import { PolishReadBar } from '../panels/PolishReadBar';
 import { ScreenplayEditor } from '../editor/ScreenplayEditor';
 import { Board } from '../board/Board';
+// Shared control styles (tool/seg buttons, scene rows, chips, save indicator).
+// PanelLayout used to import this; the shell owns it now. Keep before shell.css
+// so the workstation overrides win the cascade.
+import '../panels/panels.css';
 import './shell.css';
 
 /** The WriterDuet-informed workstation shell. Editor always center; a workspace

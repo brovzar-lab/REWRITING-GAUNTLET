@@ -320,6 +320,21 @@
   color: var(--accent);
 }
 
+/* A workspace that is showing in a region without being the writer's current
+   selection (e.g. the Journey guide holding the right panel by default) gets a
+   quiet dot, never a second active bar. */
+.rail-item.is-live::after {
+  content: '';
+  position: absolute;
+  top: 7px;
+  right: 9px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+  opacity: 0.6;
+}
+
 .rail-glyph {
   font-size: 16px;
   line-height: 1;
@@ -663,17 +678,23 @@
   min-width: 70px;
 }
 
-/* Scene navigator gains a search field in its workspace */
+/* Scene navigator search: compact, consistent with other inputs, never the
+   dominant element in the panel. */
 .scene-search {
-  margin: var(--space-sm) var(--space-md);
+  margin: 2px var(--space-md) var(--space-xs);
   width: calc(100% - 2 * var(--space-md));
+  height: 26px;
   background: var(--surface-inset);
   color: var(--text-primary);
   border: 1px solid var(--divider);
   border-radius: var(--rounded-control);
-  padding: 5px 8px;
+  padding: 0 var(--space-sm);
   font-family: var(--font-ui);
-  font-size: var(--font-size-body);
+  font-size: 12px;
+}
+
+.scene-search::placeholder {
+  color: var(--text-secondary);
 }
 
 /* Focus layout: hide chrome, keep the page. */

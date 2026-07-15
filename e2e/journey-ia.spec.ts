@@ -1,3 +1,4 @@
+import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 import { freshApp, rail, openScenes, openBoardMode, openPasses } from './helpers';
 
@@ -66,6 +67,51 @@ test('the journey guide advances as the writer works', async ({ page }) => {
   await expect(page.locator('.jg-stage.is-current')).toContainText('Private annotated read');
   await page.locator('.journey-guide').getByRole('button', { name: 'Start read' }).click();
   await expect(page.getByRole('region', { name: 'Private annotated read' })).toBeVisible();
+});
+
+test('scene rows keep number, slug, and page as separate aligned regions', async ({ page }) => {
+  await freshApp(page);
+  await openScenes(page);
+  const row = page.locator('.scene-row').first();
+  // Three distinct visible regions, never one concatenated string.
+  await expect(row.locator('.scene-number')).toHaveText('1');
+  await expect(row.locator('.scene-slug')).toContainText('EXT.');
+  await expect(row.locator('.scene-page')).toHaveText(/^p\.\s*1$/);
+  // The page ref sits to the right of the slug on the same line (no collision,
+  // no wrap into a stacked block).
+  const slug = await row.locator('.scene-slug').boundingBox();
+  const pageRef = await row.locator('.scene-page').boundingBox();
+  const rowBox = await row.boundingBox();
+  expect(pageRef!.x).toBeGreaterThanOrEqual(slug!.x + slug!.width - 1);
+  expect(rowBox!.height).toBeLessThan(36);
+});
+
+test('only the selected workspace carries the strong rail active state', async ({ page }) => {
+  await freshApp(page);
+  // First open: Project is the selection; Journey (right panel) must not show
+  // a second active bar.
+  await expect(page.locator('.rail-item.is-active')).toHaveCount(1);
+  await expect(rail(page, 'Project')).toHaveClass(/is-active/);
+  await expect(rail(page, 'Journey')).not.toHaveClass(/is-active/);
+  // Selecting Scenes moves the single strong state there.
+  await openScenes(page);
+  await expect(page.locator('.rail-item.is-active')).toHaveCount(1);
+  await expect(rail(page, 'Scenes')).toHaveClass(/is-active/);
+});
+
+test('the Scenes workspace is axe-clean in Day and Night', async ({ page }) => {
+  await freshApp(page);
+  await openScenes(page);
+  for (const theme of ['day', 'night']) {
+    await page.getByLabel('Appearance').selectOption(theme);
+    await expect(page.locator('.scene-row').first()).toBeVisible();
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .analyze();
+    expect(
+      results.violations.map((v) => ({ theme, id: v.id, nodes: v.nodes.map((n) => n.target) })),
+    ).toEqual([]);
+  }
 });
 
 test('Day and Night both work in the new shell', async ({ page }) => {

@@ -75,6 +75,9 @@ export function WorkspaceRail() {
   };
 
   const activate = (id: RailId) => {
+    // History opens a dialog and Layouts cycles a mode; neither is a workspace
+    // selection, so neither takes the rail focus.
+    if (id !== 'history' && id !== 'layouts') s.setRailFocus(id);
     switch (id) {
       case 'project':
         return s.setLeftWorkspace('project');
@@ -108,21 +111,29 @@ export function WorkspaceRail() {
 
   return (
     <nav className="workspace-rail" aria-label={t('rail.label')}>
-      {ORDER.map((id) => (
-        <button
-          key={id}
-          type="button"
-          className={`rail-item${isActive(id) ? ' is-active' : ''}`}
-          aria-pressed={isActive(id)}
-          title={t(`ws.${id}` as StringKey)}
-          onClick={() => activate(id)}
-        >
-          <span className="rail-glyph" aria-hidden="true">
-            {GLYPH[id]}
-          </span>
-          <span className="rail-label">{t(`ws.${id}` as StringKey)}</span>
-        </button>
-      ))}
+      {ORDER.map((id) => {
+        // Strong active state belongs to the one workspace the writer selected;
+        // other region-active items (e.g. Journey merely holding the right
+        // panel) show a quiet "live" dot instead of a second active bar.
+        const regionActive = isActive(id);
+        const selected = regionActive && s.railFocus === id;
+        const live = regionActive && !selected;
+        return (
+          <button
+            key={id}
+            type="button"
+            className={`rail-item${selected ? ' is-active' : ''}${live ? ' is-live' : ''}`}
+            aria-pressed={regionActive}
+            title={t(`ws.${id}` as StringKey)}
+            onClick={() => activate(id)}
+          >
+            <span className="rail-glyph" aria-hidden="true">
+              {GLYPH[id]}
+            </span>
+            <span className="rail-label">{t(`ws.${id}` as StringKey)}</span>
+          </button>
+        );
+      })}
     </nav>
   );
 }

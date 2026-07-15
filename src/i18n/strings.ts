@@ -6,6 +6,7 @@ export const dictionaries = {
   en: {
     'app.title': 'Rewrite Studio',
     'nav.title': 'Scenes',
+    'nav.search': 'Search scenes…',
     'nav.act1': 'ACT ONE',
     'nav.act2': 'ACT TWO',
     'nav.act3': 'ACT THREE',
@@ -497,6 +498,7 @@ export const dictionaries = {
   es: {
     'app.title': 'Rewrite Studio',
     'nav.title': 'Escenas',
+    'nav.search': 'Buscar escenas…',
     'nav.act1': 'PRIMER ACTO',
     'nav.act2': 'SEGUNDO ACTO',
     'nav.act3': 'TERCER ACTO',

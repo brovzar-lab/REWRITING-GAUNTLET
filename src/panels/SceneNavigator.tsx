@@ -52,8 +52,8 @@ export function SceneNavigator() {
       <input
         type="search"
         className="scene-search"
-        aria-label={t('nav.title')}
-        placeholder={`${t('nav.title')}…`}
+        aria-label={t('nav.search')}
+        placeholder={t('nav.search')}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
       />

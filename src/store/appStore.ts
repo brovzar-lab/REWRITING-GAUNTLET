@@ -69,6 +69,11 @@ export interface AppState {
   setRightWorkspace: (ws: 'journey' | 'passes' | 'evidence' | 'gameplan') => void;
   layoutMode: 'workbench' | 'board' | 'focus' | 'script_notes';
   setLayoutMode: (mode: 'workbench' | 'board' | 'focus' | 'script_notes') => void;
+  /** The rail item the writer explicitly selected. Only this one carries the
+      strong active state in the rail; other region-active items (e.g. the
+      Journey guide sitting in the right panel by default) show a quiet dot. */
+  railFocus: 'project' | 'journey' | 'scenes' | 'board' | 'evidence' | 'gameplan' | 'passes' | 'polish';
+  setRailFocus: (id: 'project' | 'journey' | 'scenes' | 'board' | 'evidence' | 'gameplan' | 'passes' | 'polish') => void;
   /** Read-only viewing (Format menu). The editor respects it. */
   readOnly: boolean;
   toggleReadOnly: () => void;
@@ -236,6 +241,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       focusMode: layoutMode === 'focus',
       fullBoard: layoutMode === 'board',
     }),
+  railFocus: 'project',
+  setRailFocus: (railFocus) => set({ railFocus }),
   readOnly: false,
   toggleReadOnly: () => set((s) => ({ readOnly: !s.readOnly })),
   findOpen: false,
@@ -244,7 +251,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   documentOpen: true,
   newProject: async () => {
     await get().takeSnapshot(`Before new project: ${get().screenplay.title}`);
-    set({ documentOpen: false, leftWorkspace: 'project', rightWorkspace: 'journey', layoutMode: 'workbench' });
+    set({ documentOpen: false, leftWorkspace: 'project', rightWorkspace: 'journey', layoutMode: 'workbench', railFocus: 'project' });
   },
   openSampleProject: () => {
     get().resetToSample();
@@ -600,6 +607,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       leftWorkspace: 'project',
       rightWorkspace: 'journey',
       layoutMode: 'workbench',
+      railFocus: 'project',
       focusMode: false,
       fullBoard: false,
       documentOpen: true,
@@ -720,6 +728,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       leftWorkspace: 'project',
       rightWorkspace: 'journey',
       layoutMode: 'workbench',
+      railFocus: 'project',
       documentOpen: true,
       privatePad: '',
       projectNotes: '',

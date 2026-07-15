@@ -223,37 +223,41 @@
   opacity: 0.4;
 }
 
-/* Scene navigator */
+/* Scene navigator: a compact professional scene list (Final Draft register).
+   Each row is a quiet navigation row on a strict grid — number | slug |
+   optional badges | page — so labels can never run together. */
 .scene-navigator .act-header {
   font-size: var(--font-size-label);
   font-weight: var(--font-weight-label);
   letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
   color: var(--text-secondary);
-  margin: var(--space-md) 0 var(--space-xs);
-  padding: 0 var(--space-md);
+  margin: var(--space-md) var(--space-md) var(--space-xs);
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--divider);
 }
 
 .scene-list {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 0 var(--space-xs);
 }
 
 .scene-row {
   display: grid;
-  /* number | slug | note badge | page ref */
-  grid-template-columns: 22px 1fr auto auto;
-  gap: var(--space-sm);
-  align-items: baseline;
+  /* number | slug | high point | note count | page ref */
+  grid-template-columns: 22px minmax(0, 1fr) auto auto auto;
+  column-gap: var(--space-sm);
+  align-items: center;
   width: 100%;
+  min-height: 26px;
   text-align: left;
   background: none;
   border: 0;
-  border-left: 2px solid transparent;
-  padding: 5px var(--space-md) 5px calc(var(--space-md) - 2px);
+  border-radius: var(--rounded-control);
+  padding: 3px var(--space-sm);
   color: var(--text-primary);
   font-family: var(--font-ui);
-  font-size: var(--font-size-body);
   cursor: pointer;
 }
 
@@ -261,27 +265,76 @@
   background: var(--row-hover);
 }
 
+/* Selected: restrained fill; the number turns accent and the slug firms up,
+   so the state never rides on color alone. */
 .scene-row.is-selected {
   background: var(--row-selected);
-  border-left-color: var(--accent);
+}
+
+.scene-row.is-selected .scene-number {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.scene-row.is-selected .scene-slug {
+  font-weight: 600;
 }
 
 .scene-number {
+  grid-column: 1;
   font-size: var(--font-size-label);
-  font-weight: var(--font-weight-label);
+  font-weight: var(--font-weight-body);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
   color: var(--text-secondary);
 }
 
 .scene-slug {
+  grid-column: 2;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 12px;
+  font-weight: 500;
 }
 
+/* Page ref is pinned to the last column so it right-aligns on every row,
+   whether or not the badge columns are occupied. */
 .scene-page {
+  grid-column: 5;
   font-size: var(--font-size-label);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-align: right;
   color: var(--text-secondary);
+}
+
+/* Structural high point: tiny quiet label, never a shouting chip. */
+.scene-highpoint {
+  font-size: 10px;
+  font-weight: var(--font-weight-label);
+  letter-spacing: var(--letter-spacing-label);
+  white-space: nowrap;
+  color: var(--text-secondary);
+  border: 1px solid var(--divider);
+  border-radius: var(--rounded-control);
+  padding: 0 4px;
+  line-height: 15px;
+}
+
+/* Note count: compact numeral pill. */
+.scene-notes {
+  min-width: 15px;
+  font-size: 10px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--text-secondary);
+  background: var(--surface-inset);
+  border: 1px solid var(--divider);
+  border-radius: 8px;
+  padding: 0 4px;
+  line-height: 14px;
 }
 
 .scene-revised {
