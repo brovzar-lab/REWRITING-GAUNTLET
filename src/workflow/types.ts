@@ -1,5 +1,17 @@
 import type { ClaimType, EvidenceStatus } from '../model/evidence';
 
+/** A single captured reader comment. kind implements Epps's doctor/patient
+    rule: store the symptom; quarantine the reader's remedy; protect praise. */
+export interface ReaderNote {
+  id: string;
+  quote: string;
+  page?: number;
+  kind: 'symptom' | 'remedy' | 'whatWorked';
+  category?: string;
+  linkedSymptomId?: string;
+  createdAt: number;
+}
+
 /** Human readers. Epps: recommend 3, never more than 5 initial readers;
     exactly ONE trusted interim reader. */
 export interface Reader {
@@ -7,6 +19,13 @@ export interface Reader {
   name: string;
   role: 'initial' | 'interim';
   addedAt: number;
+  /** What they do (director, writer friend). Optional handoff-era addition. */
+  title?: string;
+  /** Which draft label they read. */
+  draftRead?: string;
+  /** Their captured notes. Optional so pre-existing persisted rows stay valid;
+      the store always initializes new readers with []. */
+  notes?: ReaderNote[];
 }
 
 export const MAX_INITIAL_READERS = 5;

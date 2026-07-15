@@ -80,6 +80,9 @@ export interface AppState {
   /** In-script find bar. */
   findOpen: boolean;
   setFindOpen: (open: boolean) => void;
+  /** Stage-3 Notes intake takes over the center region when true. */
+  notesIntakeOpen: boolean;
+  setNotesIntakeOpen: (open: boolean) => void;
   /** Change the current document's format (Production menu / Studio extension). */
   setDocFormat: (format: 'feature' | 'one_hour' | 'half_hour') => void;
   /** Whether a script document is open in the center. False shows the empty
@@ -247,6 +250,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   toggleReadOnly: () => set((s) => ({ readOnly: !s.readOnly })),
   findOpen: false,
   setFindOpen: (findOpen) => set({ findOpen }),
+  notesIntakeOpen: false,
+  setNotesIntakeOpen: (notesIntakeOpen) => set({ notesIntakeOpen }),
   setDocFormat: (format) => set((s) => ({ screenplay: { ...s.screenplay, docFormat: format } })),
   documentOpen: true,
   newProject: async () => {
@@ -604,6 +609,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       polishReadPage: 1,
       polishReadComplete: false,
       readModeActive: false,
+      notesIntakeOpen: false,
       leftWorkspace: 'project',
       rightWorkspace: 'journey',
       layoutMode: 'workbench',
@@ -723,6 +729,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       polishReadPage: 1,
       polishReadComplete: false,
       readModeActive: false,
+      notesIntakeOpen: false,
       noteComposerOpen: false,
       inspectorTab: 'evidence',
       leftWorkspace: 'project',
