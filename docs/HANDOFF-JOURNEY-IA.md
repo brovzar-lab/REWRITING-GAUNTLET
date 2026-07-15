@@ -4,6 +4,18 @@
 > `codex/journey-ia-realignment`.** `main` is untouched and must stay that way
 > until Billy explicitly says merge. This branch is our undo button.
 
+> ✅ **Visual polish pass DONE (2026-07-15).** Latest commit
+> `c56fd6f` (`ia polish:` ×3). Polished: grouped top toolbar (history / writing /
+> navigation / view / revision / output with separators + consistent sizing),
+> premium pass strip (readable short labels + separated order badge, obvious
+> active state, wraps), un-boxed left rail (soft fill + left accent bar), elevated
+> Project actions (full-width primary "Open Project"), clearer journey guide, and
+> board-mode header + card spacing. Gate held: **349 unit / 65 e2e / build 0**,
+> axe-clean Night+Day. Proof pack refreshed in `docs/proof/ia/`.
+> ⚠️ `.claude/settings.json` exists locally only to let a background session edit
+> in place — it is untracked and **must never be committed** (never `git add -A`;
+> stage explicit files).
+
 ## 1. Branch
 `codex/journey-ia-realignment` (branched from a clean `main`).
 
